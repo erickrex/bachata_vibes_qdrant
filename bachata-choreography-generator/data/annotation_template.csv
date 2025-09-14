@@ -1,0 +1,2 @@
+clip_id,video_path,move_label,energy_level,estimated_tempo,difficulty,lead_follow_roles,notes,duration_seconds,video_quality,lighting_quality,full_body_visible,tempo_range_min,tempo_range_max,compatible_moves,annotator,annotation_date
+example_move_1,Bachata_steps/basic_moves/example_move_1.mp4,basic_step,medium,120,beginner,both,Basic bachata step with weight transfer,8.0,good,good,True,110,130,"cross_body_lead_1,forward_backward_1",Your Name,2025-09-14
