@@ -4,6 +4,7 @@ bachata-coreography-generator/.venv/
 bachata-coreography-generator/.env
 
 data/songs/
+data/Bachata_steps/
 various/
 sanity_checks/
 *.json
