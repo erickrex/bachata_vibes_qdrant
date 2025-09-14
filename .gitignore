@@ -3,10 +3,13 @@ bachata-coreography-generator/__pycache__/
 bachata-coreography-generator/.venv/
 bachata-coreography-generator/.env
 
-data/
+data/songs/
 various/
 sanity_checks/
 *.json
 
 .env
 .venv/
+
+../.DS_Store
+.DS_Store
