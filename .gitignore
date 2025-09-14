@@ -1,0 +1,9 @@
+__pycache__/
+bachata-coreography-generator/__pycache__/
+bachata-coreography-generator/.venv/
+bachata-coreography-generator/.env
+bachata-coreography-generator/data/
+
+
+.env
+.venv/
