@@ -19,4 +19,5 @@ dependencies = [
     "httpx>=0.25.0",
     "tqdm>=4.66.0",
     "scipy>=1.11.0",
+    "pandas>=2.0.0",
 ]
