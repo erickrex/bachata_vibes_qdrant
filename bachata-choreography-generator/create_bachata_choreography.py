@@ -451,8 +451,12 @@ class BachataChoreoGenerator:
         target_duration: float,
         selected_moves: List
     ) -> Any:
-        """Create a sequence that fills the target duration by repeating moves if necessary."""
+        """Create a sequence that respects ACTUAL song duration and natural clip timing."""
         from app.models.video_models import ChoreographySequence, SelectedMove, TransitionType
+        
+        # CRITICAL FIX: Use actual song duration, not target duration
+        song_duration = music_features.get('duration', target_duration)
+        effective_duration = min(target_duration, song_duration)
         
         beat_positions = music_features.get('beat_positions', [])
         tempo = music_features.get('tempo', 120)
@@ -461,50 +465,41 @@ class BachataChoreoGenerator:
         current_time = 0.0
         move_index = 0
         
-        print(f"🔄 Creating sequence to fill {target_duration:.1f}s")
+        print(f"🔄 Creating sequence for {effective_duration:.1f}s (song: {song_duration:.1f}s, target: {target_duration:.1f}s)")
         
-        # Keep adding moves until we reach the target duration
-        while current_time < target_duration:
+        # Keep adding moves until we reach the EFFECTIVE duration (not exceeding song length)
+        while current_time < effective_duration:
             # Cycle through available moves with some randomization
             base_index = move_index % len(video_paths)
             video_path = video_paths[base_index]
             move_label = selected_moves[base_index].move_candidate.move_label
             
-            # Calculate move duration based on beats with some variation
-            beats_per_move = 6  # 6 beats = 1.5 measures in Bachata
-            beat_duration = 60.0 / tempo
-            base_move_duration = beats_per_move * beat_duration
+            # Get NATURAL clip duration instead of calculating artificial duration
+            natural_duration = self._get_natural_clip_duration(video_path)
             
-            # Add some variation to move durations (±20%)
-            import random
-            duration_variation = random.uniform(0.8, 1.2)
-            move_duration = base_move_duration * duration_variation
-            
-            # Adjust duration to not exceed target
-            remaining_time = target_duration - current_time
-            if move_duration > remaining_time:
-                move_duration = remaining_time
-            
-            # Ensure reasonable duration bounds
-            move_duration = max(move_duration, 3.0)
-            move_duration = min(move_duration, 12.0)
+            # CRITICAL FIX: Ensure we don't exceed song duration
+            remaining_time = effective_duration - current_time
+            if natural_duration > remaining_time:
+                # If natural clip is too long, we need to stop here
+                print(f"   ⚠️  Stopping at {current_time:.1f}s - next clip ({natural_duration:.1f}s) would exceed song duration")
+                break
             
             move = SelectedMove(
                 clip_id=f"move_{move_index + 1}_{move_label}",
                 video_path=video_path,
                 start_time=current_time,
-                duration=move_duration,
+                duration=natural_duration,  # Use natural duration
                 transition_type=TransitionType.CUT
             )
             
             moves.append(move)
-            current_time += move_duration
+            current_time += natural_duration
             move_index += 1
             
-            print(f"   Move {move_index}: {move_label} ({move_duration:.1f}s) -> {current_time:.1f}s")
+            print(f"   Move {move_index}: {move_label} ({natural_duration:.1f}s) -> {current_time:.1f}s")
             
-            # Safety check to prevent infinite loops (increased limit for full songs)
-            max_moves = 150 if target_duration > 200 else 100 if target_duration > 100 else 50
+            # Safety check to prevent infinite loops
+            max_moves = 50  # Reasonable limit for any duration
             if move_index > max_moves:
                 print(f"⚠️  Safety limit reached ({max_moves} moves), stopping sequence creation")
                 break
@@ -515,15 +510,43 @@ class BachataChoreoGenerator:
             difficulty_level="mixed",
             audio_tempo=tempo,
             generation_parameters={
-                "sync_type": "full_duration_sequence",
+                "sync_type": "natural_duration_sequence",
                 "tempo": tempo,
                 "target_duration": target_duration,
+                "song_duration": song_duration,
                 "actual_duration": current_time,
                 "moves_repeated": move_index > len(video_paths)
             }
         )
         
         return sequence
+    
+    def _get_natural_clip_duration(self, video_path: str) -> float:
+        """Get the natural duration of a video clip using ffprobe."""
+        import subprocess
+        import json
+        
+        try:
+            cmd = [
+                "ffprobe",
+                "-v", "quiet",
+                "-print_format", "json",
+                "-show_format",
+                video_path
+            ]
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            if result.returncode == 0:
+                info = json.loads(result.stdout)
+                duration = float(info.get("format", {}).get("duration", 8.0))
+                return duration
+            else:
+                print(f"   ⚠️  Could not get duration for {video_path}, using default 8.0s")
+                return 8.0
+                
+        except Exception as e:
+            print(f"   ⚠️  Error getting duration for {video_path}: {e}, using default 8.0s")
+            return 8.0
     
     async def _generate_recommendations(
         self, 
@@ -709,7 +732,7 @@ class BachataChoreoGenerator:
         music_features: Dict[str, Any],
         audio_path: str
     ) -> str:
-        """Export detailed choreography sequence metadata to JSON."""
+        """Export detailed choreography sequence metadata to JSON with ACCURATE video composition."""
         try:
             # Create metadata directory
             metadata_dir = Path("data/choreography_metadata")
@@ -721,7 +744,29 @@ class BachataChoreoGenerator:
             metadata_filename = f"{safe_song_name}_{self.duration}_{self.quality}_sequence.json"
             metadata_path = metadata_dir / metadata_filename
             
-            # Create detailed metadata
+            # Calculate ACTUAL video composition (not planned times)
+            actual_composition = []
+            current_time = 0.0
+            
+            for i, move in enumerate(sequence.moves):
+                actual_duration = self._get_actual_clip_duration(move.video_path)
+                
+                composition_entry = {
+                    "position": i + 1,
+                    "clip_id": move.clip_id,
+                    "video_path": move.video_path,
+                    "move_name": Path(move.video_path).stem,
+                    "move_category": Path(move.video_path).parent.name,
+                    "actual_start_time": current_time,
+                    "actual_duration": actual_duration,
+                    "actual_end_time": current_time + actual_duration,
+                    "transition_type": move.transition_type.value if hasattr(move.transition_type, 'value') else str(move.transition_type),
+                    "note": "These are the ACTUAL times this clip appears in the final video"
+                }
+                actual_composition.append(composition_entry)
+                current_time += actual_duration
+            
+            # Create detailed metadata with ACCURATE information
             metadata = {
                 "song_info": {
                     "name": song_name,
@@ -734,41 +779,37 @@ class BachataChoreoGenerator:
                 },
                 "choreography_sequence": {
                     "total_moves": len(sequence.moves),
-                    "sequence_duration": sequence.total_duration,
+                    "actual_sequence_duration": current_time,
+                    "video_output_duration": video_result.duration,
                     "target_duration": self.duration,
                     "audio_tempo": sequence.audio_tempo,
                     "difficulty_level": sequence.difficulty_level,
-                    "generation_parameters": sequence.generation_parameters or {}
+                    "composition_method": "natural_clip_durations",
+                    "generation_parameters": sequence.generation_parameters or {},
+                    "note": "This metadata reflects the ACTUAL video composition, not planned durations"
                 },
-                "moves_used": [
-                    {
-                        "position": i + 1,
-                        "clip_id": move.clip_id,
-                        "video_path": move.video_path,
-                        "move_name": Path(move.video_path).stem,
-                        "move_category": Path(move.video_path).parent.name,
-                        "planned_start_time": move.start_time,
-                        "planned_duration": move.duration,
-                        "planned_end_time": move.start_time + move.duration,
-                        "actual_clip_duration": self._get_actual_clip_duration(move.video_path),
-                        "note": "Actual video uses full clip duration, not planned duration",
-                        "transition_type": move.transition_type.value if hasattr(move.transition_type, 'value') else str(move.transition_type)
-                    }
-                    for i, move in enumerate(sequence.moves)
-                ],
+                "actual_video_composition": actual_composition,
                 "musical_sections": music_features.get("sections", []),
                 "video_output": {
                     "file_path": video_result.output_path,
-                    "duration": video_result.duration,
+                    "actual_duration": video_result.duration,
                     "file_size": video_result.file_size,
                     "file_size_mb": video_result.file_size / (1024 * 1024) if video_result.file_size else 0,
                     "resolution": self.resolution,
                     "quality_setting": self.quality,
-                    "processing_time": video_result.processing_time
+                    "processing_time": video_result.processing_time,
+                    "encoding_method": "fixed_natural_durations",
+                    "note": "Generated with fixed method - no clip freezing or stretching"
                 },
                 "generation_info": {
                     "generated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-                    "generator_version": "1.0",
+                    "generator_version": "1.1-fixed",
+                    "fixes_applied": [
+                        "Removed clip duration restrictions",
+                        "Fixed FFmpeg encoding to prevent freezing/stretching", 
+                        "Accurate metadata reflecting actual video composition",
+                        "Natural clip durations preserved"
+                    ],
                     "settings": {
                         "duration": self.duration,
                         "quality": self.quality,

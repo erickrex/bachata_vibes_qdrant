@@ -1,0 +1,993 @@
+{
+  "song_info": {
+    "name": "Me Emborrachar\u00e8\u00a0 (Bachata Version)",
+    "audio_path": "data/songs/Me Emborrachar\u00e8\u00a0 (Bachata Version).mp3",
+    "tempo": 123.046875,
+    "duration": 239.4390476190476,
+    "beats_detected": 481,
+    "rhythm_strength": 0.7892117625022339,
+    "syncopation_level": 0.5856251114036581
+  },
+  "choreography_sequence": {
+    "total_moves": 78,
+    "sequence_duration": 240.11010518606147,
+    "target_duration": "full",
+    "audio_tempo": 123.046875,
+    "difficulty_level": "mixed",
+    "generation_parameters": {
+      "sync_type": "full_duration_sequence",
+      "tempo": 123.046875,
+      "target_duration": 239.4390476190476,
+      "actual_duration": 240.11010518606147,
+      "moves_repeated": true
+    }
+  },
+  "moves_used": [
+    {
+      "position": 1,
+      "clip_id": "move_1_lady_right_turn",
+      "video_path": "data/Bachata_steps/lady_right_turn/lady_right_turn_1.mp4",
+      "move_name": "lady_right_turn_1",
+      "move_category": "lady_right_turn",
+      "start_time": 0.0,
+      "duration": 3.0,
+      "end_time": 3.0,
+      "transition_type": "cut"
+    },
+    {
+      "position": 2,
+      "clip_id": "move_2_dip",
+      "video_path": "data/Bachata_steps/dip/dip_1.mp4",
+      "move_name": "dip_1",
+      "move_category": "dip",
+      "start_time": 3.0,
+      "duration": 3.0,
+      "end_time": 6.0,
+      "transition_type": "cut"
+    },
+    {
+      "position": 3,
+      "clip_id": "move_3_cross_body_lead",
+      "video_path": "data/Bachata_steps/cross_body_lead/cross_body_lead_1.mp4",
+      "move_name": "cross_body_lead_1",
+      "move_category": "cross_body_lead",
+      "start_time": 6.0,
+      "duration": 3.0,
+      "end_time": 9.0,
+      "transition_type": "cut"
+    },
+    {
+      "position": 4,
+      "clip_id": "move_4_combination_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_1.mp4",
+      "move_name": "basic_step_1",
+      "move_category": "basic_steps",
+      "start_time": 9.0,
+      "duration": 3.0939000717062233,
+      "end_time": 12.093900071706223,
+      "transition_type": "cut"
+    },
+    {
+      "position": 5,
+      "clip_id": "move_5_lady_left_turn",
+      "video_path": "data/Bachata_steps/lady_left_turn/lady_left_turn_1.mp4",
+      "move_name": "lady_left_turn_1",
+      "move_category": "lady_left_turn",
+      "start_time": 12.093900071706223,
+      "duration": 3.0,
+      "end_time": 15.093900071706223,
+      "transition_type": "cut"
+    },
+    {
+      "position": 6,
+      "clip_id": "move_6_body_roll",
+      "video_path": "data/Bachata_steps/body_roll/body_roll_1.mp4",
+      "move_name": "body_roll_1",
+      "move_category": "body_roll",
+      "start_time": 15.093900071706223,
+      "duration": 3.0,
+      "end_time": 18.093900071706223,
+      "transition_type": "cut"
+    },
+    {
+      "position": 7,
+      "clip_id": "move_7_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_2.mp4",
+      "move_name": "basic_step_2",
+      "move_category": "basic_steps",
+      "start_time": 18.093900071706223,
+      "duration": 3.0,
+      "end_time": 21.093900071706223,
+      "transition_type": "cut"
+    },
+    {
+      "position": 8,
+      "clip_id": "move_8_forward_backward",
+      "video_path": "data/Bachata_steps/forward_backward/forward_backward_1.mp4",
+      "move_name": "forward_backward_1",
+      "move_category": "forward_backward",
+      "start_time": 21.093900071706223,
+      "duration": 3.241238780260254,
+      "end_time": 24.335138851966477,
+      "transition_type": "cut"
+    },
+    {
+      "position": 9,
+      "clip_id": "move_9_lady_right_turn",
+      "video_path": "data/Bachata_steps/lady_right_turn/lady_right_turn_1.mp4",
+      "move_name": "lady_right_turn_1",
+      "move_category": "lady_right_turn",
+      "start_time": 24.335138851966477,
+      "duration": 3.0,
+      "end_time": 27.335138851966477,
+      "transition_type": "cut"
+    },
+    {
+      "position": 10,
+      "clip_id": "move_10_dip",
+      "video_path": "data/Bachata_steps/dip/dip_1.mp4",
+      "move_name": "dip_1",
+      "move_category": "dip",
+      "start_time": 27.335138851966477,
+      "duration": 3.0,
+      "end_time": 30.335138851966477,
+      "transition_type": "cut"
+    },
+    {
+      "position": 11,
+      "clip_id": "move_11_cross_body_lead",
+      "video_path": "data/Bachata_steps/cross_body_lead/cross_body_lead_1.mp4",
+      "move_name": "cross_body_lead_1",
+      "move_category": "cross_body_lead",
+      "start_time": 30.335138851966477,
+      "duration": 3.364606011596096,
+      "end_time": 33.69974486356257,
+      "transition_type": "cut"
+    },
+    {
+      "position": 12,
+      "clip_id": "move_12_combination_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_1.mp4",
+      "move_name": "basic_step_1",
+      "move_category": "basic_steps",
+      "start_time": 33.69974486356257,
+      "duration": 3.1984459990038703,
+      "end_time": 36.898190862566445,
+      "transition_type": "cut"
+    },
+    {
+      "position": 13,
+      "clip_id": "move_13_lady_left_turn",
+      "video_path": "data/Bachata_steps/lady_left_turn/lady_left_turn_1.mp4",
+      "move_name": "lady_left_turn_1",
+      "move_category": "lady_left_turn",
+      "start_time": 36.898190862566445,
+      "duration": 3.0,
+      "end_time": 39.898190862566445,
+      "transition_type": "cut"
+    },
+    {
+      "position": 14,
+      "clip_id": "move_14_body_roll",
+      "video_path": "data/Bachata_steps/body_roll/body_roll_1.mp4",
+      "move_name": "body_roll_1",
+      "move_category": "body_roll",
+      "start_time": 39.898190862566445,
+      "duration": 3.0,
+      "end_time": 42.898190862566445,
+      "transition_type": "cut"
+    },
+    {
+      "position": 15,
+      "clip_id": "move_15_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_2.mp4",
+      "move_name": "basic_step_2",
+      "move_category": "basic_steps",
+      "start_time": 42.898190862566445,
+      "duration": 3.378293840481214,
+      "end_time": 46.27648470304766,
+      "transition_type": "cut"
+    },
+    {
+      "position": 16,
+      "clip_id": "move_16_forward_backward",
+      "video_path": "data/Bachata_steps/forward_backward/forward_backward_1.mp4",
+      "move_name": "forward_backward_1",
+      "move_category": "forward_backward",
+      "start_time": 46.27648470304766,
+      "duration": 3.0,
+      "end_time": 49.27648470304766,
+      "transition_type": "cut"
+    },
+    {
+      "position": 17,
+      "clip_id": "move_17_lady_right_turn",
+      "video_path": "data/Bachata_steps/lady_right_turn/lady_right_turn_1.mp4",
+      "move_name": "lady_right_turn_1",
+      "move_category": "lady_right_turn",
+      "start_time": 49.27648470304766,
+      "duration": 3.3866455614031015,
+      "end_time": 52.66313026445076,
+      "transition_type": "cut"
+    },
+    {
+      "position": 18,
+      "clip_id": "move_18_dip",
+      "video_path": "data/Bachata_steps/dip/dip_1.mp4",
+      "move_name": "dip_1",
+      "move_category": "dip",
+      "start_time": 52.66313026445076,
+      "duration": 3.0,
+      "end_time": 55.66313026445076,
+      "transition_type": "cut"
+    },
+    {
+      "position": 19,
+      "clip_id": "move_19_cross_body_lead",
+      "video_path": "data/Bachata_steps/cross_body_lead/cross_body_lead_1.mp4",
+      "move_name": "cross_body_lead_1",
+      "move_category": "cross_body_lead",
+      "start_time": 55.66313026445076,
+      "duration": 3.0,
+      "end_time": 58.66313026445076,
+      "transition_type": "cut"
+    },
+    {
+      "position": 20,
+      "clip_id": "move_20_combination_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_1.mp4",
+      "move_name": "basic_step_1",
+      "move_category": "basic_steps",
+      "start_time": 58.66313026445076,
+      "duration": 3.1271186831981206,
+      "end_time": 61.79024894764888,
+      "transition_type": "cut"
+    },
+    {
+      "position": 21,
+      "clip_id": "move_21_lady_left_turn",
+      "video_path": "data/Bachata_steps/lady_left_turn/lady_left_turn_1.mp4",
+      "move_name": "lady_left_turn_1",
+      "move_category": "lady_left_turn",
+      "start_time": 61.79024894764888,
+      "duration": 3.0,
+      "end_time": 64.79024894764888,
+      "transition_type": "cut"
+    },
+    {
+      "position": 22,
+      "clip_id": "move_22_body_roll",
+      "video_path": "data/Bachata_steps/body_roll/body_roll_1.mp4",
+      "move_name": "body_roll_1",
+      "move_category": "body_roll",
+      "start_time": 64.79024894764888,
+      "duration": 3.0,
+      "end_time": 67.79024894764888,
+      "transition_type": "cut"
+    },
+    {
+      "position": 23,
+      "clip_id": "move_23_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_2.mp4",
+      "move_name": "basic_step_2",
+      "move_category": "basic_steps",
+      "start_time": 67.79024894764888,
+      "duration": 3.0,
+      "end_time": 70.79024894764888,
+      "transition_type": "cut"
+    },
+    {
+      "position": 24,
+      "clip_id": "move_24_forward_backward",
+      "video_path": "data/Bachata_steps/forward_backward/forward_backward_1.mp4",
+      "move_name": "forward_backward_1",
+      "move_category": "forward_backward",
+      "start_time": 70.79024894764888,
+      "duration": 3.0,
+      "end_time": 73.79024894764888,
+      "transition_type": "cut"
+    },
+    {
+      "position": 25,
+      "clip_id": "move_25_lady_right_turn",
+      "video_path": "data/Bachata_steps/lady_right_turn/lady_right_turn_1.mp4",
+      "move_name": "lady_right_turn_1",
+      "move_category": "lady_right_turn",
+      "start_time": 73.79024894764888,
+      "duration": 3.0,
+      "end_time": 76.79024894764888,
+      "transition_type": "cut"
+    },
+    {
+      "position": 26,
+      "clip_id": "move_26_dip",
+      "video_path": "data/Bachata_steps/dip/dip_1.mp4",
+      "move_name": "dip_1",
+      "move_category": "dip",
+      "start_time": 76.79024894764888,
+      "duration": 3.311286561800528,
+      "end_time": 80.1015355094494,
+      "transition_type": "cut"
+    },
+    {
+      "position": 27,
+      "clip_id": "move_27_cross_body_lead",
+      "video_path": "data/Bachata_steps/cross_body_lead/cross_body_lead_1.mp4",
+      "move_name": "cross_body_lead_1",
+      "move_category": "cross_body_lead",
+      "start_time": 80.1015355094494,
+      "duration": 3.0,
+      "end_time": 83.1015355094494,
+      "transition_type": "cut"
+    },
+    {
+      "position": 28,
+      "clip_id": "move_28_combination_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_1.mp4",
+      "move_name": "basic_step_1",
+      "move_category": "basic_steps",
+      "start_time": 83.1015355094494,
+      "duration": 3.0,
+      "end_time": 86.1015355094494,
+      "transition_type": "cut"
+    },
+    {
+      "position": 29,
+      "clip_id": "move_29_lady_left_turn",
+      "video_path": "data/Bachata_steps/lady_left_turn/lady_left_turn_1.mp4",
+      "move_name": "lady_left_turn_1",
+      "move_category": "lady_left_turn",
+      "start_time": 86.1015355094494,
+      "duration": 3.173673740871017,
+      "end_time": 89.27520925032042,
+      "transition_type": "cut"
+    },
+    {
+      "position": 30,
+      "clip_id": "move_30_body_roll",
+      "video_path": "data/Bachata_steps/body_roll/body_roll_1.mp4",
+      "move_name": "body_roll_1",
+      "move_category": "body_roll",
+      "start_time": 89.27520925032042,
+      "duration": 3.046935174325108,
+      "end_time": 92.32214442464553,
+      "transition_type": "cut"
+    },
+    {
+      "position": 31,
+      "clip_id": "move_31_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_2.mp4",
+      "move_name": "basic_step_2",
+      "move_category": "basic_steps",
+      "start_time": 92.32214442464553,
+      "duration": 3.0,
+      "end_time": 95.32214442464553,
+      "transition_type": "cut"
+    },
+    {
+      "position": 32,
+      "clip_id": "move_32_forward_backward",
+      "video_path": "data/Bachata_steps/forward_backward/forward_backward_1.mp4",
+      "move_name": "forward_backward_1",
+      "move_category": "forward_backward",
+      "start_time": 95.32214442464553,
+      "duration": 3.0,
+      "end_time": 98.32214442464553,
+      "transition_type": "cut"
+    },
+    {
+      "position": 33,
+      "clip_id": "move_33_lady_right_turn",
+      "video_path": "data/Bachata_steps/lady_right_turn/lady_right_turn_1.mp4",
+      "move_name": "lady_right_turn_1",
+      "move_category": "lady_right_turn",
+      "start_time": 98.32214442464553,
+      "duration": 3.0816837093321947,
+      "end_time": 101.40382813397773,
+      "transition_type": "cut"
+    },
+    {
+      "position": 34,
+      "clip_id": "move_34_dip",
+      "video_path": "data/Bachata_steps/dip/dip_1.mp4",
+      "move_name": "dip_1",
+      "move_category": "dip",
+      "start_time": 101.40382813397773,
+      "duration": 3.0,
+      "end_time": 104.40382813397773,
+      "transition_type": "cut"
+    },
+    {
+      "position": 35,
+      "clip_id": "move_35_cross_body_lead",
+      "video_path": "data/Bachata_steps/cross_body_lead/cross_body_lead_1.mp4",
+      "move_name": "cross_body_lead_1",
+      "move_category": "cross_body_lead",
+      "start_time": 104.40382813397773,
+      "duration": 3.3220403985459956,
+      "end_time": 107.72586853252372,
+      "transition_type": "cut"
+    },
+    {
+      "position": 36,
+      "clip_id": "move_36_combination_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_1.mp4",
+      "move_name": "basic_step_1",
+      "move_category": "basic_steps",
+      "start_time": 107.72586853252372,
+      "duration": 3.0,
+      "end_time": 110.72586853252372,
+      "transition_type": "cut"
+    },
+    {
+      "position": 37,
+      "clip_id": "move_37_lady_left_turn",
+      "video_path": "data/Bachata_steps/lady_left_turn/lady_left_turn_1.mp4",
+      "move_name": "lady_left_turn_1",
+      "move_category": "lady_left_turn",
+      "start_time": 110.72586853252372,
+      "duration": 3.0724063735412335,
+      "end_time": 113.79827490606495,
+      "transition_type": "cut"
+    },
+    {
+      "position": 38,
+      "clip_id": "move_38_body_roll",
+      "video_path": "data/Bachata_steps/body_roll/body_roll_1.mp4",
+      "move_name": "body_roll_1",
+      "move_category": "body_roll",
+      "start_time": 113.79827490606495,
+      "duration": 3.0,
+      "end_time": 116.79827490606495,
+      "transition_type": "cut"
+    },
+    {
+      "position": 39,
+      "clip_id": "move_39_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_2.mp4",
+      "move_name": "basic_step_2",
+      "move_category": "basic_steps",
+      "start_time": 116.79827490606495,
+      "duration": 3.0181521959559237,
+      "end_time": 119.81642710202087,
+      "transition_type": "cut"
+    },
+    {
+      "position": 40,
+      "clip_id": "move_40_forward_backward",
+      "video_path": "data/Bachata_steps/forward_backward/forward_backward_1.mp4",
+      "move_name": "forward_backward_1",
+      "move_category": "forward_backward",
+      "start_time": 119.81642710202087,
+      "duration": 3.0,
+      "end_time": 122.81642710202087,
+      "transition_type": "cut"
+    },
+    {
+      "position": 41,
+      "clip_id": "move_41_lady_right_turn",
+      "video_path": "data/Bachata_steps/lady_right_turn/lady_right_turn_1.mp4",
+      "move_name": "lady_right_turn_1",
+      "move_category": "lady_right_turn",
+      "start_time": 122.81642710202087,
+      "duration": 3.4948947865174684,
+      "end_time": 126.31132188853833,
+      "transition_type": "cut"
+    },
+    {
+      "position": 42,
+      "clip_id": "move_42_dip",
+      "video_path": "data/Bachata_steps/dip/dip_1.mp4",
+      "move_name": "dip_1",
+      "move_category": "dip",
+      "start_time": 126.31132188853833,
+      "duration": 3.0,
+      "end_time": 129.31132188853832,
+      "transition_type": "cut"
+    },
+    {
+      "position": 43,
+      "clip_id": "move_43_cross_body_lead",
+      "video_path": "data/Bachata_steps/cross_body_lead/cross_body_lead_1.mp4",
+      "move_name": "cross_body_lead_1",
+      "move_category": "cross_body_lead",
+      "start_time": 129.31132188853832,
+      "duration": 3.0,
+      "end_time": 132.31132188853832,
+      "transition_type": "cut"
+    },
+    {
+      "position": 44,
+      "clip_id": "move_44_combination_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_1.mp4",
+      "move_name": "basic_step_1",
+      "move_category": "basic_steps",
+      "start_time": 132.31132188853832,
+      "duration": 3.033317130653982,
+      "end_time": 135.3446390191923,
+      "transition_type": "cut"
+    },
+    {
+      "position": 45,
+      "clip_id": "move_45_lady_left_turn",
+      "video_path": "data/Bachata_steps/lady_left_turn/lady_left_turn_1.mp4",
+      "move_name": "lady_left_turn_1",
+      "move_category": "lady_left_turn",
+      "start_time": 135.3446390191923,
+      "duration": 3.4660619501084224,
+      "end_time": 138.8107009693007,
+      "transition_type": "cut"
+    },
+    {
+      "position": 46,
+      "clip_id": "move_46_body_roll",
+      "video_path": "data/Bachata_steps/body_roll/body_roll_1.mp4",
+      "move_name": "body_roll_1",
+      "move_category": "body_roll",
+      "start_time": 138.8107009693007,
+      "duration": 3.0,
+      "end_time": 141.8107009693007,
+      "transition_type": "cut"
+    },
+    {
+      "position": 47,
+      "clip_id": "move_47_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_2.mp4",
+      "move_name": "basic_step_2",
+      "move_category": "basic_steps",
+      "start_time": 141.8107009693007,
+      "duration": 3.0,
+      "end_time": 144.8107009693007,
+      "transition_type": "cut"
+    },
+    {
+      "position": 48,
+      "clip_id": "move_48_forward_backward",
+      "video_path": "data/Bachata_steps/forward_backward/forward_backward_1.mp4",
+      "move_name": "forward_backward_1",
+      "move_category": "forward_backward",
+      "start_time": 144.8107009693007,
+      "duration": 3.0,
+      "end_time": 147.8107009693007,
+      "transition_type": "cut"
+    },
+    {
+      "position": 49,
+      "clip_id": "move_49_lady_right_turn",
+      "video_path": "data/Bachata_steps/lady_right_turn/lady_right_turn_1.mp4",
+      "move_name": "lady_right_turn_1",
+      "move_category": "lady_right_turn",
+      "start_time": 147.8107009693007,
+      "duration": 3.0,
+      "end_time": 150.8107009693007,
+      "transition_type": "cut"
+    },
+    {
+      "position": 50,
+      "clip_id": "move_50_dip",
+      "video_path": "data/Bachata_steps/dip/dip_1.mp4",
+      "move_name": "dip_1",
+      "move_category": "dip",
+      "start_time": 150.8107009693007,
+      "duration": 3.0,
+      "end_time": 153.8107009693007,
+      "transition_type": "cut"
+    },
+    {
+      "position": 51,
+      "clip_id": "move_51_cross_body_lead",
+      "video_path": "data/Bachata_steps/cross_body_lead/cross_body_lead_1.mp4",
+      "move_name": "cross_body_lead_1",
+      "move_category": "cross_body_lead",
+      "start_time": 153.8107009693007,
+      "duration": 3.4471104411282543,
+      "end_time": 157.25781141042896,
+      "transition_type": "cut"
+    },
+    {
+      "position": 52,
+      "clip_id": "move_52_combination_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_1.mp4",
+      "move_name": "basic_step_1",
+      "move_category": "basic_steps",
+      "start_time": 157.25781141042896,
+      "duration": 3.0,
+      "end_time": 160.25781141042896,
+      "transition_type": "cut"
+    },
+    {
+      "position": 53,
+      "clip_id": "move_53_lady_left_turn",
+      "video_path": "data/Bachata_steps/lady_left_turn/lady_left_turn_1.mp4",
+      "move_name": "lady_left_turn_1",
+      "move_category": "lady_left_turn",
+      "start_time": 160.25781141042896,
+      "duration": 3.054308144408091,
+      "end_time": 163.31211955483704,
+      "transition_type": "cut"
+    },
+    {
+      "position": 54,
+      "clip_id": "move_54_body_roll",
+      "video_path": "data/Bachata_steps/body_roll/body_roll_1.mp4",
+      "move_name": "body_roll_1",
+      "move_category": "body_roll",
+      "start_time": 163.31211955483704,
+      "duration": 3.1752753598484365,
+      "end_time": 166.48739491468547,
+      "transition_type": "cut"
+    },
+    {
+      "position": 55,
+      "clip_id": "move_55_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_2.mp4",
+      "move_name": "basic_step_2",
+      "move_category": "basic_steps",
+      "start_time": 166.48739491468547,
+      "duration": 3.0,
+      "end_time": 169.48739491468547,
+      "transition_type": "cut"
+    },
+    {
+      "position": 56,
+      "clip_id": "move_56_forward_backward",
+      "video_path": "data/Bachata_steps/forward_backward/forward_backward_1.mp4",
+      "move_name": "forward_backward_1",
+      "move_category": "forward_backward",
+      "start_time": 169.48739491468547,
+      "duration": 3.076107391295344,
+      "end_time": 172.56350230598082,
+      "transition_type": "cut"
+    },
+    {
+      "position": 57,
+      "clip_id": "move_57_lady_right_turn",
+      "video_path": "data/Bachata_steps/lady_right_turn/lady_right_turn_1.mp4",
+      "move_name": "lady_right_turn_1",
+      "move_category": "lady_right_turn",
+      "start_time": 172.56350230598082,
+      "duration": 3.0,
+      "end_time": 175.56350230598082,
+      "transition_type": "cut"
+    },
+    {
+      "position": 58,
+      "clip_id": "move_58_dip",
+      "video_path": "data/Bachata_steps/dip/dip_1.mp4",
+      "move_name": "dip_1",
+      "move_category": "dip",
+      "start_time": 175.56350230598082,
+      "duration": 3.0965478880068376,
+      "end_time": 178.66005019398764,
+      "transition_type": "cut"
+    },
+    {
+      "position": 59,
+      "clip_id": "move_59_cross_body_lead",
+      "video_path": "data/Bachata_steps/cross_body_lead/cross_body_lead_1.mp4",
+      "move_name": "cross_body_lead_1",
+      "move_category": "cross_body_lead",
+      "start_time": 178.66005019398764,
+      "duration": 3.0,
+      "end_time": 181.66005019398764,
+      "transition_type": "cut"
+    },
+    {
+      "position": 60,
+      "clip_id": "move_60_combination_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_1.mp4",
+      "move_name": "basic_step_1",
+      "move_category": "basic_steps",
+      "start_time": 181.66005019398764,
+      "duration": 3.4900299358422413,
+      "end_time": 185.1500801298299,
+      "transition_type": "cut"
+    },
+    {
+      "position": 61,
+      "clip_id": "move_61_lady_left_turn",
+      "video_path": "data/Bachata_steps/lady_left_turn/lady_left_turn_1.mp4",
+      "move_name": "lady_left_turn_1",
+      "move_category": "lady_left_turn",
+      "start_time": 185.1500801298299,
+      "duration": 3.0,
+      "end_time": 188.1500801298299,
+      "transition_type": "cut"
+    },
+    {
+      "position": 62,
+      "clip_id": "move_62_body_roll",
+      "video_path": "data/Bachata_steps/body_roll/body_roll_1.mp4",
+      "move_name": "body_roll_1",
+      "move_category": "body_roll",
+      "start_time": 188.1500801298299,
+      "duration": 3.0,
+      "end_time": 191.1500801298299,
+      "transition_type": "cut"
+    },
+    {
+      "position": 63,
+      "clip_id": "move_63_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_2.mp4",
+      "move_name": "basic_step_2",
+      "move_category": "basic_steps",
+      "start_time": 191.1500801298299,
+      "duration": 3.0,
+      "end_time": 194.1500801298299,
+      "transition_type": "cut"
+    },
+    {
+      "position": 64,
+      "clip_id": "move_64_forward_backward",
+      "video_path": "data/Bachata_steps/forward_backward/forward_backward_1.mp4",
+      "move_name": "forward_backward_1",
+      "move_category": "forward_backward",
+      "start_time": 194.1500801298299,
+      "duration": 3.0,
+      "end_time": 197.1500801298299,
+      "transition_type": "cut"
+    },
+    {
+      "position": 65,
+      "clip_id": "move_65_lady_right_turn",
+      "video_path": "data/Bachata_steps/lady_right_turn/lady_right_turn_1.mp4",
+      "move_name": "lady_right_turn_1",
+      "move_category": "lady_right_turn",
+      "start_time": 197.1500801298299,
+      "duration": 3.0,
+      "end_time": 200.1500801298299,
+      "transition_type": "cut"
+    },
+    {
+      "position": 66,
+      "clip_id": "move_66_dip",
+      "video_path": "data/Bachata_steps/dip/dip_1.mp4",
+      "move_name": "dip_1",
+      "move_category": "dip",
+      "start_time": 200.1500801298299,
+      "duration": 3.236418611365172,
+      "end_time": 203.38649874119506,
+      "transition_type": "cut"
+    },
+    {
+      "position": 67,
+      "clip_id": "move_67_cross_body_lead",
+      "video_path": "data/Bachata_steps/cross_body_lead/cross_body_lead_1.mp4",
+      "move_name": "cross_body_lead_1",
+      "move_category": "cross_body_lead",
+      "start_time": 203.38649874119506,
+      "duration": 3.0,
+      "end_time": 206.38649874119506,
+      "transition_type": "cut"
+    },
+    {
+      "position": 68,
+      "clip_id": "move_68_combination_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_1.mp4",
+      "move_name": "basic_step_1",
+      "move_category": "basic_steps",
+      "start_time": 206.38649874119506,
+      "duration": 3.0,
+      "end_time": 209.38649874119506,
+      "transition_type": "cut"
+    },
+    {
+      "position": 69,
+      "clip_id": "move_69_lady_left_turn",
+      "video_path": "data/Bachata_steps/lady_left_turn/lady_left_turn_1.mp4",
+      "move_name": "lady_left_turn_1",
+      "move_category": "lady_left_turn",
+      "start_time": 209.38649874119506,
+      "duration": 3.0,
+      "end_time": 212.38649874119506,
+      "transition_type": "cut"
+    },
+    {
+      "position": 70,
+      "clip_id": "move_70_body_roll",
+      "video_path": "data/Bachata_steps/body_roll/body_roll_1.mp4",
+      "move_name": "body_roll_1",
+      "move_category": "body_roll",
+      "start_time": 212.38649874119506,
+      "duration": 3.0,
+      "end_time": 215.38649874119506,
+      "transition_type": "cut"
+    },
+    {
+      "position": 71,
+      "clip_id": "move_71_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_2.mp4",
+      "move_name": "basic_step_2",
+      "move_category": "basic_steps",
+      "start_time": 215.38649874119506,
+      "duration": 3.0,
+      "end_time": 218.38649874119506,
+      "transition_type": "cut"
+    },
+    {
+      "position": 72,
+      "clip_id": "move_72_forward_backward",
+      "video_path": "data/Bachata_steps/forward_backward/forward_backward_1.mp4",
+      "move_name": "forward_backward_1",
+      "move_category": "forward_backward",
+      "start_time": 218.38649874119506,
+      "duration": 3.113636794948413,
+      "end_time": 221.50013553614346,
+      "transition_type": "cut"
+    },
+    {
+      "position": 73,
+      "clip_id": "move_73_lady_right_turn",
+      "video_path": "data/Bachata_steps/lady_right_turn/lady_right_turn_1.mp4",
+      "move_name": "lady_right_turn_1",
+      "move_category": "lady_right_turn",
+      "start_time": 221.50013553614346,
+      "duration": 3.3802486802795824,
+      "end_time": 224.88038421642304,
+      "transition_type": "cut"
+    },
+    {
+      "position": 74,
+      "clip_id": "move_74_dip",
+      "video_path": "data/Bachata_steps/dip/dip_1.mp4",
+      "move_name": "dip_1",
+      "move_category": "dip",
+      "start_time": 224.88038421642304,
+      "duration": 3.0,
+      "end_time": 227.88038421642304,
+      "transition_type": "cut"
+    },
+    {
+      "position": 75,
+      "clip_id": "move_75_cross_body_lead",
+      "video_path": "data/Bachata_steps/cross_body_lead/cross_body_lead_1.mp4",
+      "move_name": "cross_body_lead_1",
+      "move_category": "cross_body_lead",
+      "start_time": 227.88038421642304,
+      "duration": 3.0,
+      "end_time": 230.88038421642304,
+      "transition_type": "cut"
+    },
+    {
+      "position": 76,
+      "clip_id": "move_76_combination_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_1.mp4",
+      "move_name": "basic_step_1",
+      "move_category": "basic_steps",
+      "start_time": 230.88038421642304,
+      "duration": 3.0,
+      "end_time": 233.88038421642304,
+      "transition_type": "cut"
+    },
+    {
+      "position": 77,
+      "clip_id": "move_77_lady_left_turn",
+      "video_path": "data/Bachata_steps/lady_left_turn/lady_left_turn_1.mp4",
+      "move_name": "lady_left_turn_1",
+      "move_category": "lady_left_turn",
+      "start_time": 233.88038421642304,
+      "duration": 3.2297209696384255,
+      "end_time": 237.11010518606147,
+      "transition_type": "cut"
+    },
+    {
+      "position": 78,
+      "clip_id": "move_78_body_roll",
+      "video_path": "data/Bachata_steps/body_roll/body_roll_1.mp4",
+      "move_name": "body_roll_1",
+      "move_category": "body_roll",
+      "start_time": 237.11010518606147,
+      "duration": 3.0,
+      "end_time": 240.11010518606147,
+      "transition_type": "cut"
+    }
+  ],
+  "musical_sections": [
+    {
+      "start_time": 0.0,
+      "end_time": 17.368526077097506,
+      "section_type": "intro",
+      "energy_level": 0.2771218822744207,
+      "recommended_move_types": [
+        "basic_step",
+        "side_step"
+      ]
+    },
+    {
+      "start_time": 17.368526077097506,
+      "end_time": 53.98639455782313,
+      "section_type": "verse",
+      "energy_level": 0.2546421880071384,
+      "recommended_move_types": [
+        "basic_step",
+        "forward_backward",
+        "side_step",
+        "cross_body_lead",
+        "hammerlock",
+        "lady_left_turn"
+      ]
+    },
+    {
+      "start_time": 53.98639455782313,
+      "end_time": 92.57795918367347,
+      "section_type": "chorus",
+      "energy_level": 0.300908095830722,
+      "recommended_move_types": [
+        "cross_body_lead",
+        "lady_left_turn",
+        "lady_right_turn",
+        "copa",
+        "turns",
+        "styling"
+      ]
+    },
+    {
+      "start_time": 92.57795918367347,
+      "end_time": 178.21315192743765,
+      "section_type": "chorus",
+      "energy_level": 0.2702329050278829,
+      "recommended_move_types": [
+        "cross_body_lead",
+        "lady_left_turn",
+        "lady_right_turn"
+      ]
+    },
+    {
+      "start_time": 178.21315192743765,
+      "end_time": 195.2798185941043,
+      "section_type": "chorus",
+      "energy_level": 0.34682625479641416,
+      "recommended_move_types": [
+        "cross_body_lead",
+        "lady_left_turn",
+        "lady_right_turn",
+        "copa",
+        "turns",
+        "styling"
+      ]
+    },
+    {
+      "start_time": 195.2798185941043,
+      "end_time": 235.12526077097505,
+      "section_type": "verse",
+      "energy_level": 0.29285014591468517,
+      "recommended_move_types": [
+        "basic_step",
+        "forward_backward",
+        "side_step",
+        "cross_body_lead",
+        "hammerlock",
+        "lady_left_turn"
+      ]
+    },
+    {
+      "start_time": 235.12526077097505,
+      "end_time": 239.4390476190476,
+      "section_type": "outro",
+      "energy_level": 0.09654138195570852,
+      "recommended_move_types": [
+        "basic_step",
+        "close_embrace"
+      ]
+    }
+  ],
+  "video_output": {
+    "file_path": "data/output/Me_Emborrachar\u00e8_Bachata_Versio_full_fast_choreography.mp4",
+    "duration": 239.439002,
+    "file_size": 37941883,
+    "file_size_mb": 36.18419933319092,
+    "resolution": "1280x720",
+    "quality_setting": "fast",
+    "processing_time": 26.478708028793335
+  },
+  "generation_info": {
+    "generated_at": "2025-09-15 12:59:01",
+    "generator_version": "1.0",
+    "settings": {
+      "duration": "full",
+      "quality": "fast",
+      "max_moves_analyzed": 8,
+      "target_fps": 10
+    }
+  }
+}

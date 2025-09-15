@@ -239,7 +239,8 @@ class VideoGenerator:
         temp_files: List[str]
     ) -> str:
         """
-        Create a concatenation file for FFmpeg.
+        Create a concatenation file for FFmpeg with NATURAL clip durations.
+        NO duration manipulation - clips play at their natural length.
         
         Args:
             sequence: The choreography sequence
@@ -255,9 +256,12 @@ class VideoGenerator:
             for move in sequence.moves:
                 # Convert to absolute path for FFmpeg
                 abs_path = os.path.abspath(move.video_path)
+                # CRITICAL FIX: Just list the file, no duration manipulation
                 f.write(f"file '{abs_path}'\n")
+                # NO duration or inpoint/outpoint specifications
+                # Let clips play at their natural duration
         
-        logger.info(f"Created concatenation file: {concat_file_path}")
+        logger.info(f"Created natural duration concatenation file: {concat_file_path}")
         return concat_file_path
     
     def _create_beat_synchronized_concat_file(
@@ -267,46 +271,79 @@ class VideoGenerator:
         temp_files: List[str]
     ) -> str:
         """
-        Create a concatenation file with beat-synchronized timing adjustments.
+        Create a concatenation file with NATURAL durations (no beat manipulation).
+        CRITICAL FIX: Beat sync was causing timing issues, use natural durations.
         
         Args:
             sequence: The choreography sequence
-            music_features: Music analysis features including beat positions
+            music_features: Music analysis features (ignored to prevent manipulation)
             temp_files: List to track temporary files
             
         Returns:
-            Path to the concatenation file with timing adjustments
+            Path to the concatenation file with natural durations
         """
-        concat_file_path = os.path.join(self.config.temp_dir, f"beat_sync_concat_{int(time.time())}.txt")
+        concat_file_path = os.path.join(self.config.temp_dir, f"natural_concat_{int(time.time())}.txt")
         temp_files.append(concat_file_path)
         
-        beat_positions = music_features.get('beat_positions', [])
-        tempo = music_features.get('tempo', 120)
-        
-        logger.info(f"Creating beat-synchronized concat file with {len(beat_positions)} beats at {tempo} BPM")
+        logger.info(f"Creating natural duration concat file (beat sync disabled to fix timing issues)")
         
         with open(concat_file_path, 'w') as f:
-            for i, move in enumerate(sequence.moves):
+            for move in sequence.moves:
                 abs_path = os.path.abspath(move.video_path)
-                
-                # Calculate beat-aligned duration if we have beat information
-                if beat_positions and i < len(beat_positions) - 1:
-                    # Find the closest beat positions for this move's timing
-                    move_start_beat = self._find_closest_beat(move.start_time, beat_positions)
-                    move_end_time = move.start_time + move.duration
-                    move_end_beat = self._find_closest_beat(move_end_time, beat_positions)
-                    
-                    # For now, let's not use beat alignment duration adjustments
-                    # as they're causing clips to be truncated incorrectly
-                    # TODO: Implement proper beat alignment that respects full clip durations
-                    pass
-                
-                # Use full clip without duration restrictions
+                # CRITICAL FIX: No beat alignment, no duration manipulation
+                # Just concatenate clips at their natural durations
                 f.write(f"file '{abs_path}'\n")
         
-        logger.info(f"Created beat-synchronized concatenation file: {concat_file_path}")
+        logger.info(f"Created natural duration concatenation file: {concat_file_path}")
         return concat_file_path
     
+    def _get_concat_video_duration(self, concat_file_path: str) -> float:
+        """
+        Get the total duration of concatenated video clips.
+        
+        Args:
+            concat_file_path: Path to the concatenation file
+            
+        Returns:
+            Total duration in seconds
+        """
+        try:
+            # Read the concat file to get individual clip paths
+            with open(concat_file_path, 'r') as f:
+                lines = f.readlines()
+            
+            total_duration = 0.0
+            for line in lines:
+                if line.startswith("file "):
+                    # Extract file path (remove 'file ' and quotes)
+                    file_path = line.strip()[5:].strip("'\"")
+                    
+                    # Get duration of this clip
+                    try:
+                        cmd = [
+                            "ffprobe",
+                            "-v", "quiet",
+                            "-print_format", "json",
+                            "-show_format",
+                            file_path
+                        ]
+                        
+                        result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+                        if result.returncode == 0:
+                            info = json.loads(result.stdout)
+                            duration = float(info.get("format", {}).get("duration", 0))
+                            total_duration += duration
+                    except Exception as e:
+                        logger.warning(f"Could not get duration for {file_path}: {e}")
+                        total_duration += 8.0  # Default fallback
+            
+            logger.info(f"Total concatenated video duration: {total_duration:.2f}s")
+            return total_duration
+            
+        except Exception as e:
+            logger.error(f"Could not calculate concat video duration: {e}")
+            return 60.0  # Fallback duration
+
     def _find_closest_beat(self, time_position: float, beat_positions: List[float]) -> int:
         """
         Find the index of the beat position closest to the given time.
@@ -339,7 +376,9 @@ class VideoGenerator:
         music_features: Optional[dict] = None
     ) -> str:
         """
-        Concatenate videos using FFmpeg with enhanced audio synchronization.
+        Concatenate videos using TWO-STEP process to preserve natural timing.
+        Step 1: Concatenate videos with copy codec (preserves timing)
+        Step 2: Add audio overlay without re-encoding video
         
         Args:
             concat_file_path: Path to the concatenation file
@@ -354,49 +393,116 @@ class VideoGenerator:
         # Ensure output directory exists
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         
-        # Build FFmpeg command for simple concatenation
+        if audio_path and os.path.exists(audio_path) and self.config.add_audio_overlay:
+            return self._two_step_video_audio_process(concat_file_path, audio_path, output_path)
+        else:
+            return self._simple_concatenation(concat_file_path, output_path)
+    
+    def _two_step_video_audio_process(self, concat_file_path: str, audio_path: str, output_path: str) -> str:
+        """
+        Two-step process to preserve natural video timing:
+        1. Concatenate videos with copy codec (no re-encoding)
+        2. Add audio overlay without touching video stream
+        """
+        temp_video_path = output_path.replace('.mp4', '_temp_video.mp4')
+        
+        try:
+            # Step 1: Concatenate videos with COPY codec (preserves exact timing)
+            logger.info("Step 1: Concatenating videos with natural timing preservation")
+            cmd1 = [
+                "ffmpeg",
+                "-f", "concat",
+                "-safe", "0",
+                "-i", concat_file_path,
+                "-c", "copy",  # CRITICAL: Copy codec preserves exact timing
+                "-y", temp_video_path
+            ]
+            
+            logger.info(f"Running Step 1: {' '.join(cmd1)}")
+            result1 = subprocess.run(cmd1, capture_output=True, text=True, timeout=120)
+            
+            if result1.returncode != 0:
+                raise VideoGenerationError(f"Step 1 failed: {result1.stderr}")
+            
+            # Get video duration for audio trimming
+            video_duration = self._get_video_duration(temp_video_path)
+            
+            # Step 2: Add audio overlay without re-encoding video
+            logger.info("Step 2: Adding audio overlay without video re-encoding")
+            cmd2 = [
+                "ffmpeg",
+                "-i", temp_video_path,
+                "-ss", "0",
+                "-t", str(video_duration),
+                "-i", audio_path,
+                "-c:v", "copy",  # CRITICAL: Copy video stream - no re-encoding
+                "-c:a", self.config.audio_codec,
+                "-b:a", self.config.audio_bitrate,
+                "-map", "0:v:0",  # Video from temp file
+                "-map", "1:a:0",  # Audio from audio file
+                "-movflags", "+faststart",
+                "-y", output_path
+            ]
+            
+            logger.info(f"Running Step 2: {' '.join(cmd2)}")
+            result2 = subprocess.run(cmd2, capture_output=True, text=True, timeout=120)
+            
+            if result2.returncode != 0:
+                raise VideoGenerationError(f"Step 2 failed: {result2.stderr}")
+            
+            # Clean up temp file
+            if os.path.exists(temp_video_path):
+                os.remove(temp_video_path)
+            
+            logger.info("Two-step video generation completed successfully")
+            return output_path
+            
+        except Exception as e:
+            # Clean up temp file on error
+            if os.path.exists(temp_video_path):
+                os.remove(temp_video_path)
+            raise VideoGenerationError(f"Two-step process failed: {e}")
+    
+    def _simple_concatenation(self, concat_file_path: str, output_path: str) -> str:
+        """Simple concatenation without audio overlay."""
         cmd = [
             "ffmpeg",
             "-f", "concat",
             "-safe", "0",
             "-i", concat_file_path,
-            "-c", "copy",  # Copy streams without re-encoding for speed
-            "-y",  # Overwrite output file
-            output_path
+            "-c", "copy",
+            "-y", output_path
         ]
         
-        # Enhanced audio overlay with synchronization and web optimization
-        if audio_path and os.path.exists(audio_path) and self.config.add_audio_overlay:
-            cmd = self._build_audio_sync_command(
-                concat_file_path, audio_path, output_path, music_features
-            )
-        else:
-            # Optimize for web playback even without audio overlay
-            cmd = self._build_web_optimized_command(concat_file_path, output_path)
+        logger.info(f"Running simple concatenation: {' '.join(cmd)}")
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
         
-        logger.info(f"Running FFmpeg command: {' '.join(cmd)}")
+        if result.returncode != 0:
+            raise VideoGenerationError(f"Simple concatenation failed: {result.stderr}")
         
+        return output_path
+    
+    def _get_video_duration(self, video_path: str) -> float:
+        """Get duration of a video file."""
         try:
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=300  # 5 minute timeout
-            )
+            cmd = [
+                "ffprobe",
+                "-v", "quiet",
+                "-print_format", "json",
+                "-show_format",
+                video_path
+            ]
             
-            if result.returncode != 0:
-                error_msg = f"FFmpeg failed with return code {result.returncode}\n"
-                error_msg += f"STDOUT: {result.stdout}\n"
-                error_msg += f"STDERR: {result.stderr}"
-                raise VideoGenerationError(error_msg)
-            
-            logger.info("Video concatenation completed successfully")
-            return output_path
-            
-        except subprocess.TimeoutExpired:
-            raise VideoGenerationError("FFmpeg process timed out")
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            if result.returncode == 0:
+                info = json.loads(result.stdout)
+                return float(info.get("format", {}).get("duration", 60.0))
+            else:
+                return 60.0
+                
         except Exception as e:
-            raise VideoGenerationError(f"FFmpeg execution failed: {e}")
+            logger.warning(f"Could not get video duration: {e}")
+            return 60.0
     
     def _get_output_info(self, output_path: str) -> Tuple[Optional[float], Optional[int]]:
         """
@@ -459,77 +565,48 @@ class VideoGenerator:
         music_features: Optional[dict] = None
     ) -> List[str]:
         """
-        Build FFmpeg command for audio-synchronized video generation.
+        Build FFmpeg command using TWO-STEP process to preserve natural timing.
+        Step 1: Concatenate videos with natural timing
+        Step 2: Add audio overlay without re-encoding video
         
         Args:
             concat_file_path: Path to concatenation file
             audio_path: Path to audio file
             output_path: Output video path
-            music_features: Optional music features for advanced sync
+            music_features: Optional music features for audio duration
             
         Returns:
-            FFmpeg command as list of strings
+            FFmpeg command as list of strings (will be executed in two steps)
         """
-        cmd = [
+        # Use two-step process to avoid timing manipulation
+        return self._build_two_step_command(concat_file_path, audio_path, output_path)
+    
+    def _build_two_step_command(self, concat_file_path: str, audio_path: str, output_path: str) -> List[str]:
+        """
+        Build command for two-step process:
+        1. Concatenate videos preserving natural timing
+        2. Add audio overlay without video re-encoding
+        """
+        # For now, return the concatenation command
+        # The audio overlay will be handled separately
+        return [
             "ffmpeg",
             "-f", "concat",
             "-safe", "0",
             "-i", concat_file_path,
-            "-i", audio_path,
             
-            # Video encoding optimized for web
-            "-c:v", self.config.video_codec,
-            "-preset", "medium",  # Balance between speed and compression
-            "-crf", "23",  # Constant rate factor for good quality
-            "-maxrate", self.config.video_bitrate,
-            "-bufsize", "4M",  # Buffer size for rate control
+            # CRITICAL: Use copy codec to preserve exact timing
+            "-c", "copy",  # Copy both video and audio streams without re-encoding
             
-            # Audio encoding
-            "-c:a", self.config.audio_codec,
-            "-b:a", self.config.audio_bitrate,
-            "-ar", "44100",  # Standard sample rate
+            # Basic web optimization
+            "-movflags", "+faststart",
             
-            # Stream mapping
-            "-map", "0:v:0",  # Video from concatenated clips
-            "-map", "1:a:0",  # Audio from audio file
-            
-            # Synchronization and timing
-            "-vsync", "cfr",  # Constant frame rate for web compatibility
-            "-r", str(self.config.frame_rate),  # Explicit frame rate
-            
-            # Web optimization
-            "-movflags", "+faststart",  # Enable progressive download
-            "-pix_fmt", "yuv420p",  # Ensure compatibility with all browsers
-            
-            # Duration handling
-            "-shortest",  # End when shortest stream ends
-            
-            # Audio processing
+            "-y", output_path.replace('.mp4', '_temp.mp4')  # Temporary file first
         ]
-        
-        # Add audio normalization if enabled
-        if self.config.normalize_audio:
-            cmd.extend(["-af", "loudnorm=I=-16:TP=-1.5:LRA=11"])
-        
-        # Add resolution if specified
-        if self.config.resolution:
-            cmd.extend(["-s", self.config.resolution])
-        
-        # Beat synchronization adjustments
-        if music_features and music_features.get('tempo'):
-            tempo = music_features['tempo']
-            # Add subtle tempo-based frame rate adjustment for better sync
-            if 90 <= tempo <= 150:  # Typical Bachata range
-                # Slight frame rate adjustment based on tempo
-                adjusted_fps = self.config.frame_rate * (tempo / 120.0) * 0.02 + self.config.frame_rate * 0.98
-                cmd[cmd.index(str(self.config.frame_rate))] = f"{adjusted_fps:.2f}"
-        
-        cmd.extend(["-y", output_path])
-        return cmd
     
     def _build_web_optimized_command(self, concat_file_path: str, output_path: str) -> List[str]:
         """
-        Build FFmpeg command optimized for web playback without audio overlay.
+        Build FFmpeg command for NATURAL duration video without audio overlay.
         
         Args:
             concat_file_path: Path to concatenation file
@@ -544,18 +621,17 @@ class VideoGenerator:
             "-safe", "0",
             "-i", concat_file_path,
             
-            # Web-optimized video encoding
+            # Simple video encoding - NO manipulation
             "-c:v", self.config.video_codec,
             "-preset", "medium",
             "-crf", "23",
-            "-maxrate", self.config.video_bitrate,
-            "-bufsize", "4M",
             
-            # Web compatibility
+            # Basic web compatibility
             "-movflags", "+faststart",
             "-pix_fmt", "yuv420p",
-            "-vsync", "cfr",
-            "-r", str(self.config.frame_rate),
+            
+            # NO vsync cfr - preserve natural timing
+            # NO frame rate forcing
             
             # Copy audio from original clips if present
             "-c:a", self.config.audio_codec,

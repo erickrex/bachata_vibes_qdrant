@@ -1,0 +1,197 @@
+{
+  "song_info": {
+    "name": "Chayanne - Bailando Bachata (Letra\u29f8Lyrics)",
+    "audio_path": "data/songs/Chayanne - Bailando Bachata (Letra\u29f8Lyrics).mp3",
+    "tempo": 129.19921875,
+    "duration": 169.77274376417233,
+    "beats_detected": 352,
+    "rhythm_strength": 0.8352319017142753,
+    "syncopation_level": 0.579369274136716
+  },
+  "choreography_sequence": {
+    "total_moves": 7,
+    "actual_sequence_duration": 59.32911,
+    "video_output_duration": 59.416667,
+    "target_duration": "1min",
+    "audio_tempo": 129.19921875,
+    "difficulty_level": "mixed",
+    "composition_method": "natural_clip_durations",
+    "generation_parameters": {
+      "sync_type": "natural_duration_sequence",
+      "tempo": 129.19921875,
+      "target_duration": 60.0,
+      "song_duration": 169.77274376417233,
+      "actual_duration": 59.32911,
+      "moves_repeated": false
+    },
+    "note": "This metadata reflects the ACTUAL video composition, not planned durations"
+  },
+  "actual_video_composition": [
+    {
+      "position": 1,
+      "clip_id": "move_1_hammerlock",
+      "video_path": "data/Bachata_steps/hammerlock/hammerlock_1.mp4",
+      "move_name": "hammerlock_1",
+      "move_category": "hammerlock",
+      "actual_start_time": 0.0,
+      "actual_duration": 10.041667,
+      "actual_end_time": 10.041667,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 2,
+      "clip_id": "move_2_lady_right_turn",
+      "video_path": "data/Bachata_steps/lady_right_turn/lady_right_turn_1.mp4",
+      "move_name": "lady_right_turn_1",
+      "move_category": "lady_right_turn",
+      "actual_start_time": 10.041667,
+      "actual_duration": 6.666667,
+      "actual_end_time": 16.708334,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 3,
+      "clip_id": "move_3_dips",
+      "video_path": "data/Bachata_steps/dip/dip_1.mp4",
+      "move_name": "dip_1",
+      "move_category": "dip",
+      "actual_start_time": 16.708334,
+      "actual_duration": 14.381042,
+      "actual_end_time": 31.089376,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 4,
+      "clip_id": "move_4_body_roll",
+      "video_path": "data/Bachata_steps/body_roll/body_roll_1.mp4",
+      "move_name": "body_roll_1",
+      "move_category": "body_roll",
+      "actual_start_time": 31.089376,
+      "actual_duration": 10.041667,
+      "actual_end_time": 41.131043000000005,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 5,
+      "clip_id": "move_5_forward_backward",
+      "video_path": "data/Bachata_steps/forward_backward/forward_backward_1.mp4",
+      "move_name": "forward_backward_1",
+      "move_category": "forward_backward",
+      "actual_start_time": 41.131043000000005,
+      "actual_duration": 6.4064,
+      "actual_end_time": 47.537443,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 6,
+      "clip_id": "move_6_lady_left_turn",
+      "video_path": "data/Bachata_steps/lady_left_turn/lady_left_turn_1.mp4",
+      "move_name": "lady_left_turn_1",
+      "move_category": "lady_left_turn",
+      "actual_start_time": 47.537443,
+      "actual_duration": 4.666667,
+      "actual_end_time": 52.20411,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 7,
+      "clip_id": "move_7_cross_body_lead",
+      "video_path": "data/Bachata_steps/cross_body_lead/cross_body_lead_1.mp4",
+      "move_name": "cross_body_lead_1",
+      "move_category": "cross_body_lead",
+      "actual_start_time": 52.20411,
+      "actual_duration": 7.125,
+      "actual_end_time": 59.32911,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    }
+  ],
+  "musical_sections": [
+    {
+      "start_time": 0.0,
+      "end_time": 14.721451247165533,
+      "section_type": "intro",
+      "energy_level": 0.2001845263327412,
+      "recommended_move_types": [
+        "basic_step",
+        "side_step"
+      ]
+    },
+    {
+      "start_time": 14.721451247165533,
+      "end_time": 164.21151927437643,
+      "section_type": "verse",
+      "energy_level": 0.28448861561033967,
+      "recommended_move_types": [
+        "basic_step",
+        "forward_backward",
+        "side_step",
+        "cross_body_lead",
+        "hammerlock",
+        "lady_left_turn"
+      ]
+    },
+    {
+      "start_time": 164.21151927437643,
+      "end_time": 164.722358276644,
+      "section_type": "bridge",
+      "energy_level": 0.22383942902088166,
+      "recommended_move_types": [
+        "basic_step",
+        "arm_styling"
+      ]
+    },
+    {
+      "start_time": 164.722358276644,
+      "end_time": 165.5350566893424,
+      "section_type": "bridge",
+      "energy_level": 0.1807685452699661,
+      "recommended_move_types": [
+        "basic_step",
+        "arm_styling"
+      ]
+    },
+    {
+      "start_time": 165.5350566893424,
+      "end_time": 169.77274376417233,
+      "section_type": "outro",
+      "energy_level": 0.04615575695470646,
+      "recommended_move_types": [
+        "basic_step"
+      ]
+    }
+  ],
+  "video_output": {
+    "file_path": "data/output/Chayanne_Bailando_Bachata_Letr_1m_fast_choreography.mp4",
+    "actual_duration": 59.416667,
+    "file_size": 7182814,
+    "file_size_mb": 6.850065231323242,
+    "resolution": "1280x720",
+    "quality_setting": "fast",
+    "processing_time": 3.607603073120117,
+    "encoding_method": "fixed_natural_durations",
+    "note": "Generated with fixed method - no clip freezing or stretching"
+  },
+  "generation_info": {
+    "generated_at": "2025-09-15 16:04:13",
+    "generator_version": "1.1-fixed",
+    "fixes_applied": [
+      "Removed clip duration restrictions",
+      "Fixed FFmpeg encoding to prevent freezing/stretching",
+      "Accurate metadata reflecting actual video composition",
+      "Natural clip durations preserved"
+    ],
+    "settings": {
+      "duration": "1min",
+      "quality": "fast",
+      "max_moves_analyzed": 8,
+      "target_fps": 10
+    }
+  }
+}

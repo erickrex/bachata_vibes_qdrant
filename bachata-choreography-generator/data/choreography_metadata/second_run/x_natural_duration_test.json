@@ -1,0 +1,82 @@
+{
+  "song_info": {
+    "name": "Chayanne - Bailando Bachata (Letra\u29f8Lyrics)",
+    "audio_path": "data/songs/Chayanne - Bailando Bachata (Letra\u29f8Lyrics).mp3",
+    "tempo": 129,
+    "duration": 170
+  },
+  "choreography_sequence": {
+    "total_moves": 4,
+    "natural_sequence_duration": 43.020876,
+    "video_output_duration": 169.773,
+    "composition_method": "NATURAL_DURATIONS_NO_MANIPULATION",
+    "note": "This metadata reflects NATURAL clip durations with ZERO manipulation"
+  },
+  "natural_video_composition": [
+    {
+      "position": 1,
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_1.mp4",
+      "move_name": "basic_step_1",
+      "move_category": "basic_steps",
+      "start_time_in_final_video": 0.0,
+      "duration_in_final_video": 14.848167,
+      "end_time_in_final_video": 14.848167,
+      "manipulation_applied": "NONE - natural clip duration preserved",
+      "note": "These times reflect EXACTLY how the clip appears in the final video"
+    },
+    {
+      "position": 2,
+      "video_path": "data/Bachata_steps/cross_body_lead/cross_body_lead_1.mp4",
+      "move_name": "cross_body_lead_1",
+      "move_category": "cross_body_lead",
+      "start_time_in_final_video": 14.848167,
+      "duration_in_final_video": 7.125,
+      "end_time_in_final_video": 21.973167,
+      "manipulation_applied": "NONE - natural clip duration preserved",
+      "note": "These times reflect EXACTLY how the clip appears in the final video"
+    },
+    {
+      "position": 3,
+      "video_path": "data/Bachata_steps/lady_right_turn/lady_right_turn_1.mp4",
+      "move_name": "lady_right_turn_1",
+      "move_category": "lady_right_turn",
+      "start_time_in_final_video": 21.973167,
+      "duration_in_final_video": 6.666667,
+      "end_time_in_final_video": 28.639834,
+      "manipulation_applied": "NONE - natural clip duration preserved",
+      "note": "These times reflect EXACTLY how the clip appears in the final video"
+    },
+    {
+      "position": 4,
+      "video_path": "data/Bachata_steps/dip/dip_1.mp4",
+      "move_name": "dip_1",
+      "move_category": "dip",
+      "start_time_in_final_video": 28.639834,
+      "duration_in_final_video": 14.381042,
+      "end_time_in_final_video": 43.020876,
+      "manipulation_applied": "NONE - natural clip duration preserved",
+      "note": "These times reflect EXACTLY how the clip appears in the final video"
+    }
+  ],
+  "video_output": {
+    "file_path": "data/output/natural_duration_test.mp4",
+    "natural_duration": 169.773,
+    "file_size": 8011704,
+    "file_size_mb": 7.640556335449219,
+    "resolution": "1280x720",
+    "encoding_method": "natural_durations_no_manipulation",
+    "note": "Generated with NATURAL durations - no freezing, no stretching, no manipulation"
+  },
+  "generation_info": {
+    "generated_at": "2025-09-15 15:37:03",
+    "generator_version": "2.0-natural-durations",
+    "method": "NATURAL_DURATIONS_NO_MANIPULATION",
+    "guarantees": [
+      "No clip duration manipulation",
+      "No frame rate forcing",
+      "No synchronization that alters timing",
+      "No freezing or stretching",
+      "100% accurate metadata"
+    ]
+  }
+}

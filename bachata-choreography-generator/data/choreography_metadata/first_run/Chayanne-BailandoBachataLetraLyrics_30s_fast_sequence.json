@@ -1,0 +1,231 @@
+{
+  "song_info": {
+    "name": "Chayanne - Bailando Bachata (Letra\u29f8Lyrics)",
+    "audio_path": "data/songs/Chayanne - Bailando Bachata (Letra\u29f8Lyrics).mp3",
+    "tempo": 129.19921875,
+    "duration": 169.77274376417233,
+    "beats_detected": 352,
+    "rhythm_strength": 0.8352319017142753,
+    "syncopation_level": 0.579369274136716
+  },
+  "choreography_sequence": {
+    "total_moves": 10,
+    "sequence_duration": 30.48074127559995,
+    "target_duration": "30s",
+    "audio_tempo": 129.19921875,
+    "difficulty_level": "mixed",
+    "generation_parameters": {
+      "sync_type": "full_duration_sequence",
+      "tempo": 129.19921875,
+      "target_duration": 30.0,
+      "actual_duration": 30.48074127559995,
+      "moves_repeated": true
+    }
+  },
+  "moves_used": [
+    {
+      "position": 1,
+      "clip_id": "move_1_body_roll",
+      "video_path": "data/Bachata_steps/body_roll/body_roll_1.mp4",
+      "move_name": "body_roll_1",
+      "move_category": "body_roll",
+      "planned_start_time": 0.0,
+      "planned_duration": 3.0,
+      "planned_end_time": 3.0,
+      "actual_clip_duration": 10.041667,
+      "note": "Actual video uses full clip duration, not planned duration",
+      "transition_type": "cut"
+    },
+    {
+      "position": 2,
+      "clip_id": "move_2_lady_right_turn",
+      "video_path": "data/Bachata_steps/lady_right_turn/lady_right_turn_1.mp4",
+      "move_name": "lady_right_turn_1",
+      "move_category": "lady_right_turn",
+      "planned_start_time": 3.0,
+      "planned_duration": 3.0,
+      "planned_end_time": 6.0,
+      "actual_clip_duration": 6.666667,
+      "note": "Actual video uses full clip duration, not planned duration",
+      "transition_type": "cut"
+    },
+    {
+      "position": 3,
+      "clip_id": "move_3_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_2.mp4",
+      "move_name": "basic_step_2",
+      "move_category": "basic_steps",
+      "planned_start_time": 6.0,
+      "planned_duration": 3.0,
+      "planned_end_time": 9.0,
+      "actual_clip_duration": 18.151467,
+      "note": "Actual video uses full clip duration, not planned duration",
+      "transition_type": "cut"
+    },
+    {
+      "position": 4,
+      "clip_id": "move_4_dip",
+      "video_path": "data/Bachata_steps/dip/dip_1.mp4",
+      "move_name": "dip_1",
+      "move_category": "dip",
+      "planned_start_time": 9.0,
+      "planned_duration": 3.2142703168073554,
+      "planned_end_time": 12.214270316807355,
+      "actual_clip_duration": 14.381042,
+      "note": "Actual video uses full clip duration, not planned duration",
+      "transition_type": "cut"
+    },
+    {
+      "position": 5,
+      "clip_id": "move_5_body_roll",
+      "video_path": "data/Bachata_steps/body_roll/body_roll_1.mp4",
+      "move_name": "body_roll_1",
+      "move_category": "body_roll",
+      "planned_start_time": 12.214270316807355,
+      "planned_duration": 3.0,
+      "planned_end_time": 15.214270316807355,
+      "actual_clip_duration": 10.041667,
+      "note": "Actual video uses full clip duration, not planned duration",
+      "transition_type": "cut"
+    },
+    {
+      "position": 6,
+      "clip_id": "move_6_lady_right_turn",
+      "video_path": "data/Bachata_steps/lady_right_turn/lady_right_turn_1.mp4",
+      "move_name": "lady_right_turn_1",
+      "move_category": "lady_right_turn",
+      "planned_start_time": 15.214270316807355,
+      "planned_duration": 3.266470958792596,
+      "planned_end_time": 18.48074127559995,
+      "actual_clip_duration": 6.666667,
+      "note": "Actual video uses full clip duration, not planned duration",
+      "transition_type": "cut"
+    },
+    {
+      "position": 7,
+      "clip_id": "move_7_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_2.mp4",
+      "move_name": "basic_step_2",
+      "move_category": "basic_steps",
+      "planned_start_time": 18.48074127559995,
+      "planned_duration": 3.0,
+      "planned_end_time": 21.48074127559995,
+      "actual_clip_duration": 18.151467,
+      "note": "Actual video uses full clip duration, not planned duration",
+      "transition_type": "cut"
+    },
+    {
+      "position": 8,
+      "clip_id": "move_8_dip",
+      "video_path": "data/Bachata_steps/dip/dip_1.mp4",
+      "move_name": "dip_1",
+      "move_category": "dip",
+      "planned_start_time": 21.48074127559995,
+      "planned_duration": 3.0,
+      "planned_end_time": 24.48074127559995,
+      "actual_clip_duration": 14.381042,
+      "note": "Actual video uses full clip duration, not planned duration",
+      "transition_type": "cut"
+    },
+    {
+      "position": 9,
+      "clip_id": "move_9_body_roll",
+      "video_path": "data/Bachata_steps/body_roll/body_roll_1.mp4",
+      "move_name": "body_roll_1",
+      "move_category": "body_roll",
+      "planned_start_time": 24.48074127559995,
+      "planned_duration": 3.0,
+      "planned_end_time": 27.48074127559995,
+      "actual_clip_duration": 10.041667,
+      "note": "Actual video uses full clip duration, not planned duration",
+      "transition_type": "cut"
+    },
+    {
+      "position": 10,
+      "clip_id": "move_10_lady_right_turn",
+      "video_path": "data/Bachata_steps/lady_right_turn/lady_right_turn_1.mp4",
+      "move_name": "lady_right_turn_1",
+      "move_category": "lady_right_turn",
+      "planned_start_time": 27.48074127559995,
+      "planned_duration": 3.0,
+      "planned_end_time": 30.48074127559995,
+      "actual_clip_duration": 6.666667,
+      "note": "Actual video uses full clip duration, not planned duration",
+      "transition_type": "cut"
+    }
+  ],
+  "musical_sections": [
+    {
+      "start_time": 0.0,
+      "end_time": 14.721451247165533,
+      "section_type": "intro",
+      "energy_level": 0.2001845263327412,
+      "recommended_move_types": [
+        "basic_step",
+        "side_step"
+      ]
+    },
+    {
+      "start_time": 14.721451247165533,
+      "end_time": 164.21151927437643,
+      "section_type": "verse",
+      "energy_level": 0.28448861561033967,
+      "recommended_move_types": [
+        "basic_step",
+        "forward_backward",
+        "side_step",
+        "cross_body_lead",
+        "hammerlock",
+        "lady_left_turn"
+      ]
+    },
+    {
+      "start_time": 164.21151927437643,
+      "end_time": 164.722358276644,
+      "section_type": "bridge",
+      "energy_level": 0.22383942902088166,
+      "recommended_move_types": [
+        "basic_step",
+        "arm_styling"
+      ]
+    },
+    {
+      "start_time": 164.722358276644,
+      "end_time": 165.5350566893424,
+      "section_type": "bridge",
+      "energy_level": 0.1807685452699661,
+      "recommended_move_types": [
+        "basic_step",
+        "arm_styling"
+      ]
+    },
+    {
+      "start_time": 165.5350566893424,
+      "end_time": 169.77274376417233,
+      "section_type": "outro",
+      "energy_level": 0.04615575695470646,
+      "recommended_move_types": [
+        "basic_step"
+      ]
+    }
+  ],
+  "video_output": {
+    "file_path": "data/output/Chayanne_Bailando_Bachata_Letr_30s_fast_choreography.mp4",
+    "duration": 143.993344,
+    "file_size": 16932297,
+    "file_size_mb": 16.147896766662598,
+    "resolution": "1280x720",
+    "quality_setting": "fast",
+    "processing_time": 8.668922901153564
+  },
+  "generation_info": {
+    "generated_at": "2025-09-15 13:18:16",
+    "generator_version": "1.0",
+    "settings": {
+      "duration": "30s",
+      "quality": "fast",
+      "max_moves_analyzed": 8,
+      "target_fps": 10
+    }
+  }
+}
