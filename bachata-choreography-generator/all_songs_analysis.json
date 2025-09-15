@@ -1,0 +1,1703 @@
+{
+  "analysis_summary": {
+    "total_songs": 13,
+    "successful_analyses": 13,
+    "failed_analyses": 0
+  },
+  "results": [
+    {
+      "song_name": "Aventura - Obsesion.mp3",
+      "analysis_results": {
+        "duration": 255.164126984127,
+        "tempo": 135.99917763157896,
+        "tempo_validation": {
+          "is_valid": true,
+          "is_bachata_range": true
+        },
+        "beats_detected": 556,
+        "rhythm_features": {
+          "pattern_strength": 0.759797882583511,
+          "syncopation_level": 0.5948579102605471
+        },
+        "spectral_features": {
+          "mfcc_shape": [
+            13,
+            10990
+          ],
+          "chroma_shape": [
+            12,
+            10990
+          ],
+          "spectral_centroid_shape": [
+            1,
+            10990
+          ]
+        },
+        "energy_profile": {
+          "min": 0.0,
+          "max": 0.3300656914710998,
+          "mean": 0.1670307997400465,
+          "std": 0.06721678554774212
+        },
+        "audio_embedding": {
+          "min": -0.5065802188614588,
+          "max": 0.47243512580107583,
+          "mean": 0.01954259322821231,
+          "non_zero_count": 115,
+          "dimensions": 128
+        },
+        "musical_sections": {
+          "count": 8,
+          "sections": [
+            {
+              "start_time": 0.0,
+              "end_time": 0.23219954648526078,
+              "section_type": "intro",
+              "energy_level": 0.001309733027788711,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "basic_step"
+              ]
+            },
+            {
+              "start_time": 0.23219954648526078,
+              "end_time": 10.12390022675737,
+              "section_type": "bridge",
+              "energy_level": 0.05947288734561043,
+              "tempo_stability": 0.9704789573344796,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 10.12390022675737,
+              "end_time": 10.866938775510205,
+              "section_type": "bridge",
+              "energy_level": 0.049551054683979606,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 10.866938775510205,
+              "end_time": 22.96453514739229,
+              "section_type": "bridge",
+              "energy_level": 0.06017918420773207,
+              "tempo_stability": 0.9574076947177239,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 22.96453514739229,
+              "end_time": 252.2615873015873,
+              "section_type": "verse",
+              "energy_level": 0.17998794414613545,
+              "tempo_stability": 0.9715223804823394,
+              "recommended_move_types": [
+                "basic_step",
+                "forward_backward",
+                "side_step",
+                "lady_left_turn"
+              ]
+            },
+            {
+              "start_time": 252.2615873015873,
+              "end_time": 253.51546485260772,
+              "section_type": "bridge",
+              "energy_level": 8.589628803827149e-08,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 253.51546485260772,
+              "end_time": 254.0495238095238,
+              "section_type": "bridge",
+              "energy_level": 0.0,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 254.0495238095238,
+              "end_time": 255.164126984127,
+              "section_type": "outro",
+              "energy_level": 0.0,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "basic_step",
+                "close_embrace"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "song_name": "Bubalu (Bachata Version) - DJ Tronky & J-Style [feat. Blaze & Stella].mp3",
+      "analysis_results": {
+        "duration": 265.1093424036281,
+        "tempo": 129.19921875,
+        "tempo_validation": {
+          "is_valid": true,
+          "is_bachata_range": true
+        },
+        "beats_detected": 570,
+        "rhythm_features": {
+          "pattern_strength": 0.746439897189117,
+          "syncopation_level": 0.5706987808504311
+        },
+        "spectral_features": {
+          "mfcc_shape": [
+            13,
+            11418
+          ],
+          "chroma_shape": [
+            12,
+            11418
+          ],
+          "spectral_centroid_shape": [
+            1,
+            11418
+          ]
+        },
+        "energy_profile": {
+          "min": 8.218968474693611e-07,
+          "max": 0.4025681763887405,
+          "mean": 0.22220005175506588,
+          "std": 0.06450521519926536
+        },
+        "audio_embedding": {
+          "min": -0.4439393286501166,
+          "max": 0.46707713964094144,
+          "mean": 0.02153325344384677,
+          "non_zero_count": 116,
+          "dimensions": 128
+        },
+        "musical_sections": {
+          "count": 8,
+          "sections": [
+            {
+              "start_time": 0.0,
+              "end_time": 1.6486167800453515,
+              "section_type": "intro",
+              "energy_level": 0.062081266467979866,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "basic_step"
+              ]
+            },
+            {
+              "start_time": 1.6486167800453515,
+              "end_time": 4.342131519274377,
+              "section_type": "bridge",
+              "energy_level": 0.06385092558258952,
+              "tempo_stability": 0.9747475284249153,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 4.342131519274377,
+              "end_time": 5.154829931972789,
+              "section_type": "bridge",
+              "energy_level": 0.09712194991963251,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 5.154829931972789,
+              "end_time": 8.312743764172335,
+              "section_type": "bridge",
+              "energy_level": 0.10357610894476667,
+              "tempo_stability": 0.9743589743589751,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 8.312743764172335,
+              "end_time": 14.651791383219955,
+              "section_type": "bridge",
+              "energy_level": 0.0676137710960698,
+              "tempo_stability": 0.9681410258641716,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 14.651791383219955,
+              "end_time": 255.2801814058957,
+              "section_type": "verse",
+              "energy_level": 0.23735474421654226,
+              "tempo_stability": 0.9727010106859957,
+              "recommended_move_types": [
+                "basic_step",
+                "forward_backward",
+                "side_step",
+                "cross_body_lead",
+                "hammerlock",
+                "lady_left_turn"
+              ]
+            },
+            {
+              "start_time": 255.2801814058957,
+              "end_time": 256.4643990929705,
+              "section_type": "bridge",
+              "energy_level": 0.048128993400171696,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 256.4643990929705,
+              "end_time": 265.1093424036281,
+              "section_type": "outro",
+              "energy_level": 0.07281432198444075,
+              "tempo_stability": 0.9611192104319911,
+              "recommended_move_types": [
+                "basic_step",
+                "close_embrace"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "song_name": "Chayanne - Bailando Bachata (Letra⧸Lyrics).mp3",
+      "analysis_results": {
+        "duration": 169.77274376417233,
+        "tempo": 129.19921875,
+        "tempo_validation": {
+          "is_valid": true,
+          "is_bachata_range": true
+        },
+        "beats_detected": 352,
+        "rhythm_features": {
+          "pattern_strength": 0.8352319017142753,
+          "syncopation_level": 0.579369274136716
+        },
+        "spectral_features": {
+          "mfcc_shape": [
+            13,
+            7312
+          ],
+          "chroma_shape": [
+            12,
+            7312
+          ],
+          "spectral_centroid_shape": [
+            1,
+            7312
+          ]
+        },
+        "energy_profile": {
+          "min": 1.2815616866211672e-06,
+          "max": 0.41033567786216735,
+          "mean": 0.2705350884901455,
+          "std": 0.06360609232574242
+        },
+        "audio_embedding": {
+          "min": -0.3151874612017883,
+          "max": 0.5072000381850664,
+          "mean": 0.02256955138692927,
+          "non_zero_count": 116,
+          "dimensions": 128
+        },
+        "musical_sections": {
+          "count": 5,
+          "sections": [
+            {
+              "start_time": 0.0,
+              "end_time": 14.721451247165533,
+              "section_type": "intro",
+              "energy_level": 0.2001845263327412,
+              "tempo_stability": 0.9669138888676355,
+              "recommended_move_types": [
+                "basic_step",
+                "side_step"
+              ]
+            },
+            {
+              "start_time": 14.721451247165533,
+              "end_time": 164.21151927437643,
+              "section_type": "verse",
+              "energy_level": 0.28448861561033967,
+              "tempo_stability": 0.9715343660814247,
+              "recommended_move_types": [
+                "basic_step",
+                "forward_backward",
+                "side_step",
+                "cross_body_lead",
+                "hammerlock",
+                "lady_left_turn"
+              ]
+            },
+            {
+              "start_time": 164.21151927437643,
+              "end_time": 164.722358276644,
+              "section_type": "bridge",
+              "energy_level": 0.22383942902088166,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 164.722358276644,
+              "end_time": 165.5350566893424,
+              "section_type": "bridge",
+              "energy_level": 0.1807685452699661,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 165.5350566893424,
+              "end_time": 169.77274376417233,
+              "section_type": "outro",
+              "energy_level": 0.04615575695470646,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "basic_step",
+                "close_embrace"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "song_name": "Desnúdate (feat. Jose De Rico).mp3",
+      "analysis_results": {
+        "duration": 220.03160997732425,
+        "tempo": 129.19921875,
+        "tempo_validation": {
+          "is_valid": true,
+          "is_bachata_range": true
+        },
+        "beats_detected": 463,
+        "rhythm_features": {
+          "pattern_strength": 0.9037466503866641,
+          "syncopation_level": 0.5955546243330413
+        },
+        "spectral_features": {
+          "mfcc_shape": [
+            13,
+            9476
+          ],
+          "chroma_shape": [
+            12,
+            9476
+          ],
+          "spectral_centroid_shape": [
+            1,
+            9476
+          ]
+        },
+        "energy_profile": {
+          "min": 1.709782700345386e-05,
+          "max": 0.38720220923423776,
+          "mean": 0.24392886117747456,
+          "std": 0.07098560505033318
+        },
+        "audio_embedding": {
+          "min": -0.3459046316120636,
+          "max": 0.5517298861204595,
+          "mean": 0.022647030779893274,
+          "non_zero_count": 116,
+          "dimensions": 128
+        },
+        "musical_sections": {
+          "count": 7,
+          "sections": [
+            {
+              "start_time": 0.0,
+              "end_time": 0.9520181405895691,
+              "section_type": "intro",
+              "energy_level": 0.05605745970657685,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "basic_step"
+              ]
+            },
+            {
+              "start_time": 0.9520181405895691,
+              "end_time": 1.8575963718820863,
+              "section_type": "bridge",
+              "energy_level": 0.04676070575339673,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 1.8575963718820863,
+              "end_time": 2.9024943310657596,
+              "section_type": "bridge",
+              "energy_level": 0.05707106394900216,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 2.9024943310657596,
+              "end_time": 6.199727891156463,
+              "section_type": "bridge",
+              "energy_level": 0.0505355159634016,
+              "tempo_stability": 0.9812095127941196,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 6.199727891156463,
+              "end_time": 14.048072562358277,
+              "section_type": "bridge",
+              "energy_level": 0.19168649263013177,
+              "tempo_stability": 0.9802996908567875,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 14.048072562358277,
+              "end_time": 202.50122448979593,
+              "section_type": "verse",
+              "energy_level": 0.26202849139445206,
+              "tempo_stability": 0.9763611778092168,
+              "recommended_move_types": [
+                "basic_step",
+                "forward_backward",
+                "side_step",
+                "cross_body_lead",
+                "hammerlock",
+                "lady_left_turn"
+              ]
+            },
+            {
+              "start_time": 202.50122448979593,
+              "end_time": 220.03160997732425,
+              "section_type": "outro",
+              "energy_level": 0.14064947461527386,
+              "tempo_stability": 0.9478214595539625,
+              "recommended_move_types": [
+                "basic_step",
+                "close_embrace",
+                "arm_styling"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "song_name": "Este Secreto.mp3",
+      "analysis_results": {
+        "duration": 263.28362811791385,
+        "tempo": 135.99917763157896,
+        "tempo_validation": {
+          "is_valid": true,
+          "is_bachata_range": true
+        },
+        "beats_detected": 567,
+        "rhythm_features": {
+          "pattern_strength": 0.8251333363999811,
+          "syncopation_level": 0.5951264112776637
+        },
+        "spectral_features": {
+          "mfcc_shape": [
+            13,
+            11339
+          ],
+          "chroma_shape": [
+            12,
+            11339
+          ],
+          "spectral_centroid_shape": [
+            1,
+            11339
+          ]
+        },
+        "energy_profile": {
+          "min": 3.651569895737339e-05,
+          "max": 0.40406427383422855,
+          "mean": 0.26339035708888003,
+          "std": 0.0695735847234032
+        },
+        "audio_embedding": {
+          "min": -0.3271376418127063,
+          "max": 0.525878138603495,
+          "mean": 0.02164940192760874,
+          "non_zero_count": 114,
+          "dimensions": 128
+        },
+        "musical_sections": {
+          "count": 8,
+          "sections": [
+            {
+              "start_time": 0.0,
+              "end_time": 13.188934240362812,
+              "section_type": "intro",
+              "energy_level": 0.1398912603894747,
+              "tempo_stability": 0.9720939632872662,
+              "recommended_move_types": [
+                "basic_step"
+              ]
+            },
+            {
+              "start_time": 13.188934240362812,
+              "end_time": 27.492426303854874,
+              "section_type": "bridge",
+              "energy_level": 0.2145438762623575,
+              "tempo_stability": 0.9651849083905755,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 27.492426303854874,
+              "end_time": 143.47609977324262,
+              "section_type": "verse",
+              "energy_level": 0.2827189572106253,
+              "tempo_stability": 0.9733086820505722,
+              "recommended_move_types": [
+                "basic_step",
+                "forward_backward",
+                "side_step",
+                "cross_body_lead",
+                "hammerlock",
+                "lady_left_turn"
+              ]
+            },
+            {
+              "start_time": 143.47609977324262,
+              "end_time": 168.76263038548754,
+              "section_type": "chorus",
+              "energy_level": 0.29240405452125545,
+              "tempo_stability": 0.9726185880370769,
+              "recommended_move_types": [
+                "cross_body_lead",
+                "lady_left_turn",
+                "lady_right_turn"
+              ]
+            },
+            {
+              "start_time": 168.76263038548754,
+              "end_time": 200.69006802721088,
+              "section_type": "verse",
+              "energy_level": 0.24030138413851915,
+              "tempo_stability": 0.9750999845886631,
+              "recommended_move_types": [
+                "basic_step",
+                "forward_backward",
+                "side_step",
+                "cross_body_lead",
+                "hammerlock",
+                "lady_left_turn"
+              ]
+            },
+            {
+              "start_time": 200.69006802721088,
+              "end_time": 220.70566893424035,
+              "section_type": "chorus",
+              "energy_level": 0.2947055649591433,
+              "tempo_stability": 0.9741846386501393,
+              "recommended_move_types": [
+                "cross_body_lead",
+                "lady_left_turn",
+                "lady_right_turn"
+              ]
+            },
+            {
+              "start_time": 220.70566893424035,
+              "end_time": 254.76934240362812,
+              "section_type": "verse",
+              "energy_level": 0.29488692266667227,
+              "tempo_stability": 0.9752192629776422,
+              "recommended_move_types": [
+                "basic_step",
+                "forward_backward",
+                "side_step",
+                "cross_body_lead",
+                "hammerlock",
+                "lady_left_turn"
+              ]
+            },
+            {
+              "start_time": 254.76934240362812,
+              "end_time": 263.28362811791385,
+              "section_type": "outro",
+              "energy_level": 0.07440619338965282,
+              "tempo_stability": 0.9775058336679701,
+              "recommended_move_types": [
+                "basic_step",
+                "close_embrace"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "song_name": "Gusttavo Lima - Veneno feat. Prince Royce (Letra⧸Lyrics).mp3",
+      "analysis_results": {
+        "duration": 207.2845804988662,
+        "tempo": 123.046875,
+        "tempo_validation": {
+          "is_valid": true,
+          "is_bachata_range": true
+        },
+        "beats_detected": 410,
+        "rhythm_features": {
+          "pattern_strength": 0.7601473634921778,
+          "syncopation_level": 0.597593110318455
+        },
+        "spectral_features": {
+          "mfcc_shape": [
+            13,
+            8928
+          ],
+          "chroma_shape": [
+            12,
+            8928
+          ],
+          "spectral_centroid_shape": [
+            1,
+            8928
+          ]
+        },
+        "energy_profile": {
+          "min": 0.0,
+          "max": 0.381033656001091,
+          "mean": 0.2333722096988114,
+          "std": 0.05646210478335451
+        },
+        "audio_embedding": {
+          "min": -0.2175475466511701,
+          "max": 0.5459180281494641,
+          "mean": 0.024045377751828044,
+          "non_zero_count": 115,
+          "dimensions": 128
+        },
+        "musical_sections": {
+          "count": 6,
+          "sections": [
+            {
+              "start_time": 0.0,
+              "end_time": 0.5340589569160997,
+              "section_type": "intro",
+              "energy_level": 3.8967139548022545e-06,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "basic_step"
+              ]
+            },
+            {
+              "start_time": 0.5340589569160997,
+              "end_time": 153.18204081632652,
+              "section_type": "verse",
+              "energy_level": 0.23740607601232525,
+              "tempo_stability": 0.9769164546059492,
+              "recommended_move_types": [
+                "basic_step",
+                "forward_backward",
+                "side_step",
+                "cross_body_lead",
+                "hammerlock",
+                "lady_left_turn"
+              ]
+            },
+            {
+              "start_time": 153.18204081632652,
+              "end_time": 179.00263038548752,
+              "section_type": "chorus",
+              "energy_level": 0.25024795632460994,
+              "tempo_stability": 0.9774282538743523,
+              "recommended_move_types": [
+                "cross_body_lead",
+                "lady_left_turn",
+                "lady_right_turn"
+              ]
+            },
+            {
+              "start_time": 179.00263038548752,
+              "end_time": 197.53215419501134,
+              "section_type": "verse",
+              "energy_level": 0.25396674464557106,
+              "tempo_stability": 0.9775273260398749,
+              "recommended_move_types": [
+                "basic_step",
+                "forward_backward",
+                "side_step",
+                "cross_body_lead",
+                "hammerlock",
+                "lady_left_turn"
+              ]
+            },
+            {
+              "start_time": 197.53215419501134,
+              "end_time": 206.16997732426304,
+              "section_type": "bridge",
+              "energy_level": 0.1126296773884305,
+              "tempo_stability": 0.9479648190389696,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 206.16997732426304,
+              "end_time": 207.2845804988662,
+              "section_type": "outro",
+              "energy_level": 5.145492387725905e-07,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "basic_step",
+                "close_embrace"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "song_name": "Jiory - Eso Es Amor - Bachata - Single.mp3",
+      "analysis_results": {
+        "duration": 232.96,
+        "tempo": 129.19921875,
+        "tempo_validation": {
+          "is_valid": true,
+          "is_bachata_range": true
+        },
+        "beats_detected": 502,
+        "rhythm_features": {
+          "pattern_strength": 0.8340195115226243,
+          "syncopation_level": 0.5905667711971908
+        },
+        "spectral_features": {
+          "mfcc_shape": [
+            13,
+            10033
+          ],
+          "chroma_shape": [
+            12,
+            10033
+          ],
+          "spectral_centroid_shape": [
+            1,
+            10033
+          ]
+        },
+        "energy_profile": {
+          "min": 0.0,
+          "max": 0.3669325411319733,
+          "mean": 0.23485883431599894,
+          "std": 0.05031085621004283
+        },
+        "audio_embedding": {
+          "min": -0.31895881708497603,
+          "max": 0.5631126951162622,
+          "mean": 0.023944037098655974,
+          "non_zero_count": 116,
+          "dimensions": 128
+        },
+        "musical_sections": {
+          "count": 7,
+          "sections": [
+            {
+              "start_time": 0.0,
+              "end_time": 7.894784580498866,
+              "section_type": "intro",
+              "energy_level": 0.20394999644342302,
+              "tempo_stability": 0.9746413612358026,
+              "recommended_move_types": [
+                "basic_step",
+                "side_step"
+              ]
+            },
+            {
+              "start_time": 7.894784580498866,
+              "end_time": 8.219863945578231,
+              "section_type": "bridge",
+              "energy_level": 0.23248153924942022,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 8.219863945578231,
+              "end_time": 49.574603174603176,
+              "section_type": "verse",
+              "energy_level": 0.2345881536266213,
+              "tempo_stability": 0.9689779035577598,
+              "recommended_move_types": [
+                "basic_step",
+                "forward_backward",
+                "side_step",
+                "cross_body_lead",
+                "hammerlock",
+                "lady_left_turn"
+              ]
+            },
+            {
+              "start_time": 49.574603174603176,
+              "end_time": 49.946122448979594,
+              "section_type": "bridge",
+              "energy_level": 0.1943004813976586,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 49.946122448979594,
+              "end_time": 120.53478458049887,
+              "section_type": "verse",
+              "energy_level": 0.2423537609244599,
+              "tempo_stability": 0.9699455879166624,
+              "recommended_move_types": [
+                "basic_step",
+                "forward_backward",
+                "side_step",
+                "cross_body_lead",
+                "hammerlock",
+                "lady_left_turn"
+              ]
+            },
+            {
+              "start_time": 120.53478458049887,
+              "end_time": 120.85986394557823,
+              "section_type": "bridge",
+              "energy_level": 0.2118170461484364,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 120.85986394557823,
+              "end_time": 232.96,
+              "section_type": "outro",
+              "energy_level": 0.2326242260116716,
+              "tempo_stability": 0.954189071596943,
+              "recommended_move_types": [
+                "basic_step",
+                "close_embrace",
+                "arm_styling",
+                "final_dip"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "song_name": "Lil Nas X ft. Billy Ray Cyrus - Old Town Road (Dimen5ions & DJ Tiguere Bachata Remix) Preview.mp3",
+      "analysis_results": {
+        "duration": 204.13827664399093,
+        "tempo": 129.19921875,
+        "tempo_validation": {
+          "is_valid": true,
+          "is_bachata_range": true
+        },
+        "beats_detected": 264,
+        "rhythm_features": {
+          "pattern_strength": 0.7865406742257532,
+          "syncopation_level": 0.5938017232044798
+        },
+        "spectral_features": {
+          "mfcc_shape": [
+            13,
+            8792
+          ],
+          "chroma_shape": [
+            12,
+            8792
+          ],
+          "spectral_centroid_shape": [
+            1,
+            8792
+          ]
+        },
+        "energy_profile": {
+          "min": 0.0,
+          "max": 0.554262888431549,
+          "mean": 0.14997968379629392,
+          "std": 0.1387314613998828
+        },
+        "audio_embedding": {
+          "min": -0.0005626996904650876,
+          "max": 0.7764338832176808,
+          "mean": 0.01099939865322302,
+          "non_zero_count": 70,
+          "dimensions": 128
+        },
+        "musical_sections": {
+          "count": 6,
+          "sections": [
+            {
+              "start_time": 0.0,
+              "end_time": 122.06730158730159,
+              "section_type": "intro",
+              "energy_level": 0.25083153459259055,
+              "tempo_stability": 0.9640909675177171,
+              "recommended_move_types": [
+                "basic_step",
+                "side_step",
+                "forward_backward"
+              ]
+            },
+            {
+              "start_time": 122.06730158730159,
+              "end_time": 123.53015873015873,
+              "section_type": "bridge",
+              "energy_level": 4.1012181803899864e-08,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 123.53015873015873,
+              "end_time": 124.52861678004535,
+              "section_type": "bridge",
+              "energy_level": 0.0,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 124.52861678004535,
+              "end_time": 125.82893424036281,
+              "section_type": "bridge",
+              "energy_level": 0.0,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 125.82893424036281,
+              "end_time": 126.75773242630386,
+              "section_type": "bridge",
+              "energy_level": 0.0,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 126.75773242630386,
+              "end_time": 204.13827664399093,
+              "section_type": "outro",
+              "energy_level": 0.0,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "basic_step",
+                "close_embrace",
+                "arm_styling"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "song_name": "Luis Miguel del Amargue - Besito a Besito letra.mp3",
+      "analysis_results": {
+        "duration": 212.19560090702947,
+        "tempo": 135.99917763157896,
+        "tempo_validation": {
+          "is_valid": true,
+          "is_bachata_range": true
+        },
+        "beats_detected": 463,
+        "rhythm_features": {
+          "pattern_strength": 0.7835793130467374,
+          "syncopation_level": 0.5747595341497821
+        },
+        "spectral_features": {
+          "mfcc_shape": [
+            13,
+            9139
+          ],
+          "chroma_shape": [
+            12,
+            9139
+          ],
+          "spectral_centroid_shape": [
+            1,
+            9139
+          ]
+        },
+        "energy_profile": {
+          "min": 0.0,
+          "max": 0.28924060165882115,
+          "mean": 0.15975098110178076,
+          "std": 0.04460836190903203
+        },
+        "audio_embedding": {
+          "min": -0.47698810245125045,
+          "max": 0.5171467632147843,
+          "mean": 0.02097005728399574,
+          "non_zero_count": 112,
+          "dimensions": 128
+        },
+        "musical_sections": {
+          "count": 7,
+          "sections": [
+            {
+              "start_time": 0.0,
+              "end_time": 15.371609977324264,
+              "section_type": "intro",
+              "energy_level": 0.14867157306565357,
+              "tempo_stability": 0.9395412241311935,
+              "recommended_move_types": [
+                "basic_step"
+              ]
+            },
+            {
+              "start_time": 15.371609977324264,
+              "end_time": 158.8477097505669,
+              "section_type": "verse",
+              "energy_level": 0.15902068981315098,
+              "tempo_stability": 0.971636060728768,
+              "recommended_move_types": [
+                "basic_step",
+                "forward_backward",
+                "side_step",
+                "lady_left_turn"
+              ]
+            },
+            {
+              "start_time": 158.8477097505669,
+              "end_time": 159.14956916099774,
+              "section_type": "bridge",
+              "energy_level": 0.22697333120382746,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 159.14956916099774,
+              "end_time": 208.46875283446713,
+              "section_type": "verse",
+              "energy_level": 0.17110311836293654,
+              "tempo_stability": 0.9669834674738054,
+              "recommended_move_types": [
+                "basic_step",
+                "forward_backward",
+                "side_step",
+                "lady_left_turn"
+              ]
+            },
+            {
+              "start_time": 208.46875283446713,
+              "end_time": 208.817052154195,
+              "section_type": "bridge",
+              "energy_level": 0.2253491511940956,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 208.817052154195,
+              "end_time": 209.62975056689342,
+              "section_type": "bridge",
+              "energy_level": 0.16546640564288415,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 209.62975056689342,
+              "end_time": 212.19560090702947,
+              "section_type": "outro",
+              "energy_level": 0.03071670621903068,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "basic_step",
+                "close_embrace"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "song_name": "Me Emborracharè  (Bachata Version).mp3",
+      "analysis_results": {
+        "duration": 239.4390476190476,
+        "tempo": 123.046875,
+        "tempo_validation": {
+          "is_valid": true,
+          "is_bachata_range": true
+        },
+        "beats_detected": 481,
+        "rhythm_features": {
+          "pattern_strength": 0.7892117625022339,
+          "syncopation_level": 0.5856251114036581
+        },
+        "spectral_features": {
+          "mfcc_shape": [
+            13,
+            10312
+          ],
+          "chroma_shape": [
+            12,
+            10312
+          ],
+          "spectral_centroid_shape": [
+            1,
+            10312
+          ]
+        },
+        "energy_profile": {
+          "min": 4.01166471257782e-14,
+          "max": 0.4669329315423966,
+          "mean": 0.2793823654141526,
+          "std": 0.06209485324305374
+        },
+        "audio_embedding": {
+          "min": -0.09442211476634284,
+          "max": 0.586681058372876,
+          "mean": 0.026361632865850294,
+          "non_zero_count": 114,
+          "dimensions": 128
+        },
+        "musical_sections": {
+          "count": 7,
+          "sections": [
+            {
+              "start_time": 0.0,
+              "end_time": 17.368526077097506,
+              "section_type": "intro",
+              "energy_level": 0.2771218822744207,
+              "tempo_stability": 0.9544618647745677,
+              "recommended_move_types": [
+                "basic_step",
+                "side_step"
+              ]
+            },
+            {
+              "start_time": 17.368526077097506,
+              "end_time": 53.98639455782313,
+              "section_type": "verse",
+              "energy_level": 0.2546421880071384,
+              "tempo_stability": 0.9715150576114685,
+              "recommended_move_types": [
+                "basic_step",
+                "forward_backward",
+                "side_step",
+                "cross_body_lead",
+                "hammerlock",
+                "lady_left_turn"
+              ]
+            },
+            {
+              "start_time": 53.98639455782313,
+              "end_time": 92.57795918367347,
+              "section_type": "chorus",
+              "energy_level": 0.300908095830722,
+              "tempo_stability": 0.9805301021297758,
+              "recommended_move_types": [
+                "cross_body_lead",
+                "lady_left_turn",
+                "lady_right_turn",
+                "copa",
+                "turns",
+                "styling"
+              ]
+            },
+            {
+              "start_time": 92.57795918367347,
+              "end_time": 178.21315192743765,
+              "section_type": "chorus",
+              "energy_level": 0.2702329050278829,
+              "tempo_stability": 0.9801114058666878,
+              "recommended_move_types": [
+                "cross_body_lead",
+                "lady_left_turn",
+                "lady_right_turn"
+              ]
+            },
+            {
+              "start_time": 178.21315192743765,
+              "end_time": 195.2798185941043,
+              "section_type": "chorus",
+              "energy_level": 0.34682625479641416,
+              "tempo_stability": 0.978572703221105,
+              "recommended_move_types": [
+                "cross_body_lead",
+                "lady_left_turn",
+                "lady_right_turn",
+                "copa",
+                "turns",
+                "styling"
+              ]
+            },
+            {
+              "start_time": 195.2798185941043,
+              "end_time": 235.12526077097505,
+              "section_type": "verse",
+              "energy_level": 0.29285014591468517,
+              "tempo_stability": 0.9666028050843031,
+              "recommended_move_types": [
+                "basic_step",
+                "forward_backward",
+                "side_step",
+                "cross_body_lead",
+                "hammerlock",
+                "lady_left_turn"
+              ]
+            },
+            {
+              "start_time": 235.12526077097505,
+              "end_time": 239.4390476190476,
+              "section_type": "outro",
+              "energy_level": 0.09654138195570852,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "basic_step",
+                "close_embrace"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "song_name": "Ozuna X Doja Cat X Sia - Del Mar (Dimen5ions & DJ Alejandro Bachata Remix).mp3",
+      "analysis_results": {
+        "duration": 250.11201814058956,
+        "tempo": 117.45383522727273,
+        "tempo_validation": {
+          "is_valid": true,
+          "is_bachata_range": true
+        },
+        "beats_detected": 420,
+        "rhythm_features": {
+          "pattern_strength": 0.8271044725099841,
+          "syncopation_level": 0.58365776690423
+        },
+        "spectral_features": {
+          "mfcc_shape": [
+            13,
+            10772
+          ],
+          "chroma_shape": [
+            12,
+            10772
+          ],
+          "spectral_centroid_shape": [
+            1,
+            10772
+          ]
+        },
+        "energy_profile": {
+          "min": 0.0,
+          "max": 0.4954337477684021,
+          "mean": 0.24095727598073605,
+          "std": 0.09592886686716026
+        },
+        "audio_embedding": {
+          "min": -0.3723228731868723,
+          "max": 0.4875128169039781,
+          "mean": 0.021830613384691045,
+          "non_zero_count": 118,
+          "dimensions": 128
+        },
+        "musical_sections": {
+          "count": 8,
+          "sections": [
+            {
+              "start_time": 0.0,
+              "end_time": 17.136326530612244,
+              "section_type": "intro",
+              "energy_level": 0.08532843247535112,
+              "tempo_stability": 0.9777777777777784,
+              "recommended_move_types": [
+                "basic_step"
+              ]
+            },
+            {
+              "start_time": 17.136326530612244,
+              "end_time": 125.66639455782312,
+              "section_type": "verse",
+              "energy_level": 0.29085152886886034,
+              "tempo_stability": 0.9769450166643557,
+              "recommended_move_types": [
+                "basic_step",
+                "forward_backward",
+                "side_step",
+                "cross_body_lead",
+                "hammerlock",
+                "lady_left_turn"
+              ]
+            },
+            {
+              "start_time": 125.66639455782312,
+              "end_time": 227.88063492063492,
+              "section_type": "verse",
+              "energy_level": 0.2475713328980942,
+              "tempo_stability": 0.9755993146576242,
+              "recommended_move_types": [
+                "basic_step",
+                "forward_backward",
+                "side_step",
+                "cross_body_lead",
+                "hammerlock",
+                "lady_left_turn"
+              ]
+            },
+            {
+              "start_time": 227.88063492063492,
+              "end_time": 233.9178231292517,
+              "section_type": "bridge",
+              "energy_level": 0.11978735779913573,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 233.9178231292517,
+              "end_time": 237.28471655328798,
+              "section_type": "bridge",
+              "energy_level": 0.1264505031139686,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 237.28471655328798,
+              "end_time": 240.14077097505668,
+              "section_type": "bridge",
+              "energy_level": 0.10708027864253616,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 240.14077097505668,
+              "end_time": 244.36680272108845,
+              "section_type": "bridge",
+              "energy_level": 0.10996765326606212,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 244.36680272108845,
+              "end_time": 250.11201814058956,
+              "section_type": "outro",
+              "energy_level": 0.002844020969596711,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "basic_step",
+                "close_embrace"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "song_name": "Prince Royce - Te Me Vas (Lyrics).mp3",
+      "analysis_results": {
+        "duration": 200.1212244897959,
+        "tempo": 129.19921875,
+        "tempo_validation": {
+          "is_valid": true,
+          "is_bachata_range": true
+        },
+        "beats_detected": 420,
+        "rhythm_features": {
+          "pattern_strength": 0.7755424662252532,
+          "syncopation_level": 0.5758790709744388
+        },
+        "spectral_features": {
+          "mfcc_shape": [
+            13,
+            8619
+          ],
+          "chroma_shape": [
+            12,
+            8619
+          ],
+          "spectral_centroid_shape": [
+            1,
+            8619
+          ]
+        },
+        "energy_profile": {
+          "min": 0.0,
+          "max": 0.3367763578891754,
+          "mean": 0.21620149838581101,
+          "std": 0.06500475976042452
+        },
+        "audio_embedding": {
+          "min": -0.43911834351571977,
+          "max": 0.4708937294574396,
+          "mean": 0.0198001617963072,
+          "non_zero_count": 115,
+          "dimensions": 128
+        },
+        "musical_sections": {
+          "count": 6,
+          "sections": [
+            {
+              "start_time": 0.0,
+              "end_time": 1.7647165532879818,
+              "section_type": "intro",
+              "energy_level": 0.07593205729346461,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "basic_step"
+              ]
+            },
+            {
+              "start_time": 1.7647165532879818,
+              "end_time": 2.4380952380952383,
+              "section_type": "bridge",
+              "energy_level": 0.09961875882642024,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 2.4380952380952383,
+              "end_time": 3.645532879818594,
+              "section_type": "bridge",
+              "energy_level": 0.11726758098946169,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 3.645532879818594,
+              "end_time": 6.780226757369615,
+              "section_type": "bridge",
+              "energy_level": 0.09118674592977322,
+              "tempo_stability": 0.9999999999999992,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 6.780226757369615,
+              "end_time": 198.85569160997733,
+              "section_type": "verse",
+              "energy_level": 0.22199864714879144,
+              "tempo_stability": 0.9834373701148874,
+              "recommended_move_types": [
+                "basic_step",
+                "forward_backward",
+                "side_step",
+                "cross_body_lead",
+                "hammerlock",
+                "lady_left_turn"
+              ]
+            },
+            {
+              "start_time": 198.85569160997733,
+              "end_time": 200.1212244897959,
+              "section_type": "outro",
+              "energy_level": 1.8229375445383414e-09,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "basic_step",
+                "close_embrace"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "song_name": "Romeo Santos - Suegra (Letra⧸Lyrics).mp3",
+      "analysis_results": {
+        "duration": 224.5602267573696,
+        "tempo": 123.046875,
+        "tempo_validation": {
+          "is_valid": true,
+          "is_bachata_range": true
+        },
+        "beats_detected": 444,
+        "rhythm_features": {
+          "pattern_strength": 0.7839711490132484,
+          "syncopation_level": 0.5831775384406964
+        },
+        "spectral_features": {
+          "mfcc_shape": [
+            13,
+            9672
+          ],
+          "chroma_shape": [
+            12,
+            9672
+          ],
+          "spectral_centroid_shape": [
+            1,
+            9672
+          ]
+        },
+        "energy_profile": {
+          "min": 8.287368804129248e-07,
+          "max": 0.452234610915184,
+          "mean": 0.2576126113623193,
+          "std": 0.07313498339797107
+        },
+        "audio_embedding": {
+          "min": -0.2255060872516578,
+          "max": 0.546169587382708,
+          "mean": 0.02550270682512935,
+          "non_zero_count": 115,
+          "dimensions": 128
+        },
+        "musical_sections": {
+          "count": 7,
+          "sections": [
+            {
+              "start_time": 0.0,
+              "end_time": 8.057324263038549,
+              "section_type": "intro",
+              "energy_level": 0.07083800593791106,
+              "tempo_stability": 0.9540900934138168,
+              "recommended_move_types": [
+                "basic_step"
+              ]
+            },
+            {
+              "start_time": 8.057324263038549,
+              "end_time": 117.58585034013605,
+              "section_type": "verse",
+              "energy_level": 0.26406656581484367,
+              "tempo_stability": 0.9793934926946012,
+              "recommended_move_types": [
+                "basic_step",
+                "forward_backward",
+                "side_step",
+                "cross_body_lead",
+                "hammerlock",
+                "lady_left_turn"
+              ]
+            },
+            {
+              "start_time": 117.58585034013605,
+              "end_time": 144.683537414966,
+              "section_type": "chorus",
+              "energy_level": 0.29155215590285666,
+              "tempo_stability": 0.9796951698708941,
+              "recommended_move_types": [
+                "cross_body_lead",
+                "lady_left_turn",
+                "lady_right_turn"
+              ]
+            },
+            {
+              "start_time": 144.683537414966,
+              "end_time": 145.03183673469388,
+              "section_type": "bridge",
+              "energy_level": 0.33143184602260595,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 145.03183673469388,
+              "end_time": 218.05859410430838,
+              "section_type": "chorus",
+              "energy_level": 0.2716443245072623,
+              "tempo_stability": 0.9698853015561898,
+              "recommended_move_types": [
+                "cross_body_lead",
+                "lady_left_turn",
+                "lady_right_turn"
+              ]
+            },
+            {
+              "start_time": 218.05859410430838,
+              "end_time": 218.91773242630384,
+              "section_type": "bridge",
+              "energy_level": 0.19337498644316517,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "close_embrace",
+                "arm_styling"
+              ]
+            },
+            {
+              "start_time": 218.91773242630384,
+              "end_time": 224.5602267573696,
+              "section_type": "outro",
+              "energy_level": 0.06072765575648083,
+              "tempo_stability": 0.5,
+              "recommended_move_types": [
+                "basic_step",
+                "close_embrace"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
