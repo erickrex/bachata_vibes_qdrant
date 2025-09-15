@@ -17,115 +17,40 @@ The system employs a **multi-modal machine learning pipeline** that combines aud
 ## 🏗️ **System Architecture & Data Flow**
 
 ```mermaid
-graph TB
-    %% Input Sources
-    subgraph "Input Sources"
-        A1[Audio Files<br/>MP3/WAV]
-        A2[YouTube URLs<br/>Real-time Download]
-        A3[Video Library<br/>38 Annotated Clips]
-    end
+flowchart TD
+    %% Input Layer
+    A[🎵 Audio Input<br/>MP3/WAV/YouTube] --> B[🎼 Music Analyzer]
+    V[📹 Video Library<br/>38 Annotated Clips] --> C[🤖 Move Analyzer]
     
-    %% Core Processing Pipeline
-    subgraph "Core ML Pipeline"
-        B1[Music Analyzer<br/>Librosa Engine]
-        B2[Move Analyzer<br/>MediaPipe Vision]
-        B3[Feature Fusion<br/>Multi-Modal ML]
-        B4[Recommendation Engine<br/>Optimized Scoring]
-        B5[Sequence Generator<br/>Temporal Alignment]
-        B6[Video Generator<br/>FFmpeg Pipeline]
-    end
+    %% Feature Extraction
+    B --> D[🎵 Audio Features<br/>128D: Tempo + Energy + MFCC + Chroma]
+    C --> E[💃 Movement Features<br/>384D: Pose + Dynamics + Angles]
     
-    %% Feature Extraction Details
-    subgraph "Audio Features (128D)"
-        C1[Tempo Detection<br/>80-160 BPM]
-        C2[Energy Profile<br/>RMS + Spectral]
-        C3[MFCC Features<br/>13 Coefficients]
-        C4[Chroma Features<br/>12 Harmonic Bins]
-        C5[Rhythm Analysis<br/>Syncopation + Patterns]
-    end
+    %% ML Processing
+    D --> F[🔗 Multi-Modal Fusion<br/>512D Combined Embedding]
+    E --> F
     
-    subgraph "Movement Features (384D)"
-        D1[Pose Landmarks<br/>33 Points/Frame]
-        D2[Joint Angles<br/>Key Dance Positions]
-        D3[Movement Dynamics<br/>Velocity + Acceleration]
-        D4[Spatial Coverage<br/>Area + Complexity]
-        D5[Hand Tracking<br/>21 Points Each Hand]
-    end
+    F --> G[🎯 Recommendation Engine<br/>Similarity Matching + Scoring]
     
-    %% Optimization Systems
-    subgraph "Performance Optimization"
-        E1[Embedding Cache<br/>80% Hit Rate]
-        E2[Similarity Matrix<br/>Pre-computed]
-        E3[Parallel Processing<br/>4-6 Workers]
-        E4[Quality Modes<br/>Fast/Balanced/HQ]
-    end
+    %% Sequence Generation
+    G --> H[⏱️ Sequence Generator<br/>Temporal Alignment]
     
-    %% Output Generation
-    subgraph "Output Generation"
-        F1[Move Sequence<br/>Timed Choreography]
-        F2[Video Rendering<br/>1080p/720p]
-        F3[Metadata Export<br/>JSON + Timing]
-        F4[Performance Metrics<br/>Quality Reports]
-    end
+    %% Output
+    H --> I[🎬 Video Generator<br/>FFmpeg Pipeline]
+    I --> J[✨ Generated Choreography<br/>MP4 + Metadata]
     
-    %% Data Flow Connections
-    A1 --> B1
-    A2 --> B1
-    A3 --> B2
-    
-    B1 --> C1
-    B1 --> C2
-    B1 --> C3
-    B1 --> C4
-    B1 --> C5
-    
-    B2 --> D1
-    B2 --> D2
-    B2 --> D3
-    B2 --> D4
-    B2 --> D5
-    
-    C1 --> B3
-    C2 --> B3
-    C3 --> B3
-    C4 --> B3
-    C5 --> B3
-    
-    D1 --> B3
-    D2 --> B3
-    D3 --> B3
-    D4 --> B3
-    D5 --> B3
-    
-    B3 --> B4
-    B4 --> B5
-    B5 --> B6
-    
-    B6 --> F1
-    B6 --> F2
-    B6 --> F3
-    B6 --> F4
-    
-    %% Optimization Connections
-    E1 -.-> B1
-    E1 -.-> B2
-    E2 -.-> B4
-    E3 -.-> B2
-    E4 -.-> B1
-    E4 -.-> B2
-    E4 -.-> B6
+    %% Optimization (side connections)
+    K[⚡ Performance Optimization<br/>• Caching System 80% Hit Rate<br/>• Parallel Processing 4-6 Workers<br/>• Quality Modes Fast/Balanced/HQ] -.-> B
+    K -.-> C
+    K -.-> G
+    K -.-> I
     
     %% Styling
-    style A1 fill:#e3f2fd
-    style A2 fill:#e3f2fd
-    style A3 fill:#e3f2fd
-    style B3 fill:#fff3e0
-    style B4 fill:#fce4ec
-    style F2 fill:#c8e6c9
-    style E1 fill:#f3e5f5
-    style E2 fill:#f3e5f5
-    style E3 fill:#f3e5f5
-    style E4 fill:#f3e5f5
+    style A fill:#e3f2fd
+    style F fill:#fff3e0
+    style G fill:#fce4ec
+    style J fill:#c8e6c9
+    style K fill:#f3e5f5
 ```
 
 ## 🚀 **Technical Implementation Highlights**

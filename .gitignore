@@ -19,7 +19,7 @@ bachata-choreography-generator/data/output/
 bachata-choreography-generator/data/temp/
 bachata-choreography-generator/data/test_import.json
 bachata-choreography-generator/data/test_results/
-
+bachata-choreography-generator/data/choreography_metadata/
 .env
 .venv/
 
