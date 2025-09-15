@@ -432,6 +432,35 @@ async def list_videos():
         logger.error(f"Error listing videos: {e}")
         raise HTTPException(status_code=500, detail="Error listing videos")
 
+@app.get("/api/songs")
+async def list_songs():
+    """List all available local songs."""
+    try:
+        songs_dir = Path("data/songs")
+        songs = []
+        
+        if songs_dir.exists():
+            for song_file in songs_dir.glob("*.mp3"):
+                stat = song_file.stat()
+                # Create a friendly display name from filename
+                display_name = song_file.stem.replace('_', ' ').title()
+                songs.append({
+                    "filename": song_file.name,
+                    "display_name": display_name,
+                    "path": str(song_file),
+                    "size": stat.st_size,
+                    "created": stat.st_ctime
+                })
+        
+        # Sort by display name
+        songs.sort(key=lambda x: x['display_name'])
+        
+        return {"songs": songs}
+        
+    except Exception as e:
+        logger.error(f"Error listing songs: {e}")
+        raise HTTPException(status_code=500, detail="Error listing songs")
+
 async def generate_choreography_task_safe(
     task_id: str,
     youtube_url: str,
