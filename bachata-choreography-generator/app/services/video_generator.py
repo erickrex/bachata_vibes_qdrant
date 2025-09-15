@@ -296,21 +296,12 @@ class VideoGenerator:
                     move_end_time = move.start_time + move.duration
                     move_end_beat = self._find_closest_beat(move_end_time, beat_positions)
                     
-                    # Calculate beat-aligned duration
-                    if move_end_beat > move_start_beat:
-                        beat_aligned_duration = beat_positions[move_end_beat] - beat_positions[move_start_beat]
-                        
-                        # Only adjust if the difference is reasonable (within 20% of original)
-                        duration_diff = abs(beat_aligned_duration - move.duration)
-                        if duration_diff / move.duration < 0.2:
-                            logger.debug(f"Beat-aligning move {i}: {move.duration:.2f}s -> {beat_aligned_duration:.2f}s")
-                            
-                            # Write with duration filter for beat alignment
-                            f.write(f"file '{abs_path}'\n")
-                            f.write(f"duration {beat_aligned_duration:.3f}\n")
-                            continue
+                    # For now, let's not use beat alignment duration adjustments
+                    # as they're causing clips to be truncated incorrectly
+                    # TODO: Implement proper beat alignment that respects full clip durations
+                    pass
                 
-                # Default: use original duration
+                # Use full clip without duration restrictions
                 f.write(f"file '{abs_path}'\n")
         
         logger.info(f"Created beat-synchronized concatenation file: {concat_file_path}")

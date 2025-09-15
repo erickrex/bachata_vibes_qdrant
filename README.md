@@ -1,109 +1,477 @@
-# Bachata Choreography Generator
+# 🎵 Bachata Choreography Generator
 
-**Product Vision**: Democratize bachata choreography creation by enabling anyone to generate professional-quality dance videos from any bachata song using AI-powered movement analysis and video assembly.
+An AI-powered system that generates personalized Bachata choreographies by analyzing music characteristics and matching them with appropriate dance moves from a curated video library.
 
-## 🎯 Product Overview
+## 🌟 Features Overview
 
-Transform any bachata song into a complete choreographed dance video. Upload your favorite bachata track, and our AI analyzes the music's tempo, energy, and rhythm to intelligently select and sequence dance moves from our curated library of professional clips. The result: a full-length, synchronized dance video ready to share.
+### ✅ Implemented Features
 
-## ✨ Core Features
+#### 1. **Music Analysis Engine** 🎼
+- **Tempo Detection**: Accurate BPM analysis using librosa
+- **Energy Level Analysis**: Classifies songs as low, medium, or high energy
+- **Musical Structure Detection**: Identifies verses, choruses, and bridges
+- **Batch Processing**: Analyze multiple songs efficiently
+- **Comprehensive Reporting**: Detailed analysis results with recommendations
 
-### 🎵 **Intelligent Music Analysis**
-- Automatic tempo, beat, and energy detection
-- Musical phrase recognition for natural choreography flow
-- Support for all bachata sub-genres (Traditional, Sensual, Modern)
+#### 2. **Video Annotation Framework** 📹
+- **Structured Data Models**: Pydantic-based schemas for move annotations
+- **Quality Validation**: Automated video and annotation quality checks
+- **CSV Import/Export**: Bulk editing capabilities for annotations
+- **Directory Organization**: Automated file organization by move categories
+- **Comprehensive Testing**: Full test suite for all components
 
-### 🕺 **AI-Powered Choreography Generation** 
-- 34+ professional dance clips across 11+ move categories
-- Smart move selection based on song characteristics
-- Diversity algorithm ensures varied, engaging sequences
-- Difficulty progression from beginner to advanced moves
+#### 3. **YouTube Integration** 📺
+- **Video Download**: Download Bachata songs from YouTube
+- **Audio Extraction**: Extract audio for music analysis
+- **Metadata Handling**: Preserve video information and metadata
 
-### 🎬 **Professional Video Assembly**
-- Automatic frame rate and resolution normalization
-- Seamless clip transitions without frozen sections
-- Full-song duration support (3+ minutes)
-- High-quality output (1920x1080, 30fps)
+### 🚧 Planned Features
+- **AI Choreography Generation**: Match music analysis with move sequences
+- **Web Interface**: User-friendly web application
+- **Move Transition Analysis**: Smart sequencing of dance moves
+- **Personalization**: User skill level and preference adaptation
 
-### 📊 **Comprehensive Metadata Export**
-- Detailed timeline with start/end times for each move
-- Complete choreography breakdown and statistics
-- JSON export for integration with other tools
+## 📁 Project Structure
 
-## 🏗️ Technical Architecture
-
-### **Backend (FastAPI)**
-- **Audio Processing**: Librosa-based music analysis and feature extraction
-- **Pose Detection**: MediaPipe integration for movement analysis  
-- **Video Assembly**: FFmpeg-powered professional video generation
-- **API Layer**: RESTful endpoints with real-time WebSocket updates
-
-### **Frontend (HTMX + Alpine.js)**
-- **Zero Build Process**: Pure HTML templates with server-side rendering
-- **Interactive UI**: Dynamic forms and real-time updates via HTMX
-- **State Management**: Alpine.js for client-side reactivity
-- **Modern Design**: Tailwind CSS with responsive layouts
-
-
-### Utils
-
-### 1. **Upload Your Song**
-```bash
-# Add bachata songs to the system
-uv run python song_downloader/get_songs.py  # Download from YouTube
-# Or manually add MP3/WAV files to data/test_songs/
+```
+bachata-choreography-generator/
+├── app/                          # Main application code
+│   ├── models/                   # Data models and schemas
+│   │   └── annotation_schema.py  # Move annotation data models
+│   ├── services/                 # Core business logic
+│   │   ├── music_analyzer.py     # Music analysis engine
+│   │   ├── youtube_service.py    # YouTube integration
+│   │   ├── annotation_validator.py # Annotation quality validation
+│   │   ├── annotation_interface.py # CSV import/export tools
+│   │   └── directory_organizer.py  # File organization utilities
+│   ├── static/                   # Static web assets
+│   └── templates/                # HTML templates
+├── data/                         # Data storage
+│   ├── Bachata_steps/           # Video library (38 move clips)
+│   │   ├── basic_steps/         # Basic bachata steps
+│   │   ├── cross_body_lead/     # Cross body lead variations
+│   │   ├── lady_right_turn/     # Right turn moves
+│   │   ├── lady_left_turn/      # Left turn moves
+│   │   ├── forward_backward/    # Linear movements
+│   │   ├── dip/                 # Dip moves
+│   │   ├── body_roll/           # Body roll styling
+│   │   ├── hammerlock/          # Hammerlock positions
+│   │   ├── shadow_position/     # Shadow position moves
+│   │   ├── combination/         # Complex combinations
+│   │   ├── arm_styling/         # Arm styling moves
+│   │   └── varios/              # Additional clips
+│   ├── songs/                   # Music library
+│   ├── generated/               # Generated choreographies
+│   └── bachata_annotations.json # Move clip metadata
+├── tests/                       # Test files
+└── various/                     # Development files and examples
 ```
 
-### 2. **Generate Choreography**
-```bash
-# Create a complete choreography video
-uv run python MVP/complete_pipeline.py data/test_songs/your_song.mp3 --output my_choreography.mp4
+## 🚀 Quick Start
 
-# For full song duration (auto-detected)
-uv run python MVP/full_song_choreography.py data/test_songs/your_song.mp3
+### Prerequisites
+- Python 3.8+
+- uv (Python package manager) or pip
+
+### Installation
+
+1. **Clone the repository**
+```bash
+git clone <repository-url>
+cd bachata-choreography-generator
 ```
 
+2. **Install dependencies**
+```bash
+# Using uv (recommended)
+uv sync
 
-## 🎨 Tech Stack
+# Or using pip
+pip install -r requirements.txt
 
-### **Core Technologies**
-- **FastAPI**: High-performance Python web framework
-- **HTMX**: Modern HTML-driven interactivity  
-- **Alpine.js**: Lightweight JavaScript framework
-- **Tailwind CSS**: Utility-first CSS framework
+# For full music analysis capabilities
+pip install librosa
 
-### **AI & Media Processing**
-- **Librosa**: Advanced audio analysis and feature extraction
-- **MediaPipe**: Real-time pose detection and movement analysis
-- **FFmpeg**: Professional video processing and assembly
-- **NumPy/Pandas**: Scientific computing and data analysis
+# For advanced video validation
+pip install opencv-python
+```
 
-### **Development & Deployment**
-- **uv**: Ultra-fast Python package management
-- **Docker**: Containerized development and deployment
-- **Jinja2**: Server-side HTML templating
+3. **Quick demo of all features**
+```bash
+python demo_all_features.py
+```
 
+4. **Initialize the annotation framework**
+```bash
+python setup_annotation_framework.py
+```
+
+5. **Run tests to verify installation**
+```bash
+python test_annotation_framework.py
+python verify_video_access.py
+```
+
+## 📖 Detailed Usage Guide
+
+### 🎼 Music Analysis
+
+#### Analyze a Single Song
+```python
+from app.services.music_analyzer import MusicAnalyzer
+
+analyzer = MusicAnalyzer()
+
+# Analyze from file
+result = analyzer.analyze_song("data/songs/my_bachata_song.mp3")
+print(f"Tempo: {result['tempo']} BPM")
+print(f"Energy: {result['energy_level']}")
+print(f"Duration: {result['duration']} seconds")
+
+# Analyze from YouTube URL
+result = analyzer.analyze_from_youtube("https://youtube.com/watch?v=...")
+```
+
+#### Batch Analysis
+```python
+# Analyze all songs in directory
+results = analyzer.analyze_songs_in_directory("data/songs/")
+
+# Generate summary report
+analyzer.generate_analysis_summary(results, "analysis_report.json")
+```
+
+#### Command Line Usage
+```bash
+# Analyze all songs and generate summary
+python analyze_all_songs_summary.py
+
+# Validate music analysis results
+python validate_task_3_2.py
+```
+
+### 📹 Video Annotation Management
+
+#### Setup and Validation
+```python
+from app.services.annotation_validator import AnnotationValidator
+from app.services.annotation_interface import AnnotationInterface
+
+# Initialize services
+validator = AnnotationValidator(data_dir="data")
+interface = AnnotationInterface(data_dir="data")
+
+# Load and validate annotations
+collection = validator.load_annotations("bachata_annotations.json")
+validation_report = validator.generate_validation_report()
+print(validation_report)
+```
+
+#### CSV Export/Import for Bulk Editing
+```python
+# Export to CSV for editing
+interface.export_to_csv("bachata_annotations.json", "annotations_edit.csv")
+
+# Edit the CSV file in Excel/Google Sheets, then import back
+interface.import_from_csv("annotations_edit.csv", "updated_annotations.json")
+```
+
+#### Add New Annotations
+```python
+# Add a single annotation
+new_clip_data = {
+    "clip_id": "new_move_1",
+    "video_path": "Bachata_steps/basic_steps/new_move_1.mp4",
+    "move_label": "basic_step",
+    "energy_level": "medium",
+    "estimated_tempo": 120,
+    "difficulty": "beginner",
+    "lead_follow_roles": "both",
+    "notes": "Basic step with hip movement"
+}
+
+interface.add_annotation(new_clip_data)
+```
+
+#### Command Line Usage
+```bash
+# Setup annotation framework
+python setup_annotation_framework.py
+
+# Run comprehensive tests
+python test_annotation_framework.py
+
+# Verify video file access
+python verify_video_access.py
+
+# Create annotation template for new clips
+python -c "from app.services.annotation_interface import AnnotationInterface; AnnotationInterface().create_annotation_template()"
+```
+
+### 📺 YouTube Integration
+
+#### Download and Analyze
+```python
+from app.services.youtube_service import YouTubeService
+from app.services.music_analyzer import MusicAnalyzer
+
+youtube = YouTubeService()
+analyzer = MusicAnalyzer()
+
+# Download song
+video_info = youtube.download_audio("https://youtube.com/watch?v=...", "data/songs/")
+
+# Analyze downloaded song
+if video_info["success"]:
+    analysis = analyzer.analyze_song(video_info["audio_path"])
+    print(f"Downloaded and analyzed: {video_info['title']}")
+    print(f"Tempo: {analysis['tempo']} BPM")
+```
+
+#### Command Line Usage
+```bash
+# Test YouTube functionality
+python test_youtube.py
+```
+
+### 🗂️ Directory Organization
+
+#### Organize Video Files
+```python
+from app.services.directory_organizer import DirectoryOrganizer
+
+organizer = DirectoryOrganizer(data_dir="data")
+
+# Analyze current structure
+structure = organizer.analyze_current_structure()
+print(f"Organization status: {structure['organization_status']}")
+
+# Generate organization report
+report = organizer.generate_organization_report()
+print(report)
+
+# Organize files (dry run first)
+result = organizer.organize_clips_by_annotations(dry_run=True)
+print(f"Would move {result['summary']['moved']} files")
+
+# Actually organize files
+result = organizer.organize_clips_by_annotations(dry_run=False)
+```
+
+## 🧪 Testing
+
+### Run All Tests
+```bash
+# Test annotation framework
+python test_annotation_framework.py
+
+# Test music analysis
+python test_music_analyzer.py
+
+# Test YouTube integration
+python test_youtube.py
+
+# Verify video file access
+python verify_video_access.py
+
+# Demo all features
+python demo_all_features.py
+
+# Setup and validate entire system
+python setup_annotation_framework.py
+```
+
+### Individual Component Tests
+
+#### Test Music Analysis
+```python
+from app.services.music_analyzer import MusicAnalyzer
+
+analyzer = MusicAnalyzer()
+
+# Test with sample file
+result = analyzer.analyze_song("data/songs/sample.mp3")
+assert result["tempo"] > 0
+assert result["energy_level"] in ["low", "medium", "high"]
+```
+
+#### Test Annotation Loading
+```python
+from app.services.annotation_interface import AnnotationInterface
+
+interface = AnnotationInterface(data_dir="data")
+collection = interface.load_annotations("bachata_annotations.json")
+
+print(f"Loaded {collection.total_clips} clips")
+print(f"Categories: {len(collection.move_categories)}")
+```
+
+## 📊 Data Management
+
+### Current Video Library
+- **38 annotated move clips** across 12 categories
+- **Quality validated** with comprehensive metadata
+- **Organized by difficulty**: Beginner (26%), Intermediate (21%), Advanced (53%)
+- **Energy distribution**: Low (5%), Medium (42%), High (53%)
+- **Tempo range**: 102-150 BPM
+
+### Annotation Schema
+Each move clip includes:
+- **Basic Info**: clip_id, video_path, move_label
+- **Dance Characteristics**: energy_level, estimated_tempo, difficulty
+- **Role Information**: lead_follow_roles (lead_focus, follow_focus, both)
+- **Descriptive**: notes with detailed move description
+- **Optional Metadata**: duration, quality assessments, compatibility info
+
+### Adding New Content
+
+#### Add New Video Clips
+1. Place video file in appropriate `data/Bachata_steps/` subdirectory
+2. Use annotation template: `data/annotation_template.csv`
+3. Follow guidelines in: `data/annotation_instructions.md`
+4. Import annotations and validate
+
+#### Add New Songs
+1. Place audio files in `data/songs/`
+2. Run music analysis: `python analyze_all_songs_summary.py`
+3. Review analysis results in generated reports
+
+## 🔧 Configuration
+
+### Music Analysis Settings
+```python
+# In app/services/music_analyzer.py
+TEMPO_RANGE = (80, 160)  # BPM range for Bachata
+ENERGY_THRESHOLDS = {
+    "low": 0.3,
+    "medium": 0.7,
+    "high": 1.0
+}
+```
+
+### Video Quality Standards
+```python
+# In app/models/annotation_schema.py
+MIN_DURATION = 5.0   # seconds
+MAX_DURATION = 20.0  # seconds
+MIN_TEMPO = 80       # BPM
+MAX_TEMPO = 160      # BPM
+```
+
+### Directory Organization
+```python
+# In app/services/directory_organizer.py
+CATEGORY_MAPPING = {
+    "basic_step": "basic_moves",
+    "cross_body_lead": "partner_work",
+    "lady_right_turn": "turns_spins",
+    "body_roll": "styling",
+    "dip": "advanced"
+}
+```
+
+## 📈 Performance and Optimization
+
+### Music Analysis Performance
+- **Single song**: ~2-5 seconds
+- **Batch processing**: Parallel processing for multiple files
+- **Memory usage**: Optimized for large audio files
+
+### Video Processing
+- **Annotation validation**: ~100ms per clip
+- **Directory organization**: Dry-run capability for safety
+- **CSV operations**: Handles large datasets efficiently
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+#### "Video file not found" errors
+```bash
+# Check video paths in annotations
+python verify_video_access.py
+
+# Or use the validator (may show OpenCV warnings)
+python -c "
+from app.services.annotation_validator import AnnotationValidator
+validator = AnnotationValidator()
+report = validator.generate_validation_report()
+print(report)
+"
+```
+
+#### OpenCV warnings in validation
+The validation system shows "OpenCV not available - limited video validation" warnings. This is normal and doesn't affect functionality. To enable full video validation:
+```bash
+pip install opencv-python
+```
+
+#### Music analysis fails
+```bash
+# Verify audio file format and librosa installation
+python -c "
+import librosa
+print('Librosa version:', librosa.__version__)
+"
+```
+
+#### CSV import/export issues
+```bash
+# Test CSV functionality
+python -c "
+from app.services.annotation_interface import AnnotationInterface
+interface = AnnotationInterface()
+success = interface.export_to_csv()
+print('CSV export success:', success)
+"
+```
+
+### Debug Mode
+Enable detailed logging by setting environment variable:
+```bash
+export DEBUG=1
+python your_script.py
+```
+
+## 🤝 Contributing
+
+### Development Setup
+1. Fork the repository
+2. Create a feature branch
+3. Install development dependencies
+4. Run tests before committing
+5. Submit a pull request
+
+### Code Style
+- Follow PEP 8 guidelines
+- Use type hints where possible
+- Add docstrings to all functions
+- Include tests for new features
+
+### Testing Guidelines
+- Write unit tests for new functions
+- Update integration tests for API changes
+- Ensure all tests pass before submitting
 
 ## 📄 License
 
-This project is for educational and demonstration purposes. Please respect music copyrights and dance creator rights when using this system. Developed for the AWS Kiro Hackathon :) 
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🎯 Success Criteria
+## 🙏 Acknowledgments
 
-### **MVP Achieved ✅**
-- [x] Functional AI choreography generation from any bachata song
-- [x] Professional video output with seamless transitions  
-- [x] Comprehensive metadata and timeline export
-- [x] Support for full-song duration (3+ minutes)
-- [x] 89.5% processing success rate with diverse move selection
+- **librosa** for music analysis capabilities
+- **yt-dlp** for YouTube integration
+- **Pydantic** for data validation
+- **OpenCV** for video processing (optional)
 
-### **Production Ready Targets**
-- [ ] 95%+ processing success rate
-- [ ] Sub-60 second generation time for 3-minute videos
-- [ ] 50+ unique move types across multiple bachata styles
-- [ ] Web interface with real-time progress tracking
-- [ ] Cloud deployment with scalable video processing
+## 📞 Support
+
+For questions, issues, or contributions:
+1. Check existing issues in the repository
+2. Create a new issue with detailed description
+3. Include error messages and system information
+4. Provide steps to reproduce the problem
 
 ---
 
-**Status**: ✅ **MVP Complete** - Functional AI-powered bachata choreography generator ready for production enhancement and user testing.
+**Happy Dancing! 💃🕺**

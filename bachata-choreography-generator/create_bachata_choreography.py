@@ -9,6 +9,7 @@ import time
 import asyncio
 import logging
 import argparse
+import json
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
@@ -381,6 +382,149 @@ class BachataChoreoGenerator:
         
         return selected[:max_count]
     
+    def _select_diverse_sequence_moves(self, recommendations: List, target_duration: float) -> List:
+        """Select diverse moves for the sequence, avoiding repetition."""
+        import random
+        import hashlib
+        
+        # Create a seed based on the song name for consistent but different randomization per song
+        song_seed = hashlib.md5(str(self._current_song_path).encode()).hexdigest()[:8]
+        random.seed(int(song_seed, 16))
+        
+        # Group recommendations by move type
+        move_groups = {}
+        for rec in recommendations:
+            move_type = rec.move_candidate.move_label
+            if move_type not in move_groups:
+                move_groups[move_type] = []
+            move_groups[move_type].append(rec)
+        
+        # Calculate how many moves we need based on target duration
+        # Assume each move is about 6-8 seconds on average
+        avg_move_duration = 7.0
+        num_moves_needed = max(4, int(target_duration / avg_move_duration))
+        
+        selected = []
+        move_types_used = set()
+        
+        # Shuffle the move groups for different ordering per song
+        move_group_items = list(move_groups.items())
+        random.shuffle(move_group_items)
+        
+        # First pass: select one from each different move type with randomization
+        for move_type, group in move_group_items:
+            if len(selected) < num_moves_needed:
+                # Add randomness to avoid always picking the same moves
+                if len(group) > 1:
+                    # Pick randomly from top candidates in each category
+                    candidate_pool = group[:min(len(group), 3)]
+                    selected.append(random.choice(candidate_pool))
+                else:
+                    selected.append(group[0])
+                move_types_used.add(move_type)
+        
+        # Second pass: fill remaining slots with randomized selection
+        remaining_recs = [rec for rec in recommendations if rec not in selected]
+        random.shuffle(remaining_recs)  # Randomize order
+        
+        while len(selected) < num_moves_needed and remaining_recs:
+            # Add some variety by occasionally picking less optimal moves
+            if random.random() < 0.3:  # 30% chance to pick a random move for variety
+                next_rec = random.choice(remaining_recs)
+            else:
+                # Pick the best remaining move
+                next_rec = remaining_recs[0]
+            
+            selected.append(next_rec)
+            remaining_recs.remove(next_rec)
+        
+        # Reset random seed to avoid affecting other operations
+        random.seed()
+        
+        print(f"🎯 Selected {len(selected)} diverse moves for {target_duration:.0f}s target (seed: {song_seed})")
+        return selected
+    
+    def _create_full_duration_sequence(
+        self, 
+        video_paths: List[str], 
+        music_features: Dict[str, Any], 
+        target_duration: float,
+        selected_moves: List
+    ) -> Any:
+        """Create a sequence that fills the target duration by repeating moves if necessary."""
+        from app.models.video_models import ChoreographySequence, SelectedMove, TransitionType
+        
+        beat_positions = music_features.get('beat_positions', [])
+        tempo = music_features.get('tempo', 120)
+        
+        moves = []
+        current_time = 0.0
+        move_index = 0
+        
+        print(f"🔄 Creating sequence to fill {target_duration:.1f}s")
+        
+        # Keep adding moves until we reach the target duration
+        while current_time < target_duration:
+            # Cycle through available moves with some randomization
+            base_index = move_index % len(video_paths)
+            video_path = video_paths[base_index]
+            move_label = selected_moves[base_index].move_candidate.move_label
+            
+            # Calculate move duration based on beats with some variation
+            beats_per_move = 6  # 6 beats = 1.5 measures in Bachata
+            beat_duration = 60.0 / tempo
+            base_move_duration = beats_per_move * beat_duration
+            
+            # Add some variation to move durations (±20%)
+            import random
+            duration_variation = random.uniform(0.8, 1.2)
+            move_duration = base_move_duration * duration_variation
+            
+            # Adjust duration to not exceed target
+            remaining_time = target_duration - current_time
+            if move_duration > remaining_time:
+                move_duration = remaining_time
+            
+            # Ensure reasonable duration bounds
+            move_duration = max(move_duration, 3.0)
+            move_duration = min(move_duration, 12.0)
+            
+            move = SelectedMove(
+                clip_id=f"move_{move_index + 1}_{move_label}",
+                video_path=video_path,
+                start_time=current_time,
+                duration=move_duration,
+                transition_type=TransitionType.CUT
+            )
+            
+            moves.append(move)
+            current_time += move_duration
+            move_index += 1
+            
+            print(f"   Move {move_index}: {move_label} ({move_duration:.1f}s) -> {current_time:.1f}s")
+            
+            # Safety check to prevent infinite loops (increased limit for full songs)
+            max_moves = 150 if target_duration > 200 else 100 if target_duration > 100 else 50
+            if move_index > max_moves:
+                print(f"⚠️  Safety limit reached ({max_moves} moves), stopping sequence creation")
+                break
+        
+        sequence = ChoreographySequence(
+            moves=moves,
+            total_duration=current_time,
+            difficulty_level="mixed",
+            audio_tempo=tempo,
+            generation_parameters={
+                "sync_type": "full_duration_sequence",
+                "tempo": tempo,
+                "target_duration": target_duration,
+                "actual_duration": current_time,
+                "moves_repeated": move_index > len(video_paths)
+            }
+        )
+        
+        return sequence
+    
     async def _generate_recommendations(
         self, 
         music_features: Dict[str, Any], 
@@ -440,9 +584,8 @@ class BachataChoreoGenerator:
             
             print(f"🎵 Target duration: {target_duration:.0f}s (of {full_duration:.0f}s total)")
             
-            # Select moves for sequence
-            num_moves = min(len(recommendations), 6 if self.duration == "full" else 5)
-            selected_moves = recommendations[:num_moves]
+            # Select diverse moves for sequence with better distribution
+            selected_moves = self._select_diverse_sequence_moves(recommendations, target_duration)
             video_paths = [rec.move_candidate.video_path for rec in selected_moves]
             
             print(f"📝 Selected {len(selected_moves)} moves:")
@@ -463,11 +606,12 @@ class BachataChoreoGenerator:
                 )
             )
             
-            # Create sequence
-            sequence = self.video_generator.create_beat_synchronized_sequence(
+            # Create sequence with improved duration handling
+            sequence = self._create_full_duration_sequence(
                 video_paths=video_paths,
                 music_features=music_features,
-                target_duration=target_duration
+                target_duration=target_duration,
+                selected_moves=selected_moves
             )
             
             print(f"✅ Sequence created: {len(sequence.moves)} moves, {sequence.total_duration:.1f}s")
@@ -603,9 +747,11 @@ class BachataChoreoGenerator:
                         "video_path": move.video_path,
                         "move_name": Path(move.video_path).stem,
                         "move_category": Path(move.video_path).parent.name,
-                        "start_time": move.start_time,
-                        "duration": move.duration,
-                        "end_time": move.start_time + move.duration,
+                        "planned_start_time": move.start_time,
+                        "planned_duration": move.duration,
+                        "planned_end_time": move.start_time + move.duration,
+                        "actual_clip_duration": self._get_actual_clip_duration(move.video_path),
+                        "note": "Actual video uses full clip duration, not planned duration",
                         "transition_type": move.transition_type.value if hasattr(move.transition_type, 'value') else str(move.transition_type)
                     }
                     for i, move in enumerate(sequence.moves)
@@ -643,6 +789,28 @@ class BachataChoreoGenerator:
             print(f"⚠️  Failed to export metadata: {e}")
             return ""
 
+    def _get_actual_clip_duration(self, video_path: str) -> float:
+        """Get the actual duration of a video clip using ffprobe."""
+        try:
+            import subprocess
+            cmd = [
+                "ffprobe",
+                "-v", "quiet",
+                "-print_format", "json",
+                "-show_format",
+                video_path
+            ]
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            if result.returncode == 0:
+                import json
+                info = json.loads(result.stdout)
+                return float(info.get("format", {}).get("duration", 0))
+        except Exception as e:
+            print(f"⚠️  Could not get duration for {video_path}: {e}")
+        
+        return 0.0
+    
     def _print_summary(self, results: Dict[str, Any], audio_path: str) -> None:
         """Print final summary."""
         print("\n" + "=" * 50)

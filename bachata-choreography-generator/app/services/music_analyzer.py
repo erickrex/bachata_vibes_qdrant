@@ -444,17 +444,17 @@ class MusicAnalyzer:
         
         elif section_type == "bridge":
             # Bridge: Intimate, close connection moves
-            moves = ["close_embrace", "arm_styling"]
+            moves = ["basic_step", "arm_styling"]
             if duration > 15:
-                moves.extend(["hip_roll", "sensual_styling"])
+                moves.extend(["body_roll", "dips"])
             if energy < 0.15:  # Very low energy bridges
-                moves.append("slow_body_roll")
+                moves.append("body_roll")
         
         elif section_type == "outro":
             # Outro: Graceful ending moves
-            moves = ["basic_step", "close_embrace"]
+            moves = ["basic_step", "dips"]
             if duration > 10:
-                moves.extend(["arm_styling", "final_dip"])
+                moves.extend(["arm_styling", "body_roll"])
         
         else:
             # Default fallback
@@ -465,7 +465,7 @@ class MusicAnalyzer:
             if "styling" not in moves:
                 moves.append("styling")
         elif energy < 0.15:  # Very low energy
-            moves = [move for move in moves if move in ["basic_step", "close_embrace", "arm_styling"]]
+            moves = [move for move in moves if move in ["basic_step", "body_roll", "arm_styling"]]
         
         return moves
     
