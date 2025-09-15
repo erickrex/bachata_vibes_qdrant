@@ -320,8 +320,15 @@
     - Create fallback mechanisms for processing failures
     - _Requirements: 1.1, 1.2, 6.2, 6.3_
 
-- [ ] 11. Build core web interface with song selection and progress tracking
-  - [ ] 11.1 Create centered song selection interface
+- [x] 11. Build core web interface with song selection and progress tracking
+
+
+
+
+
+  - [x] 11.1 Create centered song selection interface
+
+
     - Design clean, centered main page template with dropdown listing available songs from data/songs/ directory
     - Add "New song" option in dropdown that reveals YouTube URL input textbox when selected
     - Create single "Create Choreography" button that uses existing /api/choreography endpoint
@@ -329,7 +336,10 @@
     - Remove all extra features (difficulty selection, style controls) - focus on core functionality only
     - _Requirements: 1.1, 3.4_
 
-  - [ ] 11.2 Implement real-time progress tracking using existing endpoints
+
+  - [x] 11.2 Implement real-time progress tracking using existing endpoints
+
+
     - Build progress bar that polls /api/task/{task_id} endpoint for status updates
     - Display progress percentage, stage, and status messages from task API response
     - Add loading states that disable form controls during processing
