@@ -1,0 +1,457 @@
+{
+  "song_info": {
+    "name": "Aventura - Obsesion",
+    "audio_path": "data/songs/Aventura - Obsesion.mp3",
+    "tempo": 135.99917763157896,
+    "duration": 255.164126984127,
+    "beats_detected": 556,
+    "rhythm_strength": 0.759797882583511,
+    "syncopation_level": 0.5948579102605471
+  },
+  "choreography_sequence": {
+    "total_moves": 26,
+    "actual_sequence_duration": 251.76103999999995,
+    "video_output_duration": 251.782,
+    "target_duration": "full",
+    "audio_tempo": 135.99917763157896,
+    "difficulty_level": "mixed",
+    "composition_method": "natural_clip_durations",
+    "generation_parameters": {
+      "sync_type": "natural_duration_sequence",
+      "tempo": 135.99917763157896,
+      "target_duration": 255.164126984127,
+      "song_duration": 255.164126984127,
+      "actual_duration": 251.76103999999995,
+      "moves_repeated": true
+    },
+    "note": "This metadata reflects the ACTUAL video composition, not planned durations"
+  },
+  "actual_video_composition": [
+    {
+      "position": 1,
+      "clip_id": "move_1_dips",
+      "video_path": "data/Bachata_steps/dip/dip_1.mp4",
+      "move_name": "dip_1",
+      "move_category": "dip",
+      "actual_start_time": 0.0,
+      "actual_duration": 14.381042,
+      "actual_end_time": 14.381042,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 2,
+      "clip_id": "move_2_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_1.mp4",
+      "move_name": "basic_step_1",
+      "move_category": "basic_steps",
+      "actual_start_time": 14.381042,
+      "actual_duration": 14.848167,
+      "actual_end_time": 29.229209,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 3,
+      "clip_id": "move_3_body_roll",
+      "video_path": "data/Bachata_steps/body_roll/body_roll_1.mp4",
+      "move_name": "body_roll_1",
+      "move_category": "body_roll",
+      "actual_start_time": 29.229209,
+      "actual_duration": 10.041667,
+      "actual_end_time": 39.270876,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 4,
+      "clip_id": "move_4_hammerlock",
+      "video_path": "data/Bachata_steps/hammerlock/hammerlock_1.mp4",
+      "move_name": "hammerlock_1",
+      "move_category": "hammerlock",
+      "actual_start_time": 39.270876,
+      "actual_duration": 10.041667,
+      "actual_end_time": 49.312543000000005,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 5,
+      "clip_id": "move_5_forward_backward",
+      "video_path": "data/Bachata_steps/forward_backward/forward_backward_1.mp4",
+      "move_name": "forward_backward_1",
+      "move_category": "forward_backward",
+      "actual_start_time": 49.312543000000005,
+      "actual_duration": 6.4064,
+      "actual_end_time": 55.718943,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 6,
+      "clip_id": "move_6_lady_left_turn",
+      "video_path": "data/Bachata_steps/lady_left_turn/lady_left_turn_1.mp4",
+      "move_name": "lady_left_turn_1",
+      "move_category": "lady_left_turn",
+      "actual_start_time": 55.718943,
+      "actual_duration": 4.666667,
+      "actual_end_time": 60.38561,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 7,
+      "clip_id": "move_7_cross_body_lead",
+      "video_path": "data/Bachata_steps/cross_body_lead/cross_body_lead_1.mp4",
+      "move_name": "cross_body_lead_1",
+      "move_category": "cross_body_lead",
+      "actual_start_time": 60.38561,
+      "actual_duration": 7.125,
+      "actual_end_time": 67.51061,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 8,
+      "clip_id": "move_8_lady_right_turn",
+      "video_path": "data/Bachata_steps/lady_right_turn/lady_right_turn_1.mp4",
+      "move_name": "lady_right_turn_1",
+      "move_category": "lady_right_turn",
+      "actual_start_time": 67.51061,
+      "actual_duration": 6.666667,
+      "actual_end_time": 74.177277,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 9,
+      "clip_id": "move_9_dips",
+      "video_path": "data/Bachata_steps/dip/dip_1.mp4",
+      "move_name": "dip_1",
+      "move_category": "dip",
+      "actual_start_time": 74.177277,
+      "actual_duration": 14.381042,
+      "actual_end_time": 88.55831900000001,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 10,
+      "clip_id": "move_10_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_1.mp4",
+      "move_name": "basic_step_1",
+      "move_category": "basic_steps",
+      "actual_start_time": 88.55831900000001,
+      "actual_duration": 14.848167,
+      "actual_end_time": 103.40648600000002,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 11,
+      "clip_id": "move_11_body_roll",
+      "video_path": "data/Bachata_steps/body_roll/body_roll_1.mp4",
+      "move_name": "body_roll_1",
+      "move_category": "body_roll",
+      "actual_start_time": 103.40648600000002,
+      "actual_duration": 10.041667,
+      "actual_end_time": 113.44815300000002,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 12,
+      "clip_id": "move_12_hammerlock",
+      "video_path": "data/Bachata_steps/hammerlock/hammerlock_1.mp4",
+      "move_name": "hammerlock_1",
+      "move_category": "hammerlock",
+      "actual_start_time": 113.44815300000002,
+      "actual_duration": 10.041667,
+      "actual_end_time": 123.48982000000002,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 13,
+      "clip_id": "move_13_forward_backward",
+      "video_path": "data/Bachata_steps/forward_backward/forward_backward_1.mp4",
+      "move_name": "forward_backward_1",
+      "move_category": "forward_backward",
+      "actual_start_time": 123.48982000000002,
+      "actual_duration": 6.4064,
+      "actual_end_time": 129.89622000000003,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 14,
+      "clip_id": "move_14_lady_left_turn",
+      "video_path": "data/Bachata_steps/lady_left_turn/lady_left_turn_1.mp4",
+      "move_name": "lady_left_turn_1",
+      "move_category": "lady_left_turn",
+      "actual_start_time": 129.89622000000003,
+      "actual_duration": 4.666667,
+      "actual_end_time": 134.56288700000002,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 15,
+      "clip_id": "move_15_cross_body_lead",
+      "video_path": "data/Bachata_steps/cross_body_lead/cross_body_lead_1.mp4",
+      "move_name": "cross_body_lead_1",
+      "move_category": "cross_body_lead",
+      "actual_start_time": 134.56288700000002,
+      "actual_duration": 7.125,
+      "actual_end_time": 141.68788700000002,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 16,
+      "clip_id": "move_16_lady_right_turn",
+      "video_path": "data/Bachata_steps/lady_right_turn/lady_right_turn_1.mp4",
+      "move_name": "lady_right_turn_1",
+      "move_category": "lady_right_turn",
+      "actual_start_time": 141.68788700000002,
+      "actual_duration": 6.666667,
+      "actual_end_time": 148.354554,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 17,
+      "clip_id": "move_17_dips",
+      "video_path": "data/Bachata_steps/dip/dip_1.mp4",
+      "move_name": "dip_1",
+      "move_category": "dip",
+      "actual_start_time": 148.354554,
+      "actual_duration": 14.381042,
+      "actual_end_time": 162.73559600000002,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 18,
+      "clip_id": "move_18_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_1.mp4",
+      "move_name": "basic_step_1",
+      "move_category": "basic_steps",
+      "actual_start_time": 162.73559600000002,
+      "actual_duration": 14.848167,
+      "actual_end_time": 177.583763,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 19,
+      "clip_id": "move_19_body_roll",
+      "video_path": "data/Bachata_steps/body_roll/body_roll_1.mp4",
+      "move_name": "body_roll_1",
+      "move_category": "body_roll",
+      "actual_start_time": 177.583763,
+      "actual_duration": 10.041667,
+      "actual_end_time": 187.62543,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 20,
+      "clip_id": "move_20_hammerlock",
+      "video_path": "data/Bachata_steps/hammerlock/hammerlock_1.mp4",
+      "move_name": "hammerlock_1",
+      "move_category": "hammerlock",
+      "actual_start_time": 187.62543,
+      "actual_duration": 10.041667,
+      "actual_end_time": 197.66709699999998,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 21,
+      "clip_id": "move_21_forward_backward",
+      "video_path": "data/Bachata_steps/forward_backward/forward_backward_1.mp4",
+      "move_name": "forward_backward_1",
+      "move_category": "forward_backward",
+      "actual_start_time": 197.66709699999998,
+      "actual_duration": 6.4064,
+      "actual_end_time": 204.07349699999997,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 22,
+      "clip_id": "move_22_lady_left_turn",
+      "video_path": "data/Bachata_steps/lady_left_turn/lady_left_turn_1.mp4",
+      "move_name": "lady_left_turn_1",
+      "move_category": "lady_left_turn",
+      "actual_start_time": 204.07349699999997,
+      "actual_duration": 4.666667,
+      "actual_end_time": 208.74016399999996,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 23,
+      "clip_id": "move_23_cross_body_lead",
+      "video_path": "data/Bachata_steps/cross_body_lead/cross_body_lead_1.mp4",
+      "move_name": "cross_body_lead_1",
+      "move_category": "cross_body_lead",
+      "actual_start_time": 208.74016399999996,
+      "actual_duration": 7.125,
+      "actual_end_time": 215.86516399999996,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 24,
+      "clip_id": "move_24_lady_right_turn",
+      "video_path": "data/Bachata_steps/lady_right_turn/lady_right_turn_1.mp4",
+      "move_name": "lady_right_turn_1",
+      "move_category": "lady_right_turn",
+      "actual_start_time": 215.86516399999996,
+      "actual_duration": 6.666667,
+      "actual_end_time": 222.53183099999995,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 25,
+      "clip_id": "move_25_dips",
+      "video_path": "data/Bachata_steps/dip/dip_1.mp4",
+      "move_name": "dip_1",
+      "move_category": "dip",
+      "actual_start_time": 222.53183099999995,
+      "actual_duration": 14.381042,
+      "actual_end_time": 236.91287299999996,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    },
+    {
+      "position": 26,
+      "clip_id": "move_26_basic_step",
+      "video_path": "data/Bachata_steps/basic_steps/basic_step_1.mp4",
+      "move_name": "basic_step_1",
+      "move_category": "basic_steps",
+      "actual_start_time": 236.91287299999996,
+      "actual_duration": 14.848167,
+      "actual_end_time": 251.76103999999995,
+      "transition_type": "cut",
+      "note": "These are the ACTUAL times this clip appears in the final video"
+    }
+  ],
+  "musical_sections": [
+    {
+      "start_time": 0.0,
+      "end_time": 0.23219954648526078,
+      "section_type": "intro",
+      "energy_level": 0.001309733027788711,
+      "recommended_move_types": [
+        "basic_step"
+      ]
+    },
+    {
+      "start_time": 0.23219954648526078,
+      "end_time": 10.12390022675737,
+      "section_type": "bridge",
+      "energy_level": 0.05947288734561043,
+      "recommended_move_types": [
+        "basic_step",
+        "arm_styling",
+        "body_roll"
+      ]
+    },
+    {
+      "start_time": 10.12390022675737,
+      "end_time": 10.866938775510205,
+      "section_type": "bridge",
+      "energy_level": 0.049551054683979606,
+      "recommended_move_types": [
+        "basic_step",
+        "arm_styling",
+        "body_roll"
+      ]
+    },
+    {
+      "start_time": 10.866938775510205,
+      "end_time": 22.96453514739229,
+      "section_type": "bridge",
+      "energy_level": 0.06017918420773207,
+      "recommended_move_types": [
+        "basic_step",
+        "arm_styling",
+        "body_roll"
+      ]
+    },
+    {
+      "start_time": 22.96453514739229,
+      "end_time": 252.2615873015873,
+      "section_type": "verse",
+      "energy_level": 0.17998794414613545,
+      "recommended_move_types": [
+        "basic_step",
+        "forward_backward",
+        "side_step",
+        "lady_left_turn"
+      ]
+    },
+    {
+      "start_time": 252.2615873015873,
+      "end_time": 253.51546485260772,
+      "section_type": "bridge",
+      "energy_level": 8.589628803827149e-08,
+      "recommended_move_types": [
+        "basic_step",
+        "arm_styling",
+        "body_roll"
+      ]
+    },
+    {
+      "start_time": 253.51546485260772,
+      "end_time": 254.0495238095238,
+      "section_type": "bridge",
+      "energy_level": 0.0,
+      "recommended_move_types": [
+        "basic_step",
+        "arm_styling",
+        "body_roll"
+      ]
+    },
+    {
+      "start_time": 254.0495238095238,
+      "end_time": 255.164126984127,
+      "section_type": "outro",
+      "energy_level": 0.0,
+      "recommended_move_types": [
+        "basic_step"
+      ]
+    }
+  ],
+  "video_output": {
+    "file_path": "data/output/Aventura_Obsesion_full_fast_choreography.mp4",
+    "actual_duration": 251.782,
+    "file_size": 318443280,
+    "file_size_mb": 303.69117736816406,
+    "resolution": "1280x720",
+    "quality_setting": "fast",
+    "processing_time": 4.256585121154785,
+    "encoding_method": "fixed_natural_durations",
+    "note": "Generated with fixed method - no clip freezing or stretching"
+  },
+  "generation_info": {
+    "generated_at": "2025-09-15 17:00:31",
+    "generator_version": "1.1-fixed",
+    "fixes_applied": [
+      "Removed clip duration restrictions",
+      "Fixed FFmpeg encoding to prevent freezing/stretching",
+      "Accurate metadata reflecting actual video composition",
+      "Natural clip durations preserved"
+    ],
+    "settings": {
+      "duration": "full",
+      "quality": "fast",
+      "max_moves_analyzed": 8,
+      "target_fps": 10
+    }
+  }
+}
