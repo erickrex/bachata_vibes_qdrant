@@ -1,0 +1,399 @@
+{
+  "instructions": "Annotations for bachata video training clips",
+  "move_categories": [
+    "basic_step",
+    "cross_body_lead",
+    "lady_right_turn",
+    "dips",
+    "forward_backward",
+    "double_cross_body_lead",
+    "lady_left_turn",
+    "body_roll",
+    "hammerlock",
+    "shadow_position",
+    "combination",
+    "arm_styling"
+  ],
+  "clips": [
+    {
+      "clip_id": "basic_step_1",
+      "video_path": "Bachata_steps/basic_steps/basic_step_1.mp4",
+      "move_label": "basic_step",
+      "energy_level": "medium",
+      "estimated_tempo": 110,
+      "difficulty": "beginner",
+      "lead_follow_roles": "both",
+      "notes": "Continuous basic steps throughout 14 seconds"
+    },
+    {
+      "clip_id": "basic_step_2",
+      "video_path": "Bachata_steps/basic_steps/basic_step_2.mp4",
+      "move_label": "basic_step",
+      "energy_level": "high",
+      "estimated_tempo": 139,
+      "difficulty": "beginner",
+      "lead_follow_roles": "lead_focus",
+      "notes": "Continuous basic steps throughout 18 seconds"
+    },
+    {
+      "clip_id": "basic_step_3",
+      "video_path": "Bachata_steps/basic_steps/basic_step_3.mp4",
+      "move_label": "basic_step",
+      "energy_level": "high",
+      "estimated_tempo": 139,
+      "difficulty": "beginner",
+      "lead_follow_roles": "lead_focus",
+      "notes": "Continuous basic steps throughout 15 seconds"
+    },
+    {
+      "clip_id": "cross_body_lead_1",
+      "video_path": "Bachata_steps/cross_body_lead/cross_body_lead_1.mp4",
+      "move_label": "cross_body_lead",
+      "energy_level": "medium",
+      "estimated_tempo": 130,
+      "difficulty": "beginner",
+      "lead_follow_roles": "lead_focus",
+      "notes": "Cross body lead throughout 7 seconds"
+    },
+    {
+      "clip_id": "cross_body_lead_2",
+      "video_path": "Bachata_steps/cross_body_lead/cross_body_lead_2.mp4",
+      "move_label": "cross_body_lead",
+      "energy_level": "medium",
+      "estimated_tempo": 130,
+      "difficulty": "beginner",
+      "lead_follow_roles": "lead_focus",
+      "notes": "Cross body lead throughout 6 seconds"
+    },
+    {
+      "clip_id": "cross_body_lead_3",
+      "video_path": "Bachata_steps/cross_body_lead/cross_body_lead_3.mp4",
+      "move_label": "cross_body_lead",
+      "energy_level": "high",
+      "estimated_tempo": 108,
+      "difficulty": "beginner",
+      "lead_follow_roles": "both",
+      "notes": "Cross body lead throughout 4 seconds"
+    },
+    {
+      "clip_id": "cross_body_lead_4",
+      "video_path": "Bachata_steps/cross_body_lead/cross_body_lead_4.mp4",
+      "move_label": "cross_body_lead",
+      "energy_level": "high",
+      "estimated_tempo": 108,
+      "difficulty": "beginner",
+      "lead_follow_roles": "both",
+      "notes": "Cross body lead throughout 5 seconds"
+    },
+    {
+      "clip_id": "lady_right_turn_1",
+      "video_path": "Bachata_steps/lady_right_turn/lady_right_turn_1.mp4",
+      "move_label": "lady_right_turn",
+      "energy_level": "medium",
+      "estimated_tempo": 125,
+      "difficulty": "intermediate",
+      "lead_follow_roles": "follow_focus",
+      "notes": "Lady right turn throughout 6 seconds"
+    },
+    {
+      "clip_id": "lady_right_turn_2",
+      "video_path": "Bachata_steps/lady_right_turn/lady_right_turn_2.mp4",
+      "move_label": "lady_right_turn",
+      "energy_level": "medium",
+      "estimated_tempo": 125,
+      "difficulty": "intermediate",
+      "lead_follow_roles": "follow_focus",
+      "notes": "Lady right turn throughout 5 seconds"
+    },
+    {
+      "clip_id": "dip_1",
+      "video_path": "Bachata_steps/dip/dip_1.mp4",
+      "move_label": "dips",
+      "energy_level": "high",
+      "estimated_tempo": 136,
+      "difficulty": "advanced",
+      "lead_follow_roles": "both",
+      "notes": "Dip from second 7 to 10"
+    },
+    {
+      "clip_id": "dip_2",
+      "video_path": "Bachata_steps/dip/dip_2.mp4",
+      "move_label": "dips",
+      "energy_level": "high",
+      "estimated_tempo": 130,
+      "difficulty": "advanced",
+      "lead_follow_roles": "both",
+      "notes": "Dip from second 6 to 8"
+    },
+    {
+      "clip_id": "dip_3",
+      "video_path": "Bachata_steps/dip/dip_3.mp4",
+      "move_label": "dips",
+      "energy_level": "high",
+      "estimated_tempo": 135,
+      "difficulty": "advanced",
+      "lead_follow_roles": "both",
+      "notes": "Shadow position followed by back dip from seconds 0 to 7"
+    },
+    {
+      "clip_id": "dip_4",
+      "video_path": "Bachata_steps/dip/dip_4.mp4",
+      "move_label": "dips",
+      "energy_level": "high",
+      "estimated_tempo": 128,
+      "difficulty": "intermediate",
+      "lead_follow_roles": "both",
+      "notes": "Shadow position followed by back dip from seconds 0 to 7"
+    },
+    {
+      "clip_id": "forward_backward_1",
+      "video_path": "Bachata_steps/forward_backward/forward_backward_1.mp4",
+      "move_label": "forward_backward",
+      "energy_level": "medium",
+      "estimated_tempo": 109,
+      "difficulty": "beginner",
+      "lead_follow_roles": "both",
+      "notes": "Forward and backward throughout 6 seconds"
+    },
+    {
+      "clip_id": "forward_backward_2",
+      "video_path": "Bachata_steps/forward_backward/forward_backward_2.mp4",
+      "move_label": "forward_backward",
+      "energy_level": "medium",
+      "estimated_tempo": 106,
+      "difficulty": "beginner",
+      "lead_follow_roles": "lead_focus",
+      "notes": "Forward and backward throughout 5 seconds"
+    },
+    {
+      "clip_id": "forward_backward_3",
+      "video_path": "Bachata_steps/forward_backward/forward_backward_3.mp4",
+      "move_label": "forward_backward",
+      "energy_level": "high",
+      "estimated_tempo": 121,
+      "difficulty": "beginner",
+      "lead_follow_roles": "lead_focus",
+      "notes": "Forward and backward throughout 10 seconds"
+    },
+    {
+      "clip_id": "double_cross_body_lead_1",
+      "video_path": "Bachata_steps/double_cross_body_lead/double_cross_body_lead_1.mp4",
+      "move_label": "cross_body_lead",
+      "energy_level": "medium",
+      "estimated_tempo": 129,
+      "difficulty": "intermediate",
+      "lead_follow_roles": "both",
+      "notes": "Double cross body lead throughout 10 seconds"
+    },
+    {
+      "clip_id": "double_cross_body_lead_2",
+      "video_path": "Bachata_steps/double_cross_body_lead/double_cross_body_lead_2.mp4",
+      "move_label": "cross_body_lead",
+      "energy_level": "medium",
+      "estimated_tempo": 112,
+      "difficulty": "intermediate",
+      "lead_follow_roles": "both",
+      "notes": "Double cross body lead throughout 8 seconds"
+    },
+    {
+      "clip_id": "double_cross_body_lead_3",
+      "video_path": "Bachata_steps/double_cross_body_lead/double_cross_body_lead_3.mp4",
+      "move_label": "cross_body_lead",
+      "energy_level": "medium",
+      "estimated_tempo": 114,
+      "difficulty": "intermediate",
+      "lead_follow_roles": "both",
+      "notes": "Double cross body lead throughout 10 seconds"
+    },
+    {
+      "clip_id": "lady_left_turn_1",
+      "video_path": "Bachata_steps/lady_left_turn/lady_left_turn_1.mp4",
+      "move_label": "lady_left_turn",
+      "energy_level": "low",
+      "estimated_tempo": 104,
+      "difficulty": "intermediate",
+      "lead_follow_roles": "follow_focus",
+      "notes": "Lady left turn throughout 4 seconds"
+    },
+    {
+      "clip_id": "lady_left_turn_2",
+      "video_path": "Bachata_steps/lady_left_turn/lady_left_turn_2.mp4",
+      "move_label": "lady_left_turn",
+      "energy_level": "low",
+      "estimated_tempo": 102,
+      "difficulty": "intermediate",
+      "lead_follow_roles": "follow_focus",
+      "notes": "Lady left turn throughout 3 seconds"
+    },
+    {
+      "clip_id": "body_roll_1",
+      "video_path": "Bachata_steps/body_roll/body_roll_1.mp4",
+      "move_label": "body_roll",
+      "energy_level": "high",
+      "estimated_tempo": 140,
+      "difficulty": "advanced",
+      "lead_follow_roles": "both",
+      "notes": "Body roll throughout 10 seconds"
+    },
+    {
+      "clip_id": "body_roll_2",
+      "video_path": "Bachata_steps/body_roll/body_roll_2.mp4",
+      "move_label": "body_roll",
+      "energy_level": "high",
+      "estimated_tempo": 130,
+      "difficulty": "advanced",
+      "lead_follow_roles": "both",
+      "notes": "Body roll throughout 6 seconds"
+    },
+    {
+      "clip_id": "body_roll_3",
+      "video_path": "Bachata_steps/body_roll/body_roll_3.mp4",
+      "move_label": "body_roll",
+      "energy_level": "high",
+      "estimated_tempo": 135,
+      "difficulty": "advanced",
+      "lead_follow_roles": "both",
+      "notes": "Body roll throughout 8 seconds"
+    },
+    {
+      "clip_id": "body_roll_4",
+      "video_path": "Bachata_steps/body_roll/body_roll_4.mp4",
+      "move_label": "body_roll",
+      "energy_level": "high",
+      "estimated_tempo": 142,
+      "difficulty": "advanced",
+      "lead_follow_roles": "both",
+      "notes": "Body roll throughout 12 seconds"
+    },
+    {
+      "clip_id": "hammerlock_1",
+      "video_path": "Bachata_steps/hammerlock/hammerlock_1.mp4",
+      "move_label": "hammerlock",
+      "energy_level": "high",
+      "estimated_tempo": 138,
+      "difficulty": "advanced",
+      "lead_follow_roles": "follow_focus",
+      "notes": "Hammerlock throughout 10 seconds"
+    },
+    {
+      "clip_id": "hammerlock_2",
+      "video_path": "Bachata_steps/hammerlock/hammerlock_2.mp4",
+      "move_label": "hammerlock",
+      "energy_level": "high",
+      "estimated_tempo": 140,
+      "difficulty": "advanced",
+      "lead_follow_roles": "follow_focus",
+      "notes": "Hammerlock throughout 12 seconds"
+    },
+    {
+      "clip_id": "shadow_position_1",
+      "video_path": "Bachata_steps/shadow_position/shadow_position_1.mp4",
+      "move_label": "shadow_position",
+      "energy_level": "high",
+      "estimated_tempo": 150,
+      "difficulty": "advanced",
+      "lead_follow_roles": "both",
+      "notes": "Shadow position throughout 9 seconds"
+    },
+    {
+      "clip_id": "shadow_position_2",
+      "video_path": "Bachata_steps/shadow_position/shadow_position_2.mp4",
+      "move_label": "shadow_position",
+      "energy_level": "high",
+      "estimated_tempo": 137,
+      "difficulty": "advanced",
+      "lead_follow_roles": "both",
+      "notes": "Shadow position throughout 12 seconds"
+    },
+    {
+      "clip_id": "combination_1",
+      "video_path": "Bachata_steps/combination/combination_1.mp4",
+      "move_label": "combination",
+      "energy_level": "medium",
+      "estimated_tempo": 108,
+      "difficulty": "advanced",
+      "lead_follow_roles": "both",
+      "notes": "Combination throughout 13 seconds"
+    },
+    {
+      "clip_id": "combination_2",
+      "video_path": "Bachata_steps/combination/combination_2.mp4",
+      "move_label": "combination",
+      "energy_level": "medium",
+      "estimated_tempo": 112,
+      "difficulty": "advanced",
+      "lead_follow_roles": "both",
+      "notes": "Combination throughout 10 seconds"
+    },
+    {
+      "clip_id": "combination_3",
+      "video_path": "Bachata_steps/combination/combination_3.mp4",
+      "move_label": "combination",
+      "energy_level": "high",
+      "estimated_tempo": 135,
+      "difficulty": "advanced",
+      "lead_follow_roles": "both",
+      "notes": "Combination throughout 18 seconds"
+    },
+    {
+      "clip_id": "combination_4",
+      "video_path": "Bachata_steps/combination/combination_4.mp4",
+      "move_label": "combination",
+      "energy_level": "high",
+      "estimated_tempo": 150,
+      "difficulty": "advanced",
+      "lead_follow_roles": "both",
+      "notes": "Combination throughout 12 seconds"
+    },
+    {
+      "clip_id": "combination_5",
+      "video_path": "Bachata_steps/combination/combination_5.mp4",
+      "move_label": "combination",
+      "energy_level": "high",
+      "estimated_tempo": 150,
+      "difficulty": "advanced",
+      "lead_follow_roles": "both",
+      "notes": "Combination throughout 15 seconds"
+    },
+    {
+      "clip_id": "arm_styling_1",
+      "video_path": "Bachata_steps/arm_styling/arm_styling_1.mp4",
+      "move_label": "arm_styling",
+      "energy_level": "medium",
+      "estimated_tempo": 116,
+      "difficulty": "advanced",
+      "lead_follow_roles": "follow_focus",
+      "notes": "Arm styling throughout 10 seconds"
+    },
+    {
+      "clip_id": "arm_styling_2",
+      "video_path": "Bachata_steps/arm_styling/arm_styling_2.mp4",
+      "move_label": "arm_styling",
+      "energy_level": "medium",
+      "estimated_tempo": 120,
+      "difficulty": "advanced",
+      "lead_follow_roles": "follow_focus",
+      "notes": "Arm styling throughout 17 seconds"
+    },
+    {
+      "clip_id": "arm_styling_3",
+      "video_path": "Bachata_steps/arm_styling/arm_styling_3.mp4",
+      "move_label": "arm_styling",
+      "energy_level": "medium",
+      "estimated_tempo": 121,
+      "difficulty": "advanced",
+      "lead_follow_roles": "follow_focus",
+      "notes": "Arm styling throughout 17 seconds"
+    },
+    {
+      "clip_id": "arm_styling_4",
+      "video_path": "Bachata_steps/arm_styling/arm_styling_4.mp4",
+      "move_label": "arm_styling",
+      "energy_level": "medium",
+      "estimated_tempo": 114,
+      "difficulty": "advanced",
+      "lead_follow_roles": "follow_focus",
+      "notes": "Arm styling throughout 9 seconds"
+    }
+  ]
+}
