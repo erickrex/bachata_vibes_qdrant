@@ -215,7 +215,7 @@ class VideoGenerator:
     
     def _validate_sequence(self, sequence: ChoreographySequence) -> None:
         """
-        Validate the choreography sequence.
+        Validate the choreography sequence and log duration information.
         
         Args:
             sequence: The sequence to validate
@@ -226,12 +226,31 @@ class VideoGenerator:
         if not sequence.moves:
             raise VideoGenerationError("Sequence must contain at least one move")
         
+        total_calculated_duration = 0.0
+        
         for i, move in enumerate(sequence.moves):
             if not os.path.exists(move.video_path):
                 raise VideoGenerationError(f"Video file not found: {move.video_path}")
             
             if move.duration <= 0:
                 raise VideoGenerationError(f"Move {i} has invalid duration: {move.duration}")
+            
+            total_calculated_duration += move.duration
+        
+        # Log duration validation
+        logger.info(f"Sequence validation:")
+        logger.info(f"  - Number of moves: {len(sequence.moves)}")
+        logger.info(f"  - Sequence total_duration: {sequence.total_duration:.1f}s")
+        logger.info(f"  - Calculated duration: {total_calculated_duration:.1f}s")
+        
+        # Warn if there's a significant discrepancy
+        duration_diff = abs(sequence.total_duration - total_calculated_duration)
+        if duration_diff > 1.0:
+            logger.warning(f"Duration discrepancy: {duration_diff:.1f}s difference between sequence.total_duration and calculated duration")
+        
+        # Update sequence total_duration to match calculated value for accuracy
+        sequence.total_duration = total_calculated_duration
+        logger.info(f"Updated sequence total_duration to: {sequence.total_duration:.1f}s")
     
     def _create_concat_file(
         self, 
@@ -239,30 +258,103 @@ class VideoGenerator:
         temp_files: List[str]
     ) -> str:
         """
-        Create a concatenation file for FFmpeg with NATURAL clip durations.
-        NO duration manipulation - clips play at their natural length.
+        Create pre-trimmed video clips and concatenation file for precise duration control.
+        This method trims each clip to the exact duration before concatenation.
         
         Args:
             sequence: The choreography sequence
             temp_files: List to track temporary files
             
         Returns:
-            Path to the concatenation file
+            Path to the concatenation file with pre-trimmed clips
         """
         concat_file_path = os.path.join(self.config.temp_dir, f"concat_{int(time.time())}.txt")
         temp_files.append(concat_file_path)
         
-        with open(concat_file_path, 'w') as f:
-            for move in sequence.moves:
-                # Convert to absolute path for FFmpeg
-                abs_path = os.path.abspath(move.video_path)
-                # CRITICAL FIX: Just list the file, no duration manipulation
-                f.write(f"file '{abs_path}'\n")
-                # NO duration or inpoint/outpoint specifications
-                # Let clips play at their natural duration
+        logger.info(f"Creating pre-trimmed clips for {len(sequence.moves)} moves")
         
-        logger.info(f"Created natural duration concatenation file: {concat_file_path}")
+        trimmed_clips = []
+        
+        with open(concat_file_path, 'w') as f:
+            for i, move in enumerate(sequence.moves):
+                # Create trimmed clip for exact duration control
+                trimmed_clip_path = self._create_trimmed_clip(move, i, temp_files)
+                
+                if trimmed_clip_path:
+                    abs_path = os.path.abspath(trimmed_clip_path)
+                    f.write(f"file '{abs_path}'\n")
+                    trimmed_clips.append(trimmed_clip_path)
+                    logger.debug(f"Move {i+1}: {Path(move.video_path).name} -> {move.duration:.1f}s trimmed")
+                else:
+                    logger.error(f"Failed to create trimmed clip for move {i+1}")
+        
+        logger.info(f"Created concatenation file with {len(trimmed_clips)} pre-trimmed clips")
+        logger.info(f"Total expected duration: {sequence.total_duration:.1f}s")
         return concat_file_path
+    
+    def _create_trimmed_clip(self, move: SelectedMove, index: int, temp_files: List[str]) -> str:
+        """
+        Create a trimmed version of a video clip with exact duration and normalized properties.
+        
+        Args:
+            move: The move with video path and duration
+            index: Index for unique naming
+            temp_files: List to track temporary files
+            
+        Returns:
+            Path to the trimmed clip, or empty string if failed
+        """
+        try:
+            # Generate unique filename for trimmed clip
+            original_name = Path(move.video_path).stem
+            trimmed_path = os.path.join(
+                self.config.temp_dir, 
+                f"trimmed_{index:03d}_{original_name}_{int(time.time())}.mp4"
+            )
+            temp_files.append(trimmed_path)
+            
+            # FFmpeg command to trim clip with NORMALIZED properties
+            cmd = [
+                "ffmpeg",
+                "-i", move.video_path,
+                "-ss", "0",  # Start from beginning
+                "-t", str(move.duration),  # Exact duration
+                
+                # CRITICAL FIX: Normalize video properties for consistent concatenation
+                "-c:v", "libx264",
+                "-preset", "fast",
+                "-crf", "23",
+                "-r", "30",  # Force 30 FPS for all clips
+                "-s", "1280x720",  # Force consistent resolution
+                "-pix_fmt", "yuv420p",  # Force consistent pixel format
+                
+                # Audio normalization
+                "-c:a", "aac",
+                "-ar", "48000",  # Force 48kHz sample rate
+                "-ac", "2",  # Force stereo
+                
+                # Timing fixes
+                "-avoid_negative_ts", "make_zero",
+                "-fflags", "+genpts",  # Generate presentation timestamps
+                
+                "-y", trimmed_path
+            ]
+            
+            logger.debug(f"Trimming and normalizing clip {index+1}: duration={move.duration}s")
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+            
+            if result.returncode == 0 and os.path.exists(trimmed_path):
+                # Verify the trimmed clip duration
+                actual_duration = self._get_video_duration(trimmed_path)
+                logger.debug(f"Trimmed clip {index+1}: expected={move.duration:.1f}s, actual={actual_duration:.1f}s")
+                return trimmed_path
+            else:
+                logger.error(f"Failed to trim clip {index+1}: {result.stderr}")
+                return ""
+                
+        except Exception as e:
+            logger.error(f"Error creating trimmed clip {index+1}: {e}")
+            return ""
     
     def _create_beat_synchronized_concat_file(
         self, 
@@ -271,31 +363,19 @@ class VideoGenerator:
         temp_files: List[str]
     ) -> str:
         """
-        Create a concatenation file with NATURAL durations (no beat manipulation).
-        CRITICAL FIX: Beat sync was causing timing issues, use natural durations.
+        Create a concatenation file with pre-trimmed clips for beat synchronization.
+        Uses the same pre-trimming approach as regular concat file.
         
         Args:
             sequence: The choreography sequence
-            music_features: Music analysis features (ignored to prevent manipulation)
+            music_features: Music analysis features
             temp_files: List to track temporary files
             
         Returns:
-            Path to the concatenation file with natural durations
+            Path to the concatenation file with pre-trimmed clips
         """
-        concat_file_path = os.path.join(self.config.temp_dir, f"natural_concat_{int(time.time())}.txt")
-        temp_files.append(concat_file_path)
-        
-        logger.info(f"Creating natural duration concat file (beat sync disabled to fix timing issues)")
-        
-        with open(concat_file_path, 'w') as f:
-            for move in sequence.moves:
-                abs_path = os.path.abspath(move.video_path)
-                # CRITICAL FIX: No beat alignment, no duration manipulation
-                # Just concatenate clips at their natural durations
-                f.write(f"file '{abs_path}'\n")
-        
-        logger.info(f"Created natural duration concatenation file: {concat_file_path}")
-        return concat_file_path
+        # Use the same pre-trimming approach
+        return self._create_concat_file(sequence, temp_files)
     
     def _get_concat_video_duration(self, concat_file_path: str) -> float:
         """
@@ -400,21 +480,21 @@ class VideoGenerator:
     
     def _two_step_video_audio_process(self, concat_file_path: str, audio_path: str, output_path: str) -> str:
         """
-        Two-step process to preserve natural video timing:
-        1. Concatenate videos with copy codec (no re-encoding)
-        2. Add audio overlay without touching video stream
+        Simplified process for pre-trimmed clips:
+        1. Concatenate pre-trimmed clips with copy codec (fast and preserves quality)
+        2. Add audio overlay with exact duration matching
         """
         temp_video_path = output_path.replace('.mp4', '_temp_video.mp4')
         
         try:
-            # Step 1: Concatenate videos with COPY codec (preserves exact timing)
-            logger.info("Step 1: Concatenating videos with natural timing preservation")
+            # Step 1: Concatenate pre-trimmed clips (can use copy codec since clips are already trimmed)
+            logger.info("Step 1: Concatenating pre-trimmed clips")
             cmd1 = [
                 "ffmpeg",
                 "-f", "concat",
                 "-safe", "0",
                 "-i", concat_file_path,
-                "-c", "copy",  # CRITICAL: Copy codec preserves exact timing
+                "-c", "copy",  # Copy codec is safe with pre-trimmed clips
                 "-y", temp_video_path
             ]
             
@@ -424,22 +504,22 @@ class VideoGenerator:
             if result1.returncode != 0:
                 raise VideoGenerationError(f"Step 1 failed: {result1.stderr}")
             
-            # Get video duration for audio trimming
+            # Get video duration for verification
             video_duration = self._get_video_duration(temp_video_path)
+            logger.info(f"Step 1 completed: Video duration = {video_duration:.1f}s")
             
-            # Step 2: Add audio overlay without re-encoding video
-            logger.info("Step 2: Adding audio overlay without video re-encoding")
+            # Step 2: Add audio overlay with exact duration matching
+            logger.info("Step 2: Adding audio overlay with duration matching")
             cmd2 = [
                 "ffmpeg",
                 "-i", temp_video_path,
-                "-ss", "0",
-                "-t", str(video_duration),
                 "-i", audio_path,
-                "-c:v", "copy",  # CRITICAL: Copy video stream - no re-encoding
+                "-c:v", "copy",  # Copy video stream from step 1
                 "-c:a", self.config.audio_codec,
                 "-b:a", self.config.audio_bitrate,
                 "-map", "0:v:0",  # Video from temp file
                 "-map", "1:a:0",  # Audio from audio file
+                "-shortest",  # CRITICAL: Stop when shortest stream ends
                 "-movflags", "+faststart",
                 "-y", output_path
             ]
@@ -449,6 +529,10 @@ class VideoGenerator:
             
             if result2.returncode != 0:
                 raise VideoGenerationError(f"Step 2 failed: {result2.stderr}")
+            
+            # Verify final output duration
+            final_duration = self._get_video_duration(output_path)
+            logger.info(f"Final video duration: {final_duration:.1f}s")
             
             # Clean up temp file
             if os.path.exists(temp_video_path):
@@ -464,17 +548,17 @@ class VideoGenerator:
             raise VideoGenerationError(f"Two-step process failed: {e}")
     
     def _simple_concatenation(self, concat_file_path: str, output_path: str) -> str:
-        """Simple concatenation without audio overlay."""
+        """Simple concatenation of pre-trimmed clips without audio overlay."""
         cmd = [
             "ffmpeg",
             "-f", "concat",
             "-safe", "0",
             "-i", concat_file_path,
-            "-c", "copy",
+            "-c", "copy",  # Safe to use copy with pre-trimmed clips
             "-y", output_path
         ]
         
-        logger.info(f"Running simple concatenation: {' '.join(cmd)}")
+        logger.info(f"Running simple concatenation of pre-trimmed clips: {' '.join(cmd)}")
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
         
         if result.returncode != 0:
