@@ -7,7 +7,18 @@ data/songs/
 data/Bachata_steps/
 various/
 sanity_checks/
-*.json
+bachata-choreography-generator/test_app.py
+bachata-choreography-generator/test_pipeline_simple.py
+bachata-choreography-generator/validate_basic_pipeline.py
+bachata-choreography-generator/validate_clip_timing.py
+bachata-choreography-generator/validate_end_to_end.py
+bachata-choreography-generator/data/demo_import.json
+bachata-choreography-generator/data/monitoring/
+bachata-choreography-generator/data/optimization_results/
+bachata-choreography-generator/data/output/
+bachata-choreography-generator/data/temp/
+bachata-choreography-generator/data/test_import.json
+bachata-choreography-generator/data/test_results/
 
 .env
 .venv/
