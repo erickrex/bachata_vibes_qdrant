@@ -1,16 +1,19 @@
 """
 Multi-factor scoring recommendation system for Bachata choreography generation.
 Combines audio similarity, tempo matching, energy alignment, and difficulty compatibility.
+Now supports Qdrant vector search for optimized similarity matching.
 """
 
 import numpy as np
 from typing import List, Dict, Tuple, Optional, Any
 from dataclasses import dataclass
 import logging
+import time
 
 from .feature_fusion import FeatureFusion, MultiModalEmbedding, SimilarityScore
 from .music_analyzer import MusicFeatures
 from .move_analyzer import MoveAnalysisResult
+from .qdrant_service import SuperlinkedQdrantService, QdrantConfig, SuperlinkedSearchResult, create_qdrant_service
 
 logger = logging.getLogger(__name__)
 
@@ -70,14 +73,22 @@ class RecommendationRequest:
 class RecommendationEngine:
     """
     Multi-factor scoring recommendation system that combines:
-    - Audio similarity (40%)
+    - Audio similarity (40%) - now using Qdrant vector search
     - Tempo matching (30%) 
     - Energy alignment (20%)
     - Difficulty compatibility (10%)
+    
+    Features Qdrant integration for optimized similarity search with fallback to in-memory.
     """
     
-    def __init__(self):
-        """Initialize the recommendation engine."""
+    def __init__(self, use_qdrant: bool = True, qdrant_config: Optional[QdrantConfig] = None):
+        """
+        Initialize the recommendation engine.
+        
+        Args:
+            use_qdrant: Whether to use Qdrant for vector search
+            qdrant_config: Optional Qdrant configuration
+        """
         self.feature_fusion = FeatureFusion()
         
         # Default scoring weights
@@ -91,14 +102,162 @@ class RecommendationEngine:
         # Tempo compatibility parameters
         self.tempo_tolerance = 10.0  # ±10 BPM tolerance
         
-        logger.info("RecommendationEngine initialized with default weights: audio=40%, tempo=30%, energy=20%, difficulty=10%")
+        # Qdrant integration
+        self.use_qdrant = use_qdrant
+        self.qdrant_service = None
+        self.qdrant_available = False
+        
+        if use_qdrant:
+            try:
+                self.qdrant_service = create_qdrant_service(qdrant_config)
+                # Test if it's a real service (not mock)
+                health = self.qdrant_service.health_check()
+                self.qdrant_available = health.get("qdrant_available", False)
+                
+                if self.qdrant_available:
+                    logger.info("RecommendationEngine initialized with Qdrant vector search")
+                else:
+                    logger.warning("Qdrant not available, falling back to in-memory similarity search")
+                    
+            except Exception as e:
+                logger.warning(f"Failed to initialize Qdrant service: {e}, using in-memory search")
+                self.qdrant_available = False
+        
+        # Performance tracking
+        self.performance_stats = {
+            'qdrant_searches': 0,
+            'memory_searches': 0,
+            'avg_qdrant_time_ms': 0.0,
+            'avg_memory_time_ms': 0.0,
+            'qdrant_fallbacks': 0
+        }
+        
+        search_method = "Qdrant vector search" if self.qdrant_available else "in-memory cosine similarity"
+        logger.info(f"RecommendationEngine initialized with {search_method}, weights: audio=40%, tempo=30%, energy=20%, difficulty=10%")
     
     def recommend_moves(self, 
                        request: RecommendationRequest,
-                       move_candidates: List[MoveCandidate],
+                       move_candidates: Optional[List[MoveCandidate]] = None,
                        top_k: int = 10) -> List[RecommendationScore]:
         """
         Recommend top-k moves based on multi-factor scoring.
+        Uses Qdrant vector search when available, falls back to in-memory search.
+        
+        Args:
+            request: Recommendation request with music features and preferences
+            move_candidates: List of available move candidates (optional if using Qdrant)
+            top_k: Number of top recommendations to return
+            
+        Returns:
+            List of RecommendationScore objects sorted by overall score (descending)
+        """
+        # Try Qdrant-based recommendation first
+        if self.qdrant_available and self.qdrant_service:
+            try:
+                return self._recommend_moves_qdrant(request, top_k)
+            except Exception as e:
+                logger.warning(f"Qdrant recommendation failed: {e}, falling back to in-memory")
+                self.performance_stats['qdrant_fallbacks'] += 1
+                self.qdrant_available = False  # Disable for this session
+        
+        # Fallback to in-memory recommendation
+        if move_candidates is None:
+            raise ValueError("move_candidates required when Qdrant is not available")
+            
+        return self._recommend_moves_memory(request, move_candidates, top_k)
+    
+    def _recommend_moves_qdrant(self, 
+                               request: RecommendationRequest,
+                               top_k: int = 10) -> List[RecommendationScore]:
+        """
+        Recommend moves using Qdrant vector search.
+        
+        Args:
+            request: Recommendation request with music features and preferences
+            top_k: Number of top recommendations to return
+            
+        Returns:
+            List of RecommendationScore objects sorted by overall score (descending)
+        """
+        start_time = time.time()
+        
+        logger.info(f"Generating Qdrant-based recommendations, top_k={top_k}")
+        
+        # Use provided weights or defaults
+        weights = request.weights or self.default_weights
+        
+        # Auto-detect target energy if not specified
+        target_energy = request.target_energy
+        if target_energy is None:
+            target_energy = self._detect_music_energy_level(request.music_features)
+            logger.info(f"Auto-detected target energy level: {target_energy}")
+        
+        # Prepare query embedding (combine audio and pose components)
+        music_audio = request.music_embedding.audio_embedding
+        music_pose = request.music_embedding.pose_embedding
+        query_embedding = np.concatenate([music_audio, music_pose])
+        
+        # Define tempo range for filtering
+        tempo_tolerance = request.tempo_tolerance
+        tempo_range = (
+            request.music_features.tempo - tempo_tolerance,
+            request.music_features.tempo + tempo_tolerance
+        )
+        
+        # Search with metadata filtering
+        # Request more results than needed to account for post-processing filtering
+        search_limit = min(top_k * 3, 50)  # Get 3x results for better filtering
+        
+        search_results = self.qdrant_service.search_similar_moves(
+            query_embedding=query_embedding,
+            limit=search_limit,
+            tempo_range=tempo_range,
+            difficulty=request.target_difficulty if request.target_difficulty != "intermediate" else None,
+            energy_level=target_energy if target_energy != "medium" else None,
+            min_quality=0.7  # Minimum analysis quality
+        )
+        
+        # Convert search results to RecommendationScore objects
+        scores = []
+        for search_result in search_results:
+            # Create a minimal MoveCandidate from search result metadata
+            candidate = self._create_candidate_from_search_result(search_result)
+            
+            # Calculate detailed scoring (tempo, energy, difficulty components)
+            score = self._score_move_candidate_from_qdrant(
+                request.music_features,
+                request.music_embedding,
+                candidate,
+                search_result,
+                request.target_difficulty,
+                target_energy,
+                tempo_tolerance,
+                weights
+            )
+            scores.append(score)
+        
+        # Sort by overall score (descending) and take top_k
+        scores.sort(key=lambda x: x.overall_score, reverse=True)
+        top_scores = scores[:top_k]
+        
+        # Update performance stats
+        search_time = (time.time() - start_time) * 1000
+        self.performance_stats['qdrant_searches'] += 1
+        self.performance_stats['avg_qdrant_time_ms'] = (
+            (self.performance_stats['avg_qdrant_time_ms'] * (self.performance_stats['qdrant_searches'] - 1) + search_time) /
+            self.performance_stats['qdrant_searches']
+        )
+        
+        logger.info(f"Qdrant recommendations completed in {search_time:.2f}ms: {[f'{s.move_candidate.move_label}={s.overall_score:.3f}' for s in top_scores[:3]]}")
+        
+        return top_scores
+    
+    def _recommend_moves_memory(self, 
+                               request: RecommendationRequest,
+                               move_candidates: List[MoveCandidate],
+                               top_k: int = 10) -> List[RecommendationScore]:
+        """
+        Recommend moves using in-memory cosine similarity (fallback method).
         
         Args:
             request: Recommendation request with music features and preferences
@@ -108,7 +267,9 @@ class RecommendationEngine:
         Returns:
             List of RecommendationScore objects sorted by overall score (descending)
         """
-        logger.info(f"Generating recommendations for {len(move_candidates)} candidates, top_k={top_k}")
+        start_time = time.time()
+        
+        logger.info(f"Generating in-memory recommendations for {len(move_candidates)} candidates, top_k={top_k}")
         
         # Use provided weights or defaults
         weights = request.weights or self.default_weights
@@ -139,7 +300,15 @@ class RecommendationEngine:
         # Return top-k
         top_scores = scores[:top_k]
         
-        logger.info(f"Top recommendation scores: {[f'{s.move_candidate.move_label}={s.overall_score:.3f}' for s in top_scores[:3]]}")
+        # Update performance stats
+        search_time = (time.time() - start_time) * 1000
+        self.performance_stats['memory_searches'] += 1
+        self.performance_stats['avg_memory_time_ms'] = (
+            (self.performance_stats['avg_memory_time_ms'] * (self.performance_stats['memory_searches'] - 1) + search_time) /
+            self.performance_stats['memory_searches']
+        )
+        
+        logger.info(f"In-memory recommendations completed in {search_time:.2f}ms: {[f'{s.move_candidate.move_label}={s.overall_score:.3f}' for s in top_scores[:3]]}")
         
         return top_scores
     
@@ -472,3 +641,238 @@ class RecommendationEngine:
             explanations['difficulty'] = "Different difficulty level"
         
         return explanations
+    
+    def _create_candidate_from_search_result(self, search_result: SuperlinkedSearchResult) -> MoveCandidate:
+        """
+        Create a MoveCandidate from Qdrant search result metadata.
+        
+        Args:
+            search_result: Search result from Qdrant
+            
+        Returns:
+            MoveCandidate object
+        """
+        metadata = search_result.metadata
+        
+        # Create minimal MoveAnalysisResult from metadata
+        from .move_analyzer import MovementDynamics, PoseFeatures, HandFeatures
+        
+        # Create minimal movement dynamics
+        movement_dynamics = MovementDynamics(
+            velocity_profile=np.array([]),
+            acceleration_profile=np.array([]),
+            spatial_coverage=0.0,
+            rhythm_score=0.8,
+            complexity_score=metadata["movement_complexity"],
+            dominant_movement_direction="forward",
+            energy_level=metadata["energy_level"],
+            footwork_area_coverage=0.0,
+            upper_body_movement_range=0.0,
+            rhythm_compatibility_score=0.8,
+            movement_periodicity=0.8,
+            transition_points=[],
+            movement_intensity_profile=np.array([]),
+            spatial_distribution={}
+        )
+        
+        analysis_result = MoveAnalysisResult(
+            video_path=metadata["video_path"],
+            duration=metadata["duration"],
+            frame_count=int(metadata["duration"] * 30),  # Estimate frames
+            fps=30.0,
+            pose_features=[],  # Empty for Qdrant-based results
+            hand_features=[],  # Empty for Qdrant-based results
+            movement_dynamics=movement_dynamics,
+            pose_embedding=np.zeros(384),  # Placeholder
+            movement_embedding=np.zeros(128),  # Placeholder
+            movement_complexity_score=metadata["movement_complexity"],
+            tempo_compatibility_range=(metadata["tempo_min"], metadata["tempo_max"]),
+            difficulty_score=metadata["difficulty_score"],
+            analysis_quality=metadata["analysis_quality"],
+            pose_detection_rate=metadata["pose_detection_rate"]
+        )
+        
+        # Create minimal MultiModalEmbedding (will use Qdrant similarity score)
+        multimodal_embedding = MultiModalEmbedding(
+            audio_embedding=np.zeros(128),  # Placeholder
+            pose_embedding=np.zeros(384),   # Placeholder
+            combined_embedding=np.zeros(512)  # Placeholder
+        )
+        
+        # Create MoveCandidate
+        candidate = MoveCandidate(
+            move_id=metadata["move_id"],
+            video_path=metadata["video_path"],
+            move_label=metadata["move_label"],
+            analysis_result=analysis_result,
+            multimodal_embedding=multimodal_embedding,
+            energy_level=metadata["energy_level"],
+            difficulty=metadata["difficulty"],
+            estimated_tempo=metadata["estimated_tempo"],
+            lead_follow_roles=metadata["lead_follow_roles"]
+        )
+        
+        return candidate
+    
+    def _score_move_candidate_from_qdrant(self,
+                                        music_features: MusicFeatures,
+                                        music_embedding: MultiModalEmbedding,
+                                        candidate: MoveCandidate,
+                                        search_result: SuperlinkedSearchResult,
+                                        target_difficulty: str,
+                                        target_energy: str,
+                                        tempo_tolerance: float,
+                                        weights: Dict[str, float]) -> RecommendationScore:
+        """
+        Score a move candidate using Qdrant search result and additional factors.
+        
+        Args:
+            music_features: Music analysis features
+            music_embedding: Music multimodal embedding
+            candidate: Move candidate (created from search result)
+            search_result: Original Qdrant search result
+            target_difficulty: Target difficulty level
+            target_energy: Target energy level
+            tempo_tolerance: Tempo tolerance in BPM
+            weights: Scoring weights
+            
+        Returns:
+            RecommendationScore object
+        """
+        # 1. Audio similarity from Qdrant search score
+        # Qdrant returns cosine similarity (0-1), normalize if needed
+        audio_similarity = search_result.score
+        
+        # 2. Tempo compatibility (BPM range matching with tolerance)
+        tempo_compatibility, tempo_difference = self._calculate_tempo_compatibility(
+            music_features.tempo, candidate, tempo_tolerance
+        )
+        
+        # 3. Energy alignment (low/medium/high matching)
+        energy_alignment, energy_match = self._calculate_energy_alignment(
+            target_energy, candidate.energy_level
+        )
+        
+        # 4. Difficulty compatibility (beginner/intermediate/advanced matching)
+        difficulty_compatibility, difficulty_match = self._calculate_difficulty_compatibility(
+            target_difficulty, candidate.difficulty
+        )
+        
+        # Calculate weighted overall score
+        overall_score = (
+            weights['audio_similarity'] * audio_similarity +
+            weights['tempo_matching'] * tempo_compatibility +
+            weights['energy_alignment'] * energy_alignment +
+            weights['difficulty_compatibility'] * difficulty_compatibility
+        )
+        
+        return RecommendationScore(
+            move_candidate=candidate,
+            overall_score=overall_score,
+            audio_similarity=audio_similarity,
+            tempo_compatibility=tempo_compatibility,
+            energy_alignment=energy_alignment,
+            difficulty_compatibility=difficulty_compatibility,
+            tempo_difference=tempo_difference,
+            energy_match=energy_match,
+            difficulty_match=difficulty_match,
+            weights=weights
+        )
+    
+    def populate_qdrant_from_candidates(self, move_candidates: List[MoveCandidate]) -> Dict[str, Any]:
+        """
+        Populate Qdrant with move embeddings from existing candidates.
+        
+        Args:
+            move_candidates: List of move candidates to store
+            
+        Returns:
+            Population summary
+        """
+        if not self.qdrant_available or not self.qdrant_service:
+            return {"error": "Qdrant not available"}
+        
+        try:
+            summary = self.qdrant_service.migrate_from_memory_cache(move_candidates)
+            logger.info(f"Populated Qdrant with {summary['successful_migrations']} move embeddings")
+            return summary
+            
+        except Exception as e:
+            logger.error(f"Failed to populate Qdrant: {e}")
+            return {"error": str(e)}
+    
+    def get_performance_comparison(self) -> Dict[str, Any]:
+        """
+        Get performance comparison between Qdrant and in-memory search.
+        
+        Returns:
+            Performance statistics
+        """
+        stats = self.performance_stats.copy()
+        
+        # Add derived metrics
+        total_searches = stats['qdrant_searches'] + stats['memory_searches']
+        if total_searches > 0:
+            stats['qdrant_usage_percent'] = (stats['qdrant_searches'] / total_searches) * 100
+            stats['memory_usage_percent'] = (stats['memory_searches'] / total_searches) * 100
+        else:
+            stats['qdrant_usage_percent'] = 0
+            stats['memory_usage_percent'] = 0
+        
+        # Speed comparison
+        if stats['avg_qdrant_time_ms'] > 0 and stats['avg_memory_time_ms'] > 0:
+            if stats['avg_qdrant_time_ms'] < stats['avg_memory_time_ms']:
+                stats['qdrant_speedup'] = stats['avg_memory_time_ms'] / stats['avg_qdrant_time_ms']
+                stats['faster_method'] = "qdrant"
+            else:
+                stats['qdrant_speedup'] = stats['avg_qdrant_time_ms'] / stats['avg_memory_time_ms']
+                stats['faster_method'] = "memory"
+        
+        # Qdrant service stats if available
+        if self.qdrant_service:
+            try:
+                qdrant_stats = self.qdrant_service.get_statistics()
+                stats['qdrant_collection_size'] = qdrant_stats.total_points
+                stats['qdrant_collection_size_mb'] = qdrant_stats.collection_size_mb
+            except Exception as e:
+                logger.warning(f"Failed to get Qdrant stats: {e}")
+        
+        return stats
+    
+    def is_qdrant_available(self) -> bool:
+        """Check if Qdrant is available and healthy."""
+        if not self.qdrant_available or not self.qdrant_service:
+            return False
+        
+        try:
+            health = self.qdrant_service.health_check()
+            return health.get("can_search", False) and health.get("can_store", False)
+        except Exception:
+            return False
+    
+    def force_qdrant_refresh(self, qdrant_config: Optional[QdrantConfig] = None) -> bool:
+        """
+        Force refresh of Qdrant connection.
+        
+        Args:
+            qdrant_config: Optional new configuration
+            
+        Returns:
+            True if refresh successful
+        """
+        try:
+            self.qdrant_service = create_qdrant_service(qdrant_config)
+            health = self.qdrant_service.health_check()
+            self.qdrant_available = health.get("qdrant_available", False)
+            
+            if self.qdrant_available:
+                logger.info("Qdrant connection refreshed successfully")
+                return True
+            else:
+                logger.warning("Qdrant refresh failed - service not available")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Failed to refresh Qdrant connection: {e}")
+            self.qdrant_available = False
+            return False
