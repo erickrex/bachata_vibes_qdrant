@@ -112,6 +112,11 @@ class ChoreographyRequestValidator(BaseModel):
     energy_level: Optional[str] = Field(default=None, description="Target energy level")
     quality_mode: str = Field(default="balanced", description="Quality mode")
     
+    # Enhanced filter parameters for SuperlinkedRecommendationEngine
+    role_focus: Optional[str] = Field(default=None, description="Role focus: lead_focus, follow_focus, or both")
+    move_types: Optional[List[str]] = Field(default=None, description="Preferred move types")
+    tempo_range: Optional[List[int]] = Field(default=None, description="Tempo range [min, max] in BPM")
+    
     # Additional optional parameters
     max_duration: Optional[int] = Field(default=600, description="Maximum song duration in seconds")
     min_duration: Optional[int] = Field(default=30, description="Minimum song duration in seconds")
@@ -212,6 +217,90 @@ class ChoreographyRequestValidator(BaseModel):
                 field="min_duration",
                 value=v
             )
+        return v
+    
+    @validator('role_focus')
+    def validate_role_focus(cls, v):
+        """Validate role focus."""
+        if v is None:
+            return v
+        
+        valid_roles = ['lead_focus', 'follow_focus', 'both']
+        if v not in valid_roles:
+            raise ValidationError(
+                message="Role focus must be 'lead_focus', 'follow_focus', 'both', or null",
+                field="role_focus",
+                value=v,
+                details={"valid_options": valid_roles}
+            )
+        return v
+    
+    @validator('move_types')
+    def validate_move_types(cls, v):
+        """Validate move types."""
+        if v is None:
+            return v
+        
+        valid_move_types = [
+            'basic_step', 'cross_body_lead', 'lady_right_turn', 'lady_left_turn',
+            'forward_backward', 'dips', 'body_roll', 'hammerlock', 'shadow_position',
+            'combination', 'arm_styling', 'double_cross_body_lead'
+        ]
+        
+        if not isinstance(v, list):
+            raise ValidationError(
+                message="Move types must be a list",
+                field="move_types",
+                value=v
+            )
+        
+        invalid_types = [move for move in v if move not in valid_move_types]
+        if invalid_types:
+            raise ValidationError(
+                message=f"Invalid move types: {invalid_types}",
+                field="move_types",
+                value=v,
+                details={"valid_options": valid_move_types, "invalid": invalid_types}
+            )
+        
+        return v
+    
+    @validator('tempo_range')
+    def validate_tempo_range(cls, v):
+        """Validate tempo range."""
+        if v is None:
+            return v
+        
+        if not isinstance(v, list) or len(v) != 2:
+            raise ValidationError(
+                message="Tempo range must be a list of two integers [min, max]",
+                field="tempo_range",
+                value=v
+            )
+        
+        min_tempo, max_tempo = v
+        
+        if not isinstance(min_tempo, int) or not isinstance(max_tempo, int):
+            raise ValidationError(
+                message="Tempo range values must be integers",
+                field="tempo_range",
+                value=v
+            )
+        
+        if min_tempo < 80 or max_tempo > 180:
+            raise ValidationError(
+                message="Tempo range must be between 80 and 180 BPM",
+                field="tempo_range",
+                value=v
+            )
+        
+        if min_tempo >= max_tempo:
+            raise ValidationError(
+                message="Minimum tempo must be less than maximum tempo",
+                field="tempo_range",
+                value=v
+            )
+        
         return v
 
 class SystemResourceValidator:
