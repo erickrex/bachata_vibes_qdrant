@@ -229,8 +229,20 @@ class VideoGenerator:
         total_calculated_duration = 0.0
         
         for i, move in enumerate(sequence.moves):
-            if not os.path.exists(move.video_path):
-                raise VideoGenerationError(f"Video file not found: {move.video_path}")
+            # Resolve video path - handle both absolute and relative paths
+            video_path = move.video_path
+            if not os.path.exists(video_path):
+                # Try with data/ prefix if it's a relative path
+                if not video_path.startswith('data/') and not os.path.isabs(video_path):
+                    video_path = f"data/{video_path}"
+                    if os.path.exists(video_path):
+                        # Update the move with the correct path
+                        move.video_path = video_path
+                        logger.debug(f"Resolved video path: {move.video_path}")
+                    else:
+                        raise VideoGenerationError(f"Video file not found: {move.video_path} (also tried: {video_path})")
+                else:
+                    raise VideoGenerationError(f"Video file not found: {move.video_path}")
             
             if move.duration <= 0:
                 raise VideoGenerationError(f"Move {i} has invalid duration: {move.duration}")
@@ -758,8 +770,19 @@ class VideoGenerator:
         current_time = 0.0
         
         for i, video_path in enumerate(video_paths):
-            if not os.path.exists(video_path):
-                raise VideoGenerationError(f"Video file not found: {video_path}")
+            # Resolve video path - handle both absolute and relative paths
+            resolved_path = video_path
+            if not os.path.exists(resolved_path):
+                # Try with data/ prefix if it's a relative path
+                if not resolved_path.startswith('data/') and not os.path.isabs(resolved_path):
+                    resolved_path = f"data/{resolved_path}"
+                    if os.path.exists(resolved_path):
+                        video_paths[i] = resolved_path  # Update the list with correct path
+                        logger.debug(f"Resolved video path: {resolved_path}")
+                    else:
+                        raise VideoGenerationError(f"Video file not found: {video_path} (also tried: {resolved_path})")
+                else:
+                    raise VideoGenerationError(f"Video file not found: {video_path}")
             
             # For now, assume each clip is 10 seconds (will be improved with actual duration detection)
             duration = 10.0
@@ -841,8 +864,19 @@ class VideoGenerator:
         beats_per_move = 4  # Default to 4 beats per move
         
         for i, video_path in enumerate(video_paths):
-            if not os.path.exists(video_path):
-                raise VideoGenerationError(f"Video file not found: {video_path}")
+            # Resolve video path - handle both absolute and relative paths
+            resolved_path = video_path
+            if not os.path.exists(resolved_path):
+                # Try with data/ prefix if it's a relative path
+                if not resolved_path.startswith('data/') and not os.path.isabs(resolved_path):
+                    resolved_path = f"data/{resolved_path}"
+                    if os.path.exists(resolved_path):
+                        video_paths[i] = resolved_path  # Update the list with correct path
+                        logger.debug(f"Resolved video path: {resolved_path}")
+                    else:
+                        raise VideoGenerationError(f"Video file not found: {video_path} (also tried: {resolved_path})")
+                else:
+                    raise VideoGenerationError(f"Video file not found: {video_path}")
             
             # Calculate start time from beat position
             if current_beat_index < len(beat_positions):

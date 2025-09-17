@@ -21,10 +21,14 @@ from .move_analyzer import MoveAnalyzer, MoveAnalysisResult
 from .recommendation_engine import (
     RecommendationEngine, RecommendationRequest, MoveCandidate, RecommendationScore
 )
+from .superlinked_recommendation_engine import (
+    SuperlinkedRecommendationEngine, SuperlinkedRecommendationScore, create_superlinked_recommendation_engine
+)
 from .video_generator import VideoGenerator, VideoGenerationConfig
 from .annotation_interface import AnnotationInterface
 from .feature_fusion import FeatureFusion, MultiModalEmbedding
 from .youtube_service import YouTubeService
+from .qdrant_service import create_qdrant_service, QdrantConfig, SuperlinkedQdrantService, MockSuperlinkedQdrantService
 from ..models.video_models import ChoreographySequence
 
 logger = logging.getLogger(__name__)
@@ -59,6 +63,10 @@ class PipelineConfig:
     # Service-specific settings
     youtube_output_dir: str = "data/temp"
     annotation_data_dir: str = "data"
+    
+    # Qdrant settings
+    enable_qdrant: bool = True
+    auto_populate_qdrant: bool = True  # Automatically populate Qdrant with analyzed moves
 
 
 @dataclass
@@ -84,6 +92,12 @@ class PipelineResult:
     moves_analyzed: int = 0
     recommendations_generated: int = 0
     sequence_duration: float = 0.0
+    
+    # Qdrant statistics
+    qdrant_enabled: bool = False
+    qdrant_embeddings_stored: int = 0
+    qdrant_embeddings_retrieved: int = 0
+    qdrant_search_time: float = 0.0
 
 
 class ServiceCache:
@@ -234,6 +248,7 @@ class ChoreoGenerationPipeline:
         self._annotation_interface = None
         self._feature_fusion = None
         self._youtube_service = None
+        self._qdrant_service = None
         
         # Thread pool for parallel processing
         self._executor = None
@@ -241,6 +256,8 @@ class ChoreoGenerationPipeline:
         # Statistics
         self._cache_hits = 0
         self._cache_misses = 0
+        self._qdrant_embeddings_stored = 0
+        self._qdrant_embeddings_retrieved = 0
         
         # Ensure directories exist
         Path(self.config.output_dir).mkdir(parents=True, exist_ok=True)
@@ -269,11 +286,24 @@ class ChoreoGenerationPipeline:
         return self._move_analyzer
     
     @property
-    def recommendation_engine(self) -> RecommendationEngine:
-        """Lazy-loaded recommendation engine."""
+    def recommendation_engine(self) -> SuperlinkedRecommendationEngine:
+        """Lazy-loaded SuperlinkedRecommendationEngine with unified vector similarity and Qdrant integration."""
         if self._recommendation_engine is None:
-            logger.debug("Initializing RecommendationEngine")
-            self._recommendation_engine = RecommendationEngine()
+            logger.debug("Initializing SuperlinkedRecommendationEngine with unified embeddings and Qdrant integration")
+            
+            # Create Qdrant config for the recommendation engine
+            qdrant_config = None
+            if self.config.enable_qdrant:
+                # Use environment-based configuration for cloud deployment
+                qdrant_config = QdrantConfig.from_env()
+            
+            self._recommendation_engine = create_superlinked_recommendation_engine(
+                data_dir=self.config.annotation_data_dir,
+                qdrant_config=qdrant_config
+            )
+            
+            logger.info("SuperlinkedRecommendationEngine initialized with Qdrant integration - eliminated multi-factor scoring")
+                
         return self._recommendation_engine
     
     @property
@@ -346,11 +376,162 @@ class ChoreoGenerationPipeline:
             self._executor = ThreadPoolExecutor(max_workers=self.config.max_workers)
         return self._executor
     
+    @property
+    def qdrant_service(self) -> Optional[SuperlinkedQdrantService]:
+        """Lazy-loaded Superlinked Qdrant service with cloud deployment support."""
+        if self._qdrant_service is None and self.config.enable_qdrant:
+            logger.debug("Initializing SuperlinkedQdrantService for cloud deployment")
+            try:
+                # Use environment-based configuration for cloud deployment
+                qdrant_config = QdrantConfig.from_env()
+                self._qdrant_service = create_qdrant_service(qdrant_config)
+                
+                # Perform health check
+                health_status = self._qdrant_service.health_check()
+                if health_status.get("qdrant_available", False):
+                    if qdrant_config.url:
+                        logger.info(f"SuperlinkedQdrantService initialized successfully (Cloud): {qdrant_config.url}")
+                    else:
+                        logger.info(f"SuperlinkedQdrantService initialized successfully (Local): {qdrant_config.host}:{qdrant_config.port}")
+                    
+                    # Auto-populate if requested and collection is empty
+                    if self.config.auto_populate_qdrant:
+                        self._auto_populate_qdrant_if_needed()
+                else:
+                    logger.warning(f"Qdrant health check failed: {health_status.get('error_message', 'Unknown error')}")
+                    if isinstance(self._qdrant_service, MockSuperlinkedQdrantService):
+                        logger.info("Using mock Superlinked Qdrant service - embeddings will not be persisted")
+                
+            except Exception as e:
+                logger.error(f"Failed to initialize SuperlinkedQdrantService: {e}")
+                logger.info("Continuing without Qdrant - using in-memory similarity search only")
+                self._qdrant_service = None
+        
+        return self._qdrant_service
+    
+    def _auto_populate_qdrant_if_needed(self) -> None:
+        """Auto-populate Qdrant collection with existing move embeddings if empty."""
+        try:
+            if not self.qdrant_service or isinstance(self.qdrant_service, MockSuperlinkedQdrantService):
+                return
+            
+            # Check if collection has any points
+            collection_info = self.qdrant_service.get_collection_info()
+            points_count = collection_info.get("points_count", 0)
+            
+            if points_count == 0:
+                logger.info("Qdrant collection is empty - auto-populating with existing move embeddings")
+                # This will be done lazily during the first choreography generation
+                # to avoid blocking initialization
+            else:
+                logger.info(f"Qdrant collection already contains {points_count} move embeddings")
+                
+        except Exception as e:
+            logger.warning(f"Failed to check Qdrant collection status: {e}")
+    
+    def get_qdrant_health_status(self) -> Dict[str, Any]:
+        """Get comprehensive Qdrant health status."""
+        if not self.config.enable_qdrant:
+            return {"enabled": False, "status": "disabled"}
+        
+        try:
+            if self.qdrant_service:
+                health_status = self.qdrant_service.health_check()
+                collection_info = self.qdrant_service.get_collection_info()
+                stats = self.qdrant_service.get_statistics()
+                
+                return {
+                    "enabled": True,
+                    "status": "healthy" if health_status.get("qdrant_available") else "unhealthy",
+                    "health_check": health_status,
+                    "collection_info": collection_info,
+                    "statistics": {
+                        "total_points": stats.total_points,
+                        "search_requests": stats.search_requests,
+                        "avg_search_time_ms": stats.avg_search_time_ms,
+                        "collection_size_mb": stats.collection_size_mb
+                    }
+                }
+            else:
+                return {"enabled": True, "status": "not_initialized"}
+                
+        except Exception as e:
+            return {"enabled": True, "status": "error", "error": str(e)}
+    
+    async def _populate_qdrant_with_moves(self, move_candidates: List[MoveCandidate]) -> None:
+        """Populate Qdrant with move embeddings if not already done."""
+        try:
+            if not self.recommendation_engine.is_qdrant_available():
+                logger.debug("Qdrant not available, skipping population")
+                return
+            
+            # Check if already populated
+            if self._qdrant_embeddings_stored > 0:
+                logger.debug("Qdrant already populated, skipping")
+                return
+            
+            logger.info(f"Populating Qdrant with {len(move_candidates)} move embeddings")
+            start_time = time.time()
+            
+            # Use the recommendation engine's populate method
+            summary = self.recommendation_engine.populate_qdrant_from_candidates(move_candidates)
+            
+            if "error" not in summary:
+                self._qdrant_embeddings_stored = summary.get("successful_migrations", 0)
+                population_time = time.time() - start_time
+                
+                logger.info(f"Successfully populated Qdrant with {self._qdrant_embeddings_stored} embeddings in {population_time:.2f}s")
+            else:
+                logger.error(f"Failed to populate Qdrant: {summary['error']}")
+                
+        except Exception as e:
+            logger.error(f"Error populating Qdrant: {e}")
+    
+    def _populate_qdrant_on_startup(self) -> None:
+        """Populate Qdrant on startup (called from recommendation_engine property)."""
+        # This is a placeholder - actual population happens during first choreography generation
+        # to avoid blocking initialization with potentially expensive operations
+        logger.debug("Qdrant auto-population will occur during first choreography generation")
+    
+    def get_performance_comparison(self) -> Dict[str, Any]:
+        """Get performance statistics for SuperlinkedRecommendationEngine."""
+        if self.recommendation_engine:
+            engine_stats = self.recommendation_engine.get_performance_stats()
+            
+            # Add pipeline-level statistics
+            pipeline_stats = {
+                "pipeline_cache_hits": self._cache_hits,
+                "pipeline_cache_misses": self._cache_misses,
+                "pipeline_total_generations": getattr(self, '_total_generations', 0),
+                "engine_type": "SuperlinkedRecommendationEngine",
+                "unified_vector_approach": True,
+                "eliminated_multi_factor_scoring": True
+            }
+            
+            # Combine statistics
+            combined_stats = {**engine_stats, **pipeline_stats}
+            
+            # Log performance information
+            performance = combined_stats.get('performance', {})
+            unified_searches = performance.get('unified_searches', 0)
+            avg_time = performance.get('avg_search_time_ms', 0)
+            
+            if unified_searches > 0 and avg_time > 0:
+                logger.info(f"SuperlinkedRecommendationEngine: {unified_searches} unified vector searches, "
+                          f"avg {avg_time:.2f}ms per search")
+            
+            return combined_stats
+        else:
+            return {"error": "SuperlinkedRecommendationEngine not initialized"}
+    
     async def generate_choreography(
         self,
         audio_input: str,
         difficulty: str = "intermediate",
-        energy_level: Optional[str] = None
+        energy_level: Optional[str] = None,
+        role_focus: Optional[str] = None,
+        move_types: Optional[List[str]] = None,
+        tempo_range: Optional[List[int]] = None
     ) -> PipelineResult:
         """
         Generate choreography from audio input with optimized pipeline.
@@ -360,6 +541,9 @@ class ChoreoGenerationPipeline:
             audio_input: Path to audio file or YouTube URL
             difficulty: Target difficulty ("beginner", "intermediate", "advanced")
             energy_level: Target energy level (None for auto-detect, or "low"/"medium"/"high")
+            role_focus: Role focus preference ("lead_focus", "follow_focus", "both")
+            move_types: List of preferred move types
+            tempo_range: Tempo range [min, max] in BPM
         
         Returns:
             PipelineResult with generation results and metrics
@@ -436,6 +620,17 @@ class ChoreoGenerationPipeline:
             result.cache_hits = self._cache_hits
             result.cache_misses = self._cache_misses
             
+            # Qdrant statistics
+            result.qdrant_enabled = self.config.enable_qdrant and self.qdrant_service is not None
+            result.qdrant_embeddings_stored = self._qdrant_embeddings_stored
+            result.qdrant_embeddings_retrieved = self._qdrant_embeddings_retrieved
+            
+            # Get search time from SuperlinkedRecommendationEngine
+            if self.recommendation_engine:
+                perf_stats = self.recommendation_engine.get_performance_stats()
+                performance = perf_stats.get('performance', {})
+                result.qdrant_search_time = performance.get('avg_search_time_ms', 0.0) / 1000.0  # Convert to seconds
+            
             logger.info(f"Choreography generation completed successfully in {result.processing_time:.2f}s")
             return result
             
@@ -443,6 +638,21 @@ class ChoreoGenerationPipeline:
             logger.error(f"Pipeline execution failed: {e}")
             result.error_message = str(e)
             result.processing_time = time.time() - start_time
+            result.cache_hits = self._cache_hits
+            result.cache_misses = self._cache_misses
+            result.qdrant_enabled = self.config.enable_qdrant and self.qdrant_service is not None
+            result.qdrant_embeddings_stored = self._qdrant_embeddings_stored
+            result.qdrant_embeddings_retrieved = self._qdrant_embeddings_retrieved
+            
+            # Get Qdrant search time from recommendation engine (error case)
+            if self.recommendation_engine:
+                try:
+                    perf_stats = self.recommendation_engine.get_performance_stats()
+                    performance = perf_stats.get('performance', {})
+                    result.qdrant_search_time = performance.get('avg_search_time_ms', 0.0) / 1000.0  # Convert to seconds
+                except Exception:
+                    result.qdrant_search_time = 0.0
+            
             return result
     
     async def _get_audio_file(self, audio_input: str) -> Tuple[Optional[str], float]:
@@ -558,48 +768,113 @@ class ChoreoGenerationPipeline:
         move_candidates = []
         
         def analyze_single_move(clip) -> Optional[MoveCandidate]:
-            """Analyze a single move clip."""
+            """Analyze a single move clip with Qdrant integration."""
             try:
                 video_path = Path(self.config.annotation_data_dir) / clip.video_path
                 if not video_path.exists():
                     return None
                 
-                # Check cache first
-                cache_key = str(video_path)
-                if self.cache:
-                    cached_result = self.cache.get("move_analysis", cache_key)
-                    if cached_result:
-                        analysis_result, multimodal_embedding = cached_result
-                        self._cache_hits += 1
+                # Step 1: Check Qdrant first for existing embedding
+                candidate = None
+                if self.qdrant_service and not isinstance(self.qdrant_service, MockSuperlinkedQdrantService):
+                    try:
+                        qdrant_result = self.qdrant_service.get_move_by_id(clip.clip_id)
+                        if qdrant_result:
+                            logger.debug(f"Found move in Qdrant: {clip.clip_id}")
+                            self._qdrant_embeddings_retrieved += 1
+                            
+                            # Reconstruct candidate from Qdrant data
+                            # Note: We still need analysis_result, so we check cache or analyze
+                            cache_key = str(video_path)
+                            if self.cache:
+                                cached_result = self.cache.get("move_analysis", cache_key)
+                                if cached_result:
+                                    analysis_result, _ = cached_result  # Ignore cached embedding, use Qdrant's
+                                    self._cache_hits += 1
+                                else:
+                                    analysis_result = self.move_analyzer.analyze_move_clip(str(video_path))
+                                    self._cache_misses += 1
+                            else:
+                                analysis_result = self.move_analyzer.analyze_move_clip(str(video_path))
+                                self._cache_misses += 1
+                            
+                            # Create multimodal embedding from Qdrant vector
+                            if qdrant_result.embedding is not None:
+                                # Split the combined embedding back into audio and pose components
+                                combined_embedding = qdrant_result.embedding
+                                audio_embedding = combined_embedding[:128]  # First 128 dimensions
+                                pose_embedding = combined_embedding[128:512]  # Next 384 dimensions
+                                
+                                multimodal_embedding = MultiModalEmbedding(
+                                    audio_embedding=audio_embedding,
+                                    pose_embedding=pose_embedding
+                                )
+                            else:
+                                # Fallback: create new embedding
+                                multimodal_embedding = self.feature_fusion.create_multimodal_embedding(
+                                    music_features, analysis_result
+                                )
+                            
+                            candidate = MoveCandidate(
+                                move_id=clip.clip_id,
+                                video_path=str(video_path),
+                                move_label=clip.move_label,
+                                analysis_result=analysis_result,
+                                multimodal_embedding=multimodal_embedding,
+                                energy_level=clip.energy_level,
+                                difficulty=clip.difficulty,
+                                estimated_tempo=clip.estimated_tempo,
+                                lead_follow_roles=clip.lead_follow_roles
+                            )
+                    except Exception as e:
+                        logger.debug(f"Qdrant lookup failed for {clip.clip_id}: {e}")
+                
+                # Step 2: If not found in Qdrant, check cache or analyze
+                if candidate is None:
+                    cache_key = str(video_path)
+                    if self.cache:
+                        cached_result = self.cache.get("move_analysis", cache_key)
+                        if cached_result:
+                            analysis_result, multimodal_embedding = cached_result
+                            self._cache_hits += 1
+                        else:
+                            # Perform analysis
+                            analysis_result = self.move_analyzer.analyze_move_clip(str(video_path))
+                            multimodal_embedding = self.feature_fusion.create_multimodal_embedding(
+                                music_features, analysis_result
+                            )
+                            # Cache the result
+                            self.cache.set("move_analysis", cache_key, (analysis_result, multimodal_embedding))
+                            self._cache_misses += 1
                     else:
-                        # Perform analysis
+                        # No caching
                         analysis_result = self.move_analyzer.analyze_move_clip(str(video_path))
                         multimodal_embedding = self.feature_fusion.create_multimodal_embedding(
                             music_features, analysis_result
                         )
-                        # Cache the result
-                        self.cache.set("move_analysis", cache_key, (analysis_result, multimodal_embedding))
                         self._cache_misses += 1
-                else:
-                    # No caching
-                    analysis_result = self.move_analyzer.analyze_move_clip(str(video_path))
-                    multimodal_embedding = self.feature_fusion.create_multimodal_embedding(
-                        music_features, analysis_result
+                    
+                    # Create candidate
+                    candidate = MoveCandidate(
+                        move_id=clip.clip_id,
+                        video_path=str(video_path),
+                        move_label=clip.move_label,
+                        analysis_result=analysis_result,
+                        multimodal_embedding=multimodal_embedding,
+                        energy_level=clip.energy_level,
+                        difficulty=clip.difficulty,
+                        estimated_tempo=clip.estimated_tempo,
+                        lead_follow_roles=clip.lead_follow_roles
                     )
-                    self._cache_misses += 1
-                
-                # Create candidate
-                candidate = MoveCandidate(
-                    move_id=clip.clip_id,
-                    video_path=str(video_path),
-                    move_label=clip.move_label,
-                    analysis_result=analysis_result,
-                    multimodal_embedding=multimodal_embedding,
-                    energy_level=clip.energy_level,
-                    difficulty=clip.difficulty,
-                    estimated_tempo=clip.estimated_tempo,
-                    lead_follow_roles=clip.lead_follow_roles
-                )
+                    
+                    # Step 3: Store new embedding in Qdrant
+                    if self.qdrant_service and not isinstance(self.qdrant_service, MockSuperlinkedQdrantService):
+                        try:
+                            self.qdrant_service.store_move_embedding(candidate)
+                            self._qdrant_embeddings_stored += 1
+                            logger.debug(f"Stored move embedding in Qdrant: {clip.clip_id}")
+                        except Exception as e:
+                            logger.warning(f"Failed to store embedding in Qdrant for {clip.clip_id}: {e}")
                 
                 return candidate
                 
@@ -641,38 +916,100 @@ class ChoreoGenerationPipeline:
                 if not video_path.exists():
                     continue
                 
-                # Check cache
-                cache_key = str(video_path)
-                if self.cache:
-                    cached_result = self.cache.get("move_analysis", cache_key)
-                    if cached_result:
-                        analysis_result, multimodal_embedding = cached_result
-                        self._cache_hits += 1
+                # Step 1: Check Qdrant first for existing embedding
+                candidate = None
+                if self.qdrant_service and not isinstance(self.qdrant_service, MockSuperlinkedQdrantService):
+                    try:
+                        qdrant_result = self.qdrant_service.get_move_by_id(clip.clip_id)
+                        if qdrant_result:
+                            logger.debug(f"Found move in Qdrant: {clip.clip_id}")
+                            self._qdrant_embeddings_retrieved += 1
+                            
+                            # Still need analysis_result, check cache or analyze
+                            cache_key = str(video_path)
+                            if self.cache:
+                                cached_result = self.cache.get("move_analysis", cache_key)
+                                if cached_result:
+                                    analysis_result, _ = cached_result
+                                    self._cache_hits += 1
+                                else:
+                                    analysis_result = self.move_analyzer.analyze_move_clip(str(video_path))
+                                    self._cache_misses += 1
+                            else:
+                                analysis_result = self.move_analyzer.analyze_move_clip(str(video_path))
+                                self._cache_misses += 1
+                            
+                            # Reconstruct multimodal embedding from Qdrant
+                            if qdrant_result.embedding is not None:
+                                combined_embedding = qdrant_result.embedding
+                                audio_embedding = combined_embedding[:128]
+                                pose_embedding = combined_embedding[128:512]
+                                
+                                multimodal_embedding = MultiModalEmbedding(
+                                    audio_embedding=audio_embedding,
+                                    pose_embedding=pose_embedding
+                                )
+                            else:
+                                multimodal_embedding = self.feature_fusion.create_multimodal_embedding(
+                                    music_features, analysis_result
+                                )
+                            
+                            candidate = MoveCandidate(
+                                move_id=clip.clip_id,
+                                video_path=str(video_path),
+                                move_label=clip.move_label,
+                                analysis_result=analysis_result,
+                                multimodal_embedding=multimodal_embedding,
+                                energy_level=clip.energy_level,
+                                difficulty=clip.difficulty,
+                                estimated_tempo=clip.estimated_tempo,
+                                lead_follow_roles=clip.lead_follow_roles
+                            )
+                    except Exception as e:
+                        logger.debug(f"Qdrant lookup failed for {clip.clip_id}: {e}")
+                
+                # Step 2: If not found in Qdrant, check cache or analyze
+                if candidate is None:
+                    cache_key = str(video_path)
+                    if self.cache:
+                        cached_result = self.cache.get("move_analysis", cache_key)
+                        if cached_result:
+                            analysis_result, multimodal_embedding = cached_result
+                            self._cache_hits += 1
+                        else:
+                            analysis_result = self.move_analyzer.analyze_move_clip(str(video_path))
+                            multimodal_embedding = self.feature_fusion.create_multimodal_embedding(
+                                music_features, analysis_result
+                            )
+                            self.cache.set("move_analysis", cache_key, (analysis_result, multimodal_embedding))
+                            self._cache_misses += 1
                     else:
                         analysis_result = self.move_analyzer.analyze_move_clip(str(video_path))
                         multimodal_embedding = self.feature_fusion.create_multimodal_embedding(
                             music_features, analysis_result
                         )
-                        self.cache.set("move_analysis", cache_key, (analysis_result, multimodal_embedding))
                         self._cache_misses += 1
-                else:
-                    analysis_result = self.move_analyzer.analyze_move_clip(str(video_path))
-                    multimodal_embedding = self.feature_fusion.create_multimodal_embedding(
-                        music_features, analysis_result
+                    
+                    candidate = MoveCandidate(
+                        move_id=clip.clip_id,
+                        video_path=str(video_path),
+                        move_label=clip.move_label,
+                        analysis_result=analysis_result,
+                        multimodal_embedding=multimodal_embedding,
+                        energy_level=clip.energy_level,
+                        difficulty=clip.difficulty,
+                        estimated_tempo=clip.estimated_tempo,
+                        lead_follow_roles=clip.lead_follow_roles
                     )
-                    self._cache_misses += 1
-                
-                candidate = MoveCandidate(
-                    move_id=clip.clip_id,
-                    video_path=str(video_path),
-                    move_label=clip.move_label,
-                    analysis_result=analysis_result,
-                    multimodal_embedding=multimodal_embedding,
-                    energy_level=clip.energy_level,
-                    difficulty=clip.difficulty,
-                    estimated_tempo=clip.estimated_tempo,
-                    lead_follow_roles=clip.lead_follow_roles
-                )
+                    
+                    # Step 3: Store new embedding in Qdrant
+                    if self.qdrant_service and not isinstance(self.qdrant_service, MockSuperlinkedQdrantService):
+                        try:
+                            self.qdrant_service.store_move_embedding(candidate)
+                            self._qdrant_embeddings_stored += 1
+                            logger.debug(f"Stored move embedding in Qdrant: {clip.clip_id}")
+                        except Exception as e:
+                            logger.warning(f"Failed to store embedding in Qdrant for {clip.clip_id}: {e}")
                 
                 move_candidates.append(candidate)
                 logger.debug(f"Analyzed move: {clip.move_label}")
@@ -714,42 +1051,147 @@ class ChoreoGenerationPipeline:
         
         return selected[:max_count]
     
+    async def populate_qdrant_with_all_moves(self) -> Dict[str, Any]:
+        """
+        Populate Qdrant collection with all available move embeddings.
+        This is useful for initial setup or when rebuilding the collection.
+        """
+        if not self.qdrant_service or isinstance(self.qdrant_service, MockSuperlinkedQdrantService):
+            return {"success": False, "error": "Qdrant service not available"}
+        
+        try:
+            logger.info("Starting batch population of Qdrant with all move embeddings")
+            start_time = time.time()
+            
+            # Load all annotations
+            collection = self.annotation_interface.load_annotations("bachata_annotations.json")
+            logger.info(f"Found {collection.total_clips} total move clips")
+            
+            # Create a dummy music features for embedding generation
+            # We'll use a representative Bachata song's features
+            dummy_audio_path = "data/songs/Aventura.mp3"  # Use existing song if available
+            if Path(dummy_audio_path).exists():
+                music_features = self.music_analyzer.analyze_audio(dummy_audio_path)
+            else:
+                # Create minimal dummy features if no song available
+                import numpy as np
+                music_features = MusicFeatures(
+                    tempo=120.0,
+                    beat_positions=np.array([0.0, 0.5, 1.0, 1.5, 2.0]),
+                    duration=30.0,
+                    mfcc_features=np.random.random((13, 100)),
+                    chroma_features=np.random.random((12, 100)),
+                    spectral_centroid=np.random.random(100),
+                    rms_energy=np.random.random(100),
+                    energy_profile=np.random.random(100),
+                    percussive_component=np.random.random(100)
+                )
+            
+            # Analyze all moves and collect candidates
+            move_candidates = []
+            successful_analyses = 0
+            failed_analyses = 0
+            
+            for clip in collection.clips:
+                try:
+                    video_path = Path(self.config.annotation_data_dir) / clip.video_path
+                    if not video_path.exists():
+                        logger.warning(f"Video file not found: {video_path}")
+                        failed_analyses += 1
+                        continue
+                    
+                    # Check if already exists in Qdrant
+                    existing = self.qdrant_service.get_move_by_id(clip.clip_id)
+                    if existing:
+                        logger.debug(f"Move {clip.clip_id} already exists in Qdrant, skipping")
+                        continue
+                    
+                    # Analyze move
+                    analysis_result = self.move_analyzer.analyze_move_clip(str(video_path))
+                    multimodal_embedding = self.feature_fusion.create_multimodal_embedding(
+                        music_features, analysis_result
+                    )
+                    
+                    candidate = MoveCandidate(
+                        move_id=clip.clip_id,
+                        video_path=str(video_path),
+                        move_label=clip.move_label,
+                        analysis_result=analysis_result,
+                        multimodal_embedding=multimodal_embedding,
+                        energy_level=clip.energy_level,
+                        difficulty=clip.difficulty,
+                        estimated_tempo=clip.estimated_tempo,
+                        lead_follow_roles=clip.lead_follow_roles
+                    )
+                    
+                    move_candidates.append(candidate)
+                    successful_analyses += 1
+                    logger.debug(f"Analyzed move for Qdrant: {clip.move_label}")
+                    
+                except Exception as e:
+                    logger.warning(f"Failed to analyze move {clip.clip_id} for Qdrant: {e}")
+                    failed_analyses += 1
+            
+            # Batch store in Qdrant
+            if move_candidates:
+                logger.info(f"Batch storing {len(move_candidates)} move embeddings in Qdrant")
+                point_ids = self.qdrant_service.batch_store_embeddings(move_candidates)
+                logger.info(f"Successfully stored {len(point_ids)} embeddings in Qdrant")
+            
+            processing_time = time.time() - start_time
+            
+            # Get final collection info
+            collection_info = self.qdrant_service.get_collection_info()
+            
+            result = {
+                "success": True,
+                "total_clips": collection.total_clips,
+                "successful_analyses": successful_analyses,
+                "failed_analyses": failed_analyses,
+                "embeddings_stored": len(move_candidates),
+                "processing_time": processing_time,
+                "final_collection_size": collection_info.get("points_count", 0)
+            }
+            
+            logger.info(f"Qdrant population completed: {result}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"Failed to populate Qdrant: {e}")
+            return {"success": False, "error": str(e)}
+    
     async def _generate_recommendations_optimized(
         self,
         music_features: MusicFeatures,
         move_candidates: List[MoveCandidate],
         difficulty: str,
         energy_level: Optional[str]
-    ) -> Tuple[Optional[List[RecommendationScore]], float]:
-        """Generate recommendations with optimized scoring."""
+    ) -> Tuple[Optional[List[SuperlinkedRecommendationScore]], float]:
+        """Generate recommendations using unified Superlinked vector similarity."""
         start_time = time.time()
         
         try:
-            # Use first candidate's embedding as reference for music embedding
-            reference_embedding = move_candidates[0].multimodal_embedding
-            
-            request = RecommendationRequest(
+            # Generate recommendations using unified vector similarity
+            # This replaces the complex multi-factor scoring (audio 40%, tempo 30%, energy 20%, difficulty 10%)
+            recommendations = self.recommendation_engine.recommend_moves(
                 music_features=music_features,
-                music_embedding=reference_embedding,
                 target_difficulty=difficulty,
                 target_energy=energy_level,
-                tempo_tolerance=15.0
+                role_focus="both",  # Default to both roles
+                description="",  # Let the engine generate description from music features
+                top_k=len(move_candidates) if move_candidates else 40  # Get all available moves
             )
             
-            recommendations = self.recommendation_engine.recommend_moves(
-                request, move_candidates, top_k=len(move_candidates)
-            )
-            
-            logger.info(f"Generated {len(recommendations)} recommendations")
+            logger.info(f"Generated {len(recommendations)} recommendations using unified Superlinked vectors")
             return recommendations, time.time() - start_time
             
         except Exception as e:
-            logger.error(f"Recommendation generation failed: {e}")
+            logger.error(f"Superlinked recommendation generation failed: {e}")
             return None, time.time() - start_time
     
     async def _create_optimized_sequence(
         self,
-        recommendations: List[RecommendationScore],
+        recommendations: List[SuperlinkedRecommendationScore],
         music_features: MusicFeatures,
         duration: str = "full"
     ) -> Optional[ChoreographySequence]:
@@ -778,9 +1220,9 @@ class ChoreoGenerationPipeline:
     
     def _select_sequence_moves_for_full_song(
         self, 
-        recommendations: List[RecommendationScore], 
+        recommendations: List[SuperlinkedRecommendationScore], 
         target_duration: float
-    ) -> List[RecommendationScore]:
+    ) -> List[SuperlinkedRecommendationScore]:
         """Select diverse moves to fill the entire song duration."""
         # Calculate number of moves needed for full song
         avg_move_duration = 8.0  # seconds per move
@@ -836,9 +1278,18 @@ class ChoreoGenerationPipeline:
         """Legacy method - now delegates to full song method."""
         return self._select_sequence_moves_for_full_song(recommendations, target_duration)
     
-    def _determine_sequence_difficulty(self, selected_moves: List[RecommendationScore]) -> str:
+    def _determine_sequence_difficulty(self, selected_moves: List[SuperlinkedRecommendationScore]) -> str:
         """Determine overall sequence difficulty."""
-        difficulties = [move.move_candidate.difficulty for move in selected_moves]
+        # Convert difficulty scores back to difficulty levels
+        difficulties = []
+        for move in selected_moves:
+            score = move.move_candidate.difficulty_score
+            if score <= 1.5:
+                difficulties.append("beginner")
+            elif score <= 2.5:
+                difficulties.append("intermediate")
+            else:
+                difficulties.append("advanced")
         difficulty_counts = {
             "beginner": difficulties.count("beginner"),
             "intermediate": difficulties.count("intermediate"),
