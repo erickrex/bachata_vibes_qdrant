@@ -128,16 +128,6 @@ class FeatureFusion:
 - **Embedding Optimization**: Dimensionality reduction while preserving key relationships
 
 #### 4. **Superlinked + Qdrant Recommendation Engine** 🎯
-```python
-# Supervised learning with Qdrant Cloud vector database
-class SuperlinkedRecommendationEngine:
-    - 470D unified embeddings with 6 specialized spaces
-    - Qdrant Cloud vector similarity search (<120ms)
-    - Supervised scoring with labeled training data
-    - Real-time metadata filtering and ranking
-    - Natural language query processing
-    - Advanced diversity algorithms for varied choreographies
-```
 
 **Key Innovations:**
 - **Superlinked Embeddings**: 6 specialized embedding spaces (text, tempo, difficulty, energy, role, transitions)
@@ -148,16 +138,6 @@ class SuperlinkedRecommendationEngine:
 - **Production Performance**: 120ms average query time with 99.9% uptime
 
 #### 5. **Intelligent Sequence Generation** 🎬
-```python
-# Temporal choreography assembly with smooth transitions and diversity
-class SequenceGenerator:
-    - Musical structure mapping to dance move categories
-    - Transition optimization for movement flow
-    - Energy curve matching throughout choreography
-    - Full-song duration with adaptive pacing
-    - Anti-repetition algorithms for varied sequences
-    - Usage tracking and weighted selection for diversity
-```
 
 **Key Innovations:**
 - **Structure-Aware Mapping**: Matches musical sections to appropriate move types
@@ -181,25 +161,6 @@ Superlinked transforms our system into an **intelligent dance AI** through **6 s
 | **Energy** (64D) | Emotional intensity | Low/Medium/High energy choreography matching |
 | **Role** (48D) | Lead/Follow specialization | Personalized moves for dance role preferences |
 | **Transition** (134D) | Movement flow optimization | Smooth choreography with natural transitions |
-
-**Performance Impact:**
-- **Query Understanding**: 95%+ accuracy in interpreting natural language dance requests
-- **Real-Time Processing**: 120ms query processing for complex multi-modal requests
-- **Cross-Modal Learning**: Automatically discovers relationships between music and movement
-
-### 📊 **Supervised Learning & Qdrant Performance Metrics**
-
-| Component | Metric | Performance | Supervised Learning Benefit |
-|-----------|--------|-------------|----------------------------|
-| **Superlinked Embeddings** | Dimension | 470D unified | 6 specialized spaces for dance characteristics |
-| **Qdrant Cloud Search** | Query Latency | 120ms average | Sub-second similarity search across 38 moves |
-| **Vector Similarity** | Accuracy Rate | 95%+ precision | Trained on professionally labeled dance data |
-| **Metadata Filtering** | Filter Speed | <50ms | Real-time tempo, difficulty, energy filtering |
-| **Training Data** | Labeled Moves | 38 annotations | Professional dance instructor annotations |
-| **Model Performance** | Recommendation Quality | 90%+ relevance | Supervised training with user feedback |
-| **Diversity Engine** | Sequence Variation | 85%+ unique patterns | Anti-repetition algorithms with Top-K selection |
-| **Cloud Uptime** | Availability | 99.9% SLA | Production-grade Qdrant Cloud infrastructure |
-| **Scalability** | Concurrent Users | 1000+ requests/sec | Auto-scaling cloud deployment |
 
 ### 🎓 **Supervised Learning Training Data**
 
@@ -250,7 +211,6 @@ Superlinked transforms our system into an **intelligent dance AI** through **6 s
 - **Configurable Diversity**: Adjustable diversity levels (0.0-1.0) for different use cases
 
 
-
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -281,20 +241,8 @@ uv sync
 ```
 
 4. **Qdrant Cloud Integration (Automatic)**
-```bash
-# The system uses Qdrant Cloud for supervised learning vector storage
-# Environment variables are already configured in .env:
-# QDRANT_URL and QDRANT_API_KEY
-# 
-# Features automatically enabled:
-# ✅ 470D Superlinked embeddings storage
-# ✅ Sub-second similarity search
-# ✅ Metadata filtering (tempo, difficulty, energy, role)
-# ✅ 38 professionally labeled dance moves
-# ✅ Production-grade 99.9% uptime
-# 
-# No additional setup required - cloud deployment is automatic!
-```
+email erickrhein@gmail.com if you require the api_keys to run the project
+
 
 5. **Run the app**
 ```bash
@@ -305,54 +253,6 @@ uv run python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 http://127.0.0.1:8000/
 ```
-
-Enjoy :)
-
-### CLI Usage
-
-#### **Basic Generation**
-```bash
-# Simple choreography generation
-python generate_choreography.py --song Aventura
-
-# Each run produces a unique choreography thanks to our diversity engine!
-python generate_choreography.py --song Aventura  # Different sequence
-python generate_choreography.py --song Aventura  # Another variation
-```
-
-#### **Advanced Parameters**
-```bash
-# Specify difficulty and energy levels
-python generate_choreography.py --song Besito --difficulty advanced --energy high
-
-# Role-focused choreography
-python generate_choreography.py --song Chayanne --role-focus follow_focus
-
-# Custom move types
-python generate_choreography.py --song Veneno --move-types "body_roll,dips,combinations"
-
-# Tempo range specification
-python generate_choreography.py --song Aventura --tempo-range "120,140"
-```
-
-#### **Quality & Diversity Control**
-```bash
-# High quality with maximum diversity
-python generate_choreography.py --song Veneno --quality high_quality
-
-# Using intelligent presets
-python generate_choreography.py --song Chayanne --preset intermediate_energetic
-
-# List all available options
-python generate_choreography.py --list-options
-```
-
-#### **Diversity Features in Action**
-- **Automatic Variation**: Each generation produces unique sequences
-- **Smart Reuse**: Long songs intelligently cycle through moves without repetition
-- **Quality Preservation**: Diversity never compromises dance flow or musicality
-- **Configurable**: Adjust diversity levels through internal parameters
-
 
 
 ### 📹 Video Annotation 
@@ -384,35 +284,6 @@ interface.add_annotation(new_clip_data)
 - **Tempo range**: 102-150 BPM
 - **Diversity optimized**: Balanced move types for varied sequence generation
 
-### Diversity Engine Testing
-```bash
-# Test choreography diversity
-python test_diversity.py
-
-# Results show:
-# ✅ 85%+ unique sequence patterns for same song
-# ✅ 7+ unique moves per 21-move choreography
-# ✅ Anti-repetition algorithms prevent monotony
-# ✅ Quality maintained across all variations
-```
-
-### Annotation Schema
-Each move clip includes:
-- **Basic Info**: clip_id, video_path, move_label
-- **Dance Characteristics**: energy_level, estimated_tempo, difficulty
-- **Role Information**: lead_follow_roles (lead_focus, follow_focus, both)
-- **Descriptive**: notes with detailed move description
-- **Optional Metadata**: duration, quality assessments, compatibility info
-
-
-## 🔧 Configuration
-
-### Qdrant Cloud Deployment
-The system is configured for **Qdrant Cloud** deployment with the following benefits:
-- **No Local Infrastructure**: No need for Docker containers or local Qdrant setup
-- **Automatic Scaling**: Cloud-managed scaling and high availability
-- **Secure Access**: API key authentication for secure connections
-- **Simplified Deployment**: Environment-based configuration
 
 **Environment Variables (already configured in .env):**
 ```bash
@@ -424,11 +295,5 @@ QDRANT_API_KEY='your-api-key'
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🙏 Acknowledgments
-
-- **librosa** for music analysis capabilities
-- **yt-dlp** for YouTube integration
-- **Pydantic** for data validation
-- **OpenCV** for video processing (optional)
 
 **Happy Dancing! 💃🕺**
