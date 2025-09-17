@@ -36,7 +36,7 @@ class QdrantConfig:
     host: str = "localhost"
     port: int = 6333
     collection_name: str = "superlinked_bachata_moves"
-    vector_size: int = 512  # Superlinked unified embedding dimension
+    vector_size: int = 470  # Superlinked unified embedding dimension (384+8+8+3+3+64)
     distance_metric: str = "Cosine"  # Cosine, Dot, Euclid
     
     # Cloud deployment settings
@@ -79,7 +79,7 @@ class QdrantConfig:
                 url=qdrant_url,
                 api_key=qdrant_api_key,
                 collection_name="superlinked_bachata_moves",
-                vector_size=512,
+                vector_size=470,  # Updated to match SuperlinkedEmbeddingService dimension
                 distance_metric="Cosine",
                 timeout=30.0,
                 prefer_grpc=False
@@ -90,7 +90,7 @@ class QdrantConfig:
                 host=os.getenv('QDRANT_HOST', 'localhost'),
                 port=int(os.getenv('QDRANT_PORT', '6333')),
                 collection_name="superlinked_bachata_moves",
-                vector_size=512,
+                vector_size=470,  # Updated to match SuperlinkedEmbeddingService dimension
                 distance_metric="Cosine",
                 timeout=30.0,
                 prefer_grpc=False
@@ -290,13 +290,13 @@ class SuperlinkedQdrantService:
             )
             logger.info("Created keyword index for role_focus field")
             
-            # Index for tempo (integer field for range filtering)
+            # Index for tempo (float field for range filtering)
             self.client.create_payload_index(
                 collection_name=self.config.collection_name,
                 field_name="tempo",
-                field_schema=models.IntegerIndexParams(type="integer")
+                field_schema=models.FloatIndexParams(type="float")
             )
-            logger.info("Created integer index for tempo field")
+            logger.info("Created float index for tempo field")
             
             # Index for difficulty_score (float field for range filtering)
             self.client.create_payload_index(

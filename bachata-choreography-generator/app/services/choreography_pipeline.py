@@ -870,7 +870,19 @@ class ChoreoGenerationPipeline:
                     # Step 3: Store new embedding in Qdrant
                     if self.qdrant_service and not isinstance(self.qdrant_service, MockSuperlinkedQdrantService):
                         try:
-                            self.qdrant_service.store_move_embedding(candidate)
+                            # Convert candidate to the format expected by store_superlinked_move
+                            move_data = {
+                                "clip_id": candidate.move_id,  # Use move_id instead of clip_id
+                                "move_label": candidate.move_label,
+                                "embedding": candidate.multimodal_embedding.unified_embedding.tolist() if hasattr(candidate, 'multimodal_embedding') and candidate.multimodal_embedding and hasattr(candidate.multimodal_embedding, 'unified_embedding') else None,
+                                "tempo": candidate.estimated_tempo,
+                                "energy_level": candidate.energy_level,
+                                "difficulty": candidate.difficulty,
+                                "role_focus": candidate.lead_follow_roles,
+                                "move_category": "general",  # Default category
+                                "duration": 4.0  # Default duration
+                            }
+                            self.qdrant_service.store_superlinked_move(move_data)
                             self._qdrant_embeddings_stored += 1
                             logger.debug(f"Stored move embedding in Qdrant: {clip.clip_id}")
                         except Exception as e:
@@ -1005,7 +1017,19 @@ class ChoreoGenerationPipeline:
                     # Step 3: Store new embedding in Qdrant
                     if self.qdrant_service and not isinstance(self.qdrant_service, MockSuperlinkedQdrantService):
                         try:
-                            self.qdrant_service.store_move_embedding(candidate)
+                            # Convert candidate to the format expected by store_superlinked_move
+                            move_data = {
+                                "clip_id": candidate.move_id,  # Use move_id instead of clip_id
+                                "move_label": candidate.move_label,
+                                "embedding": candidate.multimodal_embedding.unified_embedding.tolist() if hasattr(candidate, 'multimodal_embedding') and candidate.multimodal_embedding and hasattr(candidate.multimodal_embedding, 'unified_embedding') else None,
+                                "tempo": candidate.estimated_tempo,
+                                "energy_level": candidate.energy_level,
+                                "difficulty": candidate.difficulty,
+                                "role_focus": candidate.lead_follow_roles,
+                                "move_category": "general",  # Default category
+                                "duration": 4.0  # Default duration
+                            }
+                            self.qdrant_service.store_superlinked_move(move_data)
                             self._qdrant_embeddings_stored += 1
                             logger.debug(f"Stored move embedding in Qdrant: {clip.clip_id}")
                         except Exception as e:

@@ -162,7 +162,9 @@ class SuperlinkedRecommendationEngine:
                        description: str = "",
                        custom_weights: Optional[Dict[str, float]] = None,
                        top_k: int = 10,
-                       enable_transition_awareness: bool = True) -> List[SuperlinkedRecommendationScore]:
+                       enable_transition_awareness: bool = True,
+                       diversity_factor: float = 0.3,
+                       randomization_seed: Optional[int] = None) -> List[SuperlinkedRecommendationScore]:
         """
         Generate move recommendations using unified Superlinked vector similarity with Qdrant.
         
@@ -178,9 +180,12 @@ class SuperlinkedRecommendationEngine:
             description: Natural language description
             custom_weights: Custom weights for embedding spaces
             top_k: Number of recommendations to return
+            enable_transition_awareness: Enable transition compatibility
+            diversity_factor: Factor for diversity injection (0.0 = no diversity, 1.0 = max diversity)
+            randomization_seed: Seed for reproducible randomization (None = random)
             
         Returns:
-            List of SuperlinkedRecommendationScore objects
+            List of SuperlinkedRecommendationScore objects with diversity
         """
         start_time = time.time()
         
