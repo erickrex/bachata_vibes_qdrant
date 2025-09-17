@@ -22,6 +22,9 @@ bachata-choreography-generator/data/test_results/
 bachata-choreography-generator/data/choreography_metadata/
 .env
 .venv/
+bachata-choreography-generator/data/cache/
+*.md
+
 
 ../.DS_Store
 .DS_Store
