@@ -13,6 +13,7 @@ from dataclasses import dataclass
 import logging
 import time
 import re
+import random
 
 from .superlinked_embedding_service import SuperlinkedEmbeddingService, create_superlinked_service
 from .qdrant_service import (
@@ -210,6 +211,9 @@ class SuperlinkedRecommendationEngine:
         )
         
         # Search using Qdrant if available, otherwise fallback to in-memory search
+        # Request more results than needed to enable diversity selection
+        search_limit = max(top_k * 5, 30)  # Get 5x more results for better diversity selection
+        
         if self.is_qdrant_available:
             # Use Qdrant for optimized vector search with preserved linear relationships
             search_results = self.qdrant_service.search_by_superlinked_query(
@@ -218,9 +222,9 @@ class SuperlinkedRecommendationEngine:
                 difficulty_score=difficulty_score,
                 energy_level=target_energy,
                 role_focus=role_focus,
-                limit=top_k,
-                tempo_tolerance=10.0,
-                difficulty_tolerance=0.5
+                limit=search_limit,  # Request more results for diversity
+                tempo_tolerance=20.0,  # Increased tolerance for more diverse results
+                difficulty_tolerance=1.0  # Increased tolerance for more diverse results
             )
             
             # Convert Qdrant results to SuperlinkedRecommendationScore objects
@@ -248,7 +252,7 @@ class SuperlinkedRecommendationEngine:
                 energy_level=target_energy,
                 role_focus=role_focus,
                 weights=custom_weights,
-                limit=top_k
+                limit=search_limit  # Request more results for diversity
             )
             
             # Convert to SuperlinkedRecommendationScore objects
@@ -267,6 +271,18 @@ class SuperlinkedRecommendationEngine:
             self.performance_stats['fallback_searches'] += 1
             logger.debug(f"Used fallback in-memory search")
         
+        # Apply diversity selection to avoid repetitive choreographies
+        if diversity_factor > 0.0 and len(recommendations) > top_k:
+            recommendations = self._apply_diversity_selection(
+                recommendations, 
+                top_k, 
+                diversity_factor, 
+                randomization_seed
+            )
+        else:
+            # Just take the top results if no diversity requested
+            recommendations = recommendations[:top_k]
+        
         # Update performance stats
         search_time = (time.time() - start_time) * 1000
         self.performance_stats['unified_searches'] += 1
@@ -278,6 +294,82 @@ class SuperlinkedRecommendationEngine:
         logger.info(f"Unified vector search completed in {search_time:.2f}ms: {[f'{s.move_candidate.move_label}={s.similarity_score:.3f}' for s in recommendations[:3]]}")
         
         return recommendations
+    
+    def _apply_diversity_selection(self, 
+                                 recommendations: List[SuperlinkedRecommendationScore],
+                                 top_k: int,
+                                 diversity_factor: float,
+                                 randomization_seed: Optional[int] = None) -> List[SuperlinkedRecommendationScore]:
+        """
+        Apply diversity selection to avoid repetitive choreographies.
+        
+        Uses a combination of:
+        1. Move category diversity (avoid too many of the same type)
+        2. Randomized selection from top candidates
+        3. Similarity score preservation
+        
+        Args:
+            recommendations: All available recommendations
+            top_k: Number of final recommendations to return
+            diversity_factor: How much diversity to inject (0.0-1.0)
+            randomization_seed: Seed for reproducible randomization
+            
+        Returns:
+            Diversified list of recommendations
+        """
+        import random
+        from collections import defaultdict
+        
+        if randomization_seed is not None:
+            random.seed(randomization_seed)
+        
+        if len(recommendations) <= top_k:
+            return recommendations
+        
+        # Strategy 1: Category-based diversity
+        category_counts = defaultdict(int)
+        selected_recommendations = []
+        remaining_recommendations = recommendations.copy()
+        
+        # First pass: Select diverse categories with high scores
+        max_per_category = max(1, top_k // 4)  # Allow max 25% of same category
+        
+        for rec in recommendations:
+            move_category = rec.move_candidate.move_label
+            
+            if (len(selected_recommendations) < top_k and 
+                category_counts[move_category] < max_per_category):
+                
+                selected_recommendations.append(rec)
+                category_counts[move_category] += 1
+                remaining_recommendations.remove(rec)
+        
+        # Second pass: Fill remaining slots with randomized selection
+        remaining_slots = top_k - len(selected_recommendations)
+        
+        if remaining_slots > 0 and remaining_recommendations:
+            # Apply diversity factor to determine selection strategy
+            if diversity_factor >= 0.7:
+                # High diversity: Random selection from top 50%
+                top_candidates = remaining_recommendations[:len(remaining_recommendations)//2]
+                additional = random.sample(top_candidates, min(remaining_slots, len(top_candidates)))
+            elif diversity_factor >= 0.3:
+                # Medium diversity: Weighted random selection favoring higher scores
+                weights = [1.0 / (i + 1) for i in range(len(remaining_recommendations))]
+                additional = random.choices(remaining_recommendations, weights=weights, k=remaining_slots)
+            else:
+                # Low diversity: Just take the top remaining
+                additional = remaining_recommendations[:remaining_slots]
+            
+            selected_recommendations.extend(additional)
+        
+        # Sort by similarity score to maintain quality
+        selected_recommendations.sort(key=lambda x: x.similarity_score, reverse=True)
+        
+        logger.debug(f"Applied diversity selection: {len(recommendations)} -> {len(selected_recommendations)} moves")
+        logger.debug(f"Category distribution: {dict(category_counts)}")
+        
+        return selected_recommendations[:top_k]
     
     def search_semantic_moves(self,
                             semantic_query: str,

@@ -577,7 +577,7 @@ class ChoreoGenerationPipeline:
             
             # Step 4: Generate recommendations (optimized)
             recommendations, rec_time = await self._generate_recommendations_optimized(
-                music_features, move_candidates, difficulty, energy_level
+                music_features, move_candidates, difficulty, energy_level, role_focus
             )
             if not recommendations:
                 result.error_message = "Recommendation generation failed"
@@ -1189,21 +1189,30 @@ class ChoreoGenerationPipeline:
         music_features: MusicFeatures,
         move_candidates: List[MoveCandidate],
         difficulty: str,
-        energy_level: Optional[str]
+        energy_level: Optional[str],
+        role_focus: Optional[str] = None
     ) -> Tuple[Optional[List[SuperlinkedRecommendationScore]], float]:
         """Generate recommendations using unified Superlinked vector similarity."""
         start_time = time.time()
         
         try:
-            # Generate recommendations using unified vector similarity
+            # Generate recommendations using unified vector similarity with diversity
             # This replaces the complex multi-factor scoring (audio 40%, tempo 30%, energy 20%, difficulty 10%)
+            import time as time_module
+            import random
+            
+            # Generate a random seed based on current time for diversity
+            diversity_seed = int(time_module.time() * 1000) % 10000
+            
             recommendations = self.recommendation_engine.recommend_moves(
                 music_features=music_features,
                 target_difficulty=difficulty,
                 target_energy=energy_level,
-                role_focus="both",  # Default to both roles
+                role_focus=role_focus or "both",  # Use provided role focus
                 description="",  # Let the engine generate description from music features
-                top_k=len(move_candidates) if move_candidates else 40  # Get all available moves
+                top_k=min(len(move_candidates) if move_candidates else 40, 15),  # Get more diverse recommendations
+                diversity_factor=0.5,  # Higher diversity to avoid repetitive choreographies
+                randomization_seed=diversity_seed  # Time-based seed for variety
             )
             
             logger.info(f"Generated {len(recommendations)} recommendations using unified Superlinked vectors")
@@ -1268,26 +1277,93 @@ class ChoreoGenerationPipeline:
         move_types = list(move_groups.keys())
         type_index = 0
         
+        # Enhanced diversity logic for sequence generation
+        import random
+        import time as time_module
+        from collections import defaultdict
+        
+        # Use time-based seed for different results each run
+        random.seed(int(time_module.time() * 1000) % 10000)
+        
+        # Track usage to avoid immediate repetition
+        move_usage_count = defaultdict(int)
+        recent_moves = []  # Track last 3 moves to avoid immediate repetition
+        
         while len(selected) < num_moves_needed:
-            # Get next move type in rotation
-            current_type = move_types[type_index % len(move_types)]
+            # Get next move type in rotation with some randomization
+            if random.random() < 0.3:  # 30% chance to break rotation for diversity
+                current_type = random.choice(move_types)
+            else:
+                current_type = move_types[type_index % len(move_types)]
             
-            # Find next unused move from this type
+            # Find available moves from this type, avoiding recent repetition
             available_moves = [
                 move for move in move_groups[current_type] 
-                if move not in selected
+                if move.move_candidate.move_id not in [m.move_candidate.move_id for m in recent_moves[-2:]]
             ]
             
             if available_moves:
-                selected.append(available_moves[0])
-            else:
-                # If no more moves of this type, get best remaining overall
-                remaining_recs = [rec for rec in recommendations if rec not in selected]
-                if remaining_recs:
-                    selected.append(remaining_recs[0])
+                # Sort by usage count (prefer less used moves) and add randomization
+                available_moves.sort(key=lambda x: (
+                    move_usage_count[x.move_candidate.move_id],  # Primary: usage count
+                    -x.similarity_score + random.uniform(-0.1, 0.1)  # Secondary: score with noise
+                ))
+                
+                # Select with weighted randomization favoring less-used moves
+                if len(available_moves) > 1 and random.random() < 0.5:  # 50% chance of diverse selection
+                    # Weighted selection favoring less-used moves
+                    weights = [1.0 / (move_usage_count[move.move_candidate.move_id] + 1) for move in available_moves[:3]]
+                    chosen_move = random.choices(available_moves[:3], weights=weights, k=1)[0]
                 else:
-                    # If we've used all unique moves, start repeating the best ones
-                    selected.append(recommendations[len(selected) % len(recommendations)])
+                    chosen_move = available_moves[0]
+                
+                selected.append(chosen_move)
+                move_usage_count[chosen_move.move_candidate.move_id] += 1
+                recent_moves.append(chosen_move)
+                
+                # Keep recent_moves list manageable
+                if len(recent_moves) > 4:
+                    recent_moves.pop(0)
+                    
+            else:
+                # If no moves of this type available, get best remaining overall with anti-repetition
+                remaining_recs = [
+                    rec for rec in recommendations 
+                    if rec.move_candidate.move_id not in [m.move_candidate.move_id for m in recent_moves[-2:]]
+                ]
+                
+                if remaining_recs:
+                    # Sort by usage and add randomization
+                    remaining_recs.sort(key=lambda x: (
+                        move_usage_count[x.move_candidate.move_id],
+                        -x.similarity_score + random.uniform(-0.1, 0.1)
+                    ))
+                    
+                    chosen_move = remaining_recs[0]
+                    selected.append(chosen_move)
+                    move_usage_count[chosen_move.move_candidate.move_id] += 1
+                    recent_moves.append(chosen_move)
+                    
+                    if len(recent_moves) > 4:
+                        recent_moves.pop(0)
+                else:
+                    # Last resort: pick any move but try to avoid immediate repetition
+                    fallback_moves = [
+                        rec for rec in recommendations
+                        if len(recent_moves) == 0 or rec.move_candidate.move_id != recent_moves[-1].move_candidate.move_id
+                    ]
+                    
+                    if fallback_moves:
+                        chosen_move = random.choice(fallback_moves)
+                    else:
+                        chosen_move = random.choice(recommendations)
+                    
+                    selected.append(chosen_move)
+                    move_usage_count[chosen_move.move_candidate.move_id] += 1
+                    recent_moves.append(chosen_move)
+                    
+                    if len(recent_moves) > 4:
+                        recent_moves.pop(0)
             
             type_index += 1
         

@@ -22,6 +22,7 @@ import uvicorn
 from app.services.choreography_pipeline import ChoreoGenerationPipeline, PipelineConfig, PipelineResult
 from app.services.youtube_service import YouTubeService
 from app.services.qdrant_service import create_qdrant_service, QdrantConfig
+from app.services.superlinked_recommendation_engine import SuperlinkedRecommendationEngine
 from app.exceptions import (
     ChoreographyGenerationError, YouTubeDownloadError, MusicAnalysisError,
     VideoGenerationError, ValidationError, ResourceError, ServiceUnavailableError,
@@ -71,6 +72,7 @@ templates = Jinja2Templates(directory="app/templates")
 pipeline = None
 youtube_service = YouTubeService()
 qdrant_service = None
+superlinked_engine = None
 
 # Task storage for progress tracking
 active_tasks: Dict[str, Dict] = {}
@@ -116,8 +118,21 @@ def get_pipeline() -> ChoreoGenerationPipeline:
             auto_populate_qdrant=True
         )
         pipeline = ChoreoGenerationPipeline(config)
-        logger.info("Choreography pipeline initialized")
+        logger.info("Choreography pipeline initialized with SuperlinkedRecommendationEngine")
     return pipeline
+
+def get_superlinked_engine() -> SuperlinkedRecommendationEngine:
+    """Get or create the global SuperlinkedRecommendationEngine instance."""
+    global superlinked_engine
+    if superlinked_engine is None:
+        # Use environment-based configuration for Qdrant Cloud
+        qdrant_config = QdrantConfig.from_env()
+        superlinked_engine = SuperlinkedRecommendationEngine(
+            data_dir="data",
+            qdrant_config=qdrant_config
+        )
+        logger.info("SuperlinkedRecommendationEngine initialized with Qdrant Cloud integration")
+    return superlinked_engine
 
 def get_qdrant_service():
     """Get or create the global Qdrant service instance."""
@@ -235,6 +250,13 @@ async def startup_event():
         # Initialize pipeline
         get_pipeline()
         
+        # Initialize SuperlinkedRecommendationEngine
+        try:
+            get_superlinked_engine()
+            logger.info("SuperlinkedRecommendationEngine initialized successfully")
+        except Exception as e:
+            logger.warning(f"SuperlinkedRecommendationEngine initialization failed: {e} - will use fallback")
+        
         logger.info("API startup complete - all systems ready")
         
     except Exception as e:
@@ -245,7 +267,7 @@ async def startup_event():
 async def shutdown_event():
     """Cleanup on shutdown."""
     logger.info("Shutting down API")
-    global pipeline, qdrant_service
+    global pipeline, qdrant_service, superlinked_engine
     
     # Shutdown pipeline
     if pipeline and hasattr(pipeline, '_executor') and pipeline._executor:
@@ -258,6 +280,14 @@ async def shutdown_event():
             logger.info("Qdrant service shutdown")
         except Exception as e:
             logger.warning(f"Error during Qdrant shutdown: {e}")
+    
+    # Cleanup SuperlinkedRecommendationEngine
+    if superlinked_engine:
+        try:
+            # SuperlinkedRecommendationEngine doesn't need explicit cleanup, but we can log the shutdown
+            logger.info("SuperlinkedRecommendationEngine shutdown")
+        except Exception as e:
+            logger.warning(f"Error during SuperlinkedRecommendationEngine shutdown: {e}")
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
@@ -298,7 +328,8 @@ async def health_check():
             "youtube_service": youtube_service is not None,
             "active_tasks": len(active_tasks),
             "pipeline_cache_enabled": pipeline.config.enable_caching if pipeline else False,
-            "qdrant_service": qdrant_service is not None
+            "qdrant_service": qdrant_service is not None,
+            "superlinked_engine": superlinked_engine is not None
         }
         
         # Qdrant status with collection statistics
@@ -340,6 +371,34 @@ async def health_check():
             health_status["qdrant"] = {
                 "connected": False,
                 "error": "Qdrant service not initialized"
+            }
+        
+        # SuperlinkedRecommendationEngine status
+        if superlinked_engine:
+            try:
+                perf_stats = superlinked_engine.get_performance_stats()
+                health_status["superlinked"] = {
+                    "initialized": True,
+                    "qdrant_available": superlinked_engine.is_qdrant_available,
+                    "embedding_dimension": superlinked_engine.embedding_service.total_dimension,
+                    "performance_stats": {
+                        "unified_searches": perf_stats.get("unified_searches", 0),
+                        "avg_search_time_ms": round(perf_stats.get("avg_search_time_ms", 0.0), 2),
+                        "natural_language_queries": perf_stats.get("natural_language_queries", 0),
+                        "cache_hits": perf_stats.get("cache_hits", 0),
+                        "qdrant_searches": perf_stats.get("qdrant_searches", 0),
+                        "fallback_searches": perf_stats.get("fallback_searches", 0)
+                    }
+                }
+            except Exception as e:
+                health_status["superlinked"] = {
+                    "initialized": False,
+                    "error": str(e)
+                }
+        else:
+            health_status["superlinked"] = {
+                "initialized": False,
+                "error": "SuperlinkedRecommendationEngine not initialized"
             }
         
         # Quick system validation
@@ -422,6 +481,14 @@ async def create_choreography(
                 "embeddings_stored": 0,
                 "embeddings_retrieved": 0,
                 "search_time_ms": 0.0
+            },
+            "superlinked_metrics": {
+                "unified_searches": 0,
+                "avg_search_time_ms": 0.0,
+                "natural_language_queries": 0,
+                "qdrant_searches": 0,
+                "fallback_searches": 0,
+                "cache_hits": 0
             }
         }
         
@@ -461,11 +528,25 @@ async def create_choreography(
 
 @app.get("/api/task/{task_id}", response_model=TaskStatus)
 async def get_task_status(task_id: str):
-    """Get the status of a choreography generation task."""
+    """Get the status of a choreography generation task with AI insights."""
     if task_id not in active_tasks:
         raise HTTPException(status_code=404, detail="Task not found")
     
     task_data = active_tasks[task_id]
+    
+    # Enhance task status with real-time AI insights
+    enhanced_result = task_data["result"]
+    if enhanced_result and task_data["status"] == "completed":
+        # Add real-time performance metrics
+        if superlinked_engine:
+            perf_stats = superlinked_engine.get_performance_stats()
+            enhanced_result["ai_performance"] = {
+                "search_method": "qdrant_cloud" if superlinked_engine.is_qdrant_available else "fallback_memory",
+                "unified_searches": perf_stats.get("unified_searches", 0),
+                "avg_search_time_ms": round(perf_stats.get("avg_search_time_ms", 0.0), 2),
+                "cache_hits": perf_stats.get("cache_hits", 0),
+                "embedding_dimension": getattr(superlinked_engine.embedding_service, 'total_dimension', 470)
+            }
     
     return TaskStatus(
         task_id=task_id,
@@ -473,7 +554,7 @@ async def get_task_status(task_id: str):
         progress=task_data["progress"],
         stage=task_data["stage"],
         message=task_data["message"],
-        result=task_data["result"],
+        result=enhanced_result,
         error=task_data["error"]
     )
 
@@ -589,6 +670,156 @@ async def list_videos():
         logger.error(f"Error listing videos: {e}")
         raise HTTPException(status_code=500, detail="Error listing videos")
 
+@app.get("/api/metadata/{filename}")
+async def serve_metadata(filename: str):
+    """Serve choreography metadata files with enhanced AI insights."""
+    try:
+        # Security: sanitize filename
+        safe_filename = os.path.basename(filename)
+        if safe_filename != filename:
+            logger.warning(f"Potential path traversal attempt: {filename}")
+            raise HTTPException(status_code=400, detail="Invalid filename format")
+        
+        # Only allow JSON files
+        if not safe_filename.endswith('.json'):
+            raise HTTPException(status_code=400, detail="Only JSON files are allowed")
+        
+        # Security: only allow serving from metadata directory
+        metadata_path = Path("data/choreography_metadata") / safe_filename
+        
+        # Validate file exists and is in the correct directory
+        if not metadata_path.exists() or not metadata_path.is_file():
+            logger.info(f"Metadata file not found: {metadata_path}")
+            raise HTTPException(status_code=404, detail="Metadata not found")
+        
+        # Double-check path security
+        try:
+            metadata_path_resolved = metadata_path.resolve()
+            metadata_dir_resolved = Path("data/choreography_metadata").resolve()
+            
+            if not str(metadata_path_resolved).startswith(str(metadata_dir_resolved)):
+                logger.warning(f"Path traversal attempt blocked: {metadata_path}")
+                raise HTTPException(status_code=403, detail="Access denied")
+        except Exception as e:
+            logger.error(f"Path resolution error for {metadata_path}: {e}")
+            raise HTTPException(status_code=403, detail="Access denied")
+        
+        # Load and enhance metadata with AI insights
+        with open(metadata_path, 'r') as f:
+            metadata = json.load(f)
+        
+        # Add AI insights if not already present
+        if 'ai_insights' not in metadata:
+            metadata['ai_insights'] = await _generate_ai_insights_for_metadata(metadata)
+        
+        return metadata
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error serving metadata {filename}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+async def _generate_ai_insights_for_metadata(metadata: dict) -> dict:
+    """Generate AI insights for existing metadata."""
+    try:
+        # Get SuperlinkedRecommendationEngine for insights
+        engine = get_superlinked_engine()
+        
+        # Extract move information
+        moves_used = metadata.get('moves_used', [])
+        music_analysis = metadata.get('music_analysis', {})
+        
+        # Analyze move diversity and patterns
+        move_categories = {}
+        move_transitions = []
+        
+        for i, move in enumerate(moves_used):
+            # Extract move category from video path
+            video_path = move.get('video_path', '')
+            if '/Bachata_steps/' in video_path:
+                category = video_path.split('/Bachata_steps/')[1].split('/')[0]
+                move_categories[category] = move_categories.get(category, 0) + 1
+                
+                # Track transitions
+                if i > 0:
+                    prev_move = moves_used[i-1]
+                    prev_category = prev_move.get('video_path', '').split('/Bachata_steps/')[1].split('/')[0] if '/Bachata_steps/' in prev_move.get('video_path', '') else 'unknown'
+                    move_transitions.append(f"{prev_category} → {category}")
+        
+        # Calculate diversity metrics
+        total_moves = len(moves_used)
+        unique_categories = len(move_categories)
+        diversity_score = unique_categories / max(total_moves, 1) if total_moves > 0 else 0
+        
+        # Analyze tempo matching
+        audio_tempo = music_analysis.get('tempo', 0)
+        tempo_variance = abs(audio_tempo - 125) / 125 if audio_tempo > 0 else 0  # 125 BPM is typical bachata
+        
+        # Generate insights
+        ai_insights = {
+            "embedding_analysis": {
+                "total_dimension": 470,  # SuperlinkedEmbeddingService total dimension
+                "embedding_spaces": {
+                    "semantic_text": {"dimension": 384, "weight": 0.3, "description": "Move descriptions and semantic understanding"},
+                    "tempo_matching": {"dimension": 8, "weight": 0.25, "description": "BPM alignment and rhythm compatibility"},
+                    "difficulty_progression": {"dimension": 8, "weight": 0.15, "description": "Skill level and complexity matching"},
+                    "energy_compatibility": {"dimension": 16, "weight": 0.15, "description": "Energy level and intensity matching"},
+                    "role_dynamics": {"dimension": 16, "weight": 0.1, "description": "Lead/follow role compatibility"},
+                    "transition_flow": {"dimension": 64, "weight": 0.05, "description": "Move-to-move transition patterns"}
+                }
+            },
+            "search_performance": {
+                "method": "qdrant_cloud" if engine.is_qdrant_available else "fallback_memory",
+                "vector_database": "Qdrant Cloud" if engine.is_qdrant_available else "In-Memory",
+                "embedding_dimension": 470,
+                "search_algorithm": "Cosine Similarity with Multi-Space Fusion"
+            },
+            "choreography_analysis": {
+                "move_diversity": {
+                    "unique_categories": unique_categories,
+                    "total_moves": total_moves,
+                    "diversity_score": round(diversity_score, 3),
+                    "category_distribution": move_categories,
+                    "dominant_category": max(move_categories.items(), key=lambda x: x[1])[0] if move_categories else "none"
+                },
+                "tempo_analysis": {
+                    "audio_tempo_bpm": audio_tempo,
+                    "tempo_variance": round(tempo_variance, 3),
+                    "tempo_matching_quality": "excellent" if tempo_variance < 0.1 else "good" if tempo_variance < 0.2 else "moderate",
+                    "rhythm_strength": music_analysis.get('rhythm_strength', 0),
+                    "syncopation_level": music_analysis.get('syncopation', 0)
+                },
+                "transition_patterns": {
+                    "total_transitions": len(move_transitions),
+                    "unique_transitions": len(set(move_transitions)),
+                    "most_common_transitions": list(set(move_transitions))[:5],
+                    "flow_quality": "smooth" if len(set(move_transitions)) > len(move_transitions) * 0.7 else "repetitive"
+                }
+            },
+            "ai_recommendations": {
+                "similarity_matching": "Vector similarity search with 470-dimensional embeddings",
+                "personalization": "Multi-factor embedding spaces for nuanced matching",
+                "diversity_algorithm": "Category-based selection with randomization",
+                "quality_indicators": [
+                    f"Tempo matching: {round((1 - tempo_variance) * 100, 1)}%",
+                    f"Move diversity: {round(diversity_score * 100, 1)}%",
+                    f"Rhythm alignment: {round(music_analysis.get('rhythm_strength', 0) * 100, 1)}%"
+                ]
+            }
+        }
+        
+        return ai_insights
+        
+    except Exception as e:
+        logger.warning(f"Error generating AI insights: {e}")
+        return {
+            "embedding_analysis": {"error": "Unable to generate insights"},
+            "search_performance": {"method": "unknown"},
+            "choreography_analysis": {"error": "Analysis unavailable"},
+            "ai_recommendations": {"error": "Recommendations unavailable"}
+        }
+
 @app.get("/api/songs")
 async def list_songs():
     """List all available local songs."""
@@ -617,6 +848,263 @@ async def list_songs():
     except Exception as e:
         logger.error(f"Error listing songs: {e}")
         raise HTTPException(status_code=500, detail="Error listing songs")
+
+@app.get("/api/ai-insights/{video_filename}")
+async def get_ai_insights(video_filename: str):
+    """Get detailed AI insights for a specific choreography video."""
+    try:
+        # Extract base name for metadata lookup
+        base_name = video_filename.replace('_balanced_choreography.mp4', '')
+        metadata_filename = f"{base_name}_pipeline_metadata.json"
+        metadata_path = Path("data/choreography_metadata") / metadata_filename
+        
+        if not metadata_path.exists():
+            raise HTTPException(status_code=404, detail="Metadata not found for this video")
+        
+        # Load metadata
+        with open(metadata_path, 'r') as f:
+            metadata = json.load(f)
+        
+        # Generate comprehensive AI insights
+        ai_insights = await _generate_comprehensive_ai_insights(metadata)
+        
+        return {
+            "video_filename": video_filename,
+            "ai_insights": ai_insights,
+            "metadata_source": metadata_filename,
+            "generated_at": time.time()
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error generating AI insights for {video_filename}: {e}")
+        raise HTTPException(status_code=500, detail="Error generating AI insights")
+
+async def _generate_comprehensive_ai_insights(metadata: dict) -> dict:
+    """Generate comprehensive AI insights with detailed analysis."""
+    try:
+        # Get engine for real-time stats
+        engine = get_superlinked_engine()
+        perf_stats = engine.get_performance_stats() if engine else {}
+        
+        # Extract data
+        moves_used = metadata.get('moves_used', [])
+        music_analysis = metadata.get('music_analysis', {})
+        
+        # Advanced move analysis
+        move_analysis = _analyze_move_patterns(moves_used)
+        tempo_analysis = _analyze_tempo_matching(music_analysis, moves_used)
+        diversity_analysis = _analyze_choreography_diversity(moves_used)
+        
+        return {
+            "embedding_analysis": {
+                "total_dimension": 470,
+                "active_spaces": {
+                    "semantic_understanding": {"dim": 384, "weight": 30, "description": "Natural language move descriptions"},
+                    "tempo_synchronization": {"dim": 8, "weight": 25, "description": "BPM and rhythm alignment"},
+                    "difficulty_progression": {"dim": 8, "weight": 15, "description": "Skill level matching"},
+                    "energy_compatibility": {"dim": 16, "weight": 15, "description": "Intensity and mood matching"},
+                    "role_dynamics": {"dim": 16, "weight": 10, "description": "Lead/follow interactions"},
+                    "transition_flow": {"dim": 64, "weight": 5, "description": "Move sequence fluidity"}
+                },
+                "search_performance": {
+                    "method": "qdrant_cloud" if engine and engine.is_qdrant_available else "in_memory",
+                    "avg_search_time_ms": perf_stats.get("avg_search_time_ms", 0),
+                    "total_searches": perf_stats.get("unified_searches", 0),
+                    "cache_efficiency": f"{perf_stats.get('cache_hits', 0)}/{perf_stats.get('unified_searches', 1)}"
+                }
+            },
+            "move_intelligence": move_analysis,
+            "tempo_intelligence": tempo_analysis,
+            "diversity_intelligence": diversity_analysis,
+            "quality_scores": {
+                "overall_match": _calculate_overall_match_score(move_analysis, tempo_analysis, diversity_analysis),
+                "tempo_alignment": tempo_analysis.get("alignment_score", 0),
+                "move_diversity": diversity_analysis.get("diversity_score", 0),
+                "flow_quality": move_analysis.get("flow_score", 0)
+            },
+            "ai_recommendations": _generate_ai_recommendations(move_analysis, tempo_analysis, diversity_analysis)
+        }
+        
+    except Exception as e:
+        logger.warning(f"Error in comprehensive AI insights: {e}")
+        return {"error": "Unable to generate comprehensive insights"}
+
+def _analyze_move_patterns(moves_used: list) -> dict:
+    """Analyze move patterns and transitions."""
+    if not moves_used:
+        return {"error": "No moves to analyze"}
+    
+    # Extract move categories and transitions
+    categories = []
+    transitions = []
+    
+    for i, move in enumerate(moves_used):
+        video_path = move.get('video_path', '')
+        if '/Bachata_steps/' in video_path:
+            category = video_path.split('/Bachata_steps/')[1].split('/')[0]
+            categories.append(category)
+            
+            if i > 0:
+                prev_category = categories[i-1] if i-1 < len(categories) else None
+                if prev_category:
+                    transitions.append(f"{prev_category}→{category}")
+    
+    # Analyze patterns
+    from collections import Counter
+    category_counts = Counter(categories)
+    transition_counts = Counter(transitions)
+    
+    # Calculate flow score based on transition variety
+    unique_transitions = len(set(transitions))
+    total_transitions = len(transitions)
+    flow_score = unique_transitions / max(total_transitions, 1) if total_transitions > 0 else 0
+    
+    return {
+        "total_moves": len(moves_used),
+        "unique_categories": len(set(categories)),
+        "category_distribution": dict(category_counts),
+        "transition_patterns": dict(transition_counts.most_common(5)),
+        "flow_score": round(flow_score, 3),
+        "repetition_analysis": {
+            "most_used_category": category_counts.most_common(1)[0] if category_counts else ("none", 0),
+            "category_balance": "balanced" if len(set(categories)) > len(categories) * 0.4 else "repetitive"
+        }
+    }
+
+def _analyze_tempo_matching(music_analysis: dict, moves_used: list) -> dict:
+    """Analyze how well moves match the music tempo."""
+    audio_tempo = music_analysis.get('tempo', 125)
+    rhythm_strength = music_analysis.get('rhythm_strength', 0.5)
+    syncopation = music_analysis.get('syncopation', 0.5)
+    
+    # Ideal bachata tempo range
+    ideal_min, ideal_max = 110, 140
+    tempo_variance = 0
+    
+    if audio_tempo < ideal_min:
+        tempo_variance = (ideal_min - audio_tempo) / ideal_min
+    elif audio_tempo > ideal_max:
+        tempo_variance = (audio_tempo - ideal_max) / ideal_max
+    
+    alignment_score = max(0, 1 - tempo_variance)
+    
+    return {
+        "audio_tempo_bpm": audio_tempo,
+        "ideal_range": [ideal_min, ideal_max],
+        "tempo_variance": round(tempo_variance, 3),
+        "alignment_score": round(alignment_score, 3),
+        "rhythm_strength": round(rhythm_strength, 3),
+        "syncopation_level": round(syncopation, 3),
+        "tempo_quality": "excellent" if alignment_score > 0.9 else "good" if alignment_score > 0.7 else "moderate",
+        "recommendations": _get_tempo_recommendations(audio_tempo, rhythm_strength, syncopation)
+    }
+
+def _analyze_choreography_diversity(moves_used: list) -> dict:
+    """Analyze the diversity and variety in the choreography."""
+    if not moves_used:
+        return {"diversity_score": 0, "analysis": "No moves to analyze"}
+    
+    # Extract categories
+    categories = []
+    for move in moves_used:
+        video_path = move.get('video_path', '')
+        if '/Bachata_steps/' in video_path:
+            category = video_path.split('/Bachata_steps/')[1].split('/')[0]
+            categories.append(category)
+    
+    if not categories:
+        return {"diversity_score": 0, "analysis": "No valid move categories found"}
+    
+    # Calculate diversity metrics
+    unique_categories = len(set(categories))
+    total_moves = len(categories)
+    diversity_score = unique_categories / total_moves
+    
+    # Analyze distribution
+    from collections import Counter
+    category_counts = Counter(categories)
+    max_count = max(category_counts.values())
+    min_count = min(category_counts.values())
+    distribution_balance = 1 - ((max_count - min_count) / total_moves)
+    
+    return {
+        "diversity_score": round(diversity_score, 3),
+        "distribution_balance": round(distribution_balance, 3),
+        "unique_categories": unique_categories,
+        "total_moves": total_moves,
+        "category_analysis": {
+            "most_frequent": category_counts.most_common(1)[0],
+            "least_frequent": category_counts.most_common()[-1],
+            "balance_quality": "excellent" if distribution_balance > 0.8 else "good" if distribution_balance > 0.6 else "unbalanced"
+        },
+        "diversity_quality": "high" if diversity_score > 0.6 else "moderate" if diversity_score > 0.4 else "low"
+    }
+
+def _calculate_overall_match_score(move_analysis: dict, tempo_analysis: dict, diversity_analysis: dict) -> float:
+    """Calculate an overall AI match score."""
+    try:
+        flow_score = move_analysis.get("flow_score", 0) * 0.3
+        tempo_score = tempo_analysis.get("alignment_score", 0) * 0.4
+        diversity_score = diversity_analysis.get("diversity_score", 0) * 0.3
+        
+        overall = flow_score + tempo_score + diversity_score
+        return round(overall, 3)
+    except:
+        return 0.0
+
+def _generate_ai_recommendations(move_analysis: dict, tempo_analysis: dict, diversity_analysis: dict) -> list:
+    """Generate AI-powered recommendations for improvement."""
+    recommendations = []
+    
+    # Tempo recommendations
+    if tempo_analysis.get("alignment_score", 0) < 0.8:
+        recommendations.append({
+            "type": "tempo",
+            "priority": "high",
+            "message": f"Consider adjusting move selection for {tempo_analysis.get('audio_tempo_bpm', 0):.0f} BPM tempo",
+            "suggestion": "Focus on moves that match the music's rhythm more closely"
+        })
+    
+    # Diversity recommendations
+    if diversity_analysis.get("diversity_score", 0) < 0.5:
+        recommendations.append({
+            "type": "diversity",
+            "priority": "medium",
+            "message": "Choreography could benefit from more move variety",
+            "suggestion": "Try incorporating different move categories for better visual interest"
+        })
+    
+    # Flow recommendations
+    if move_analysis.get("flow_score", 0) < 0.6:
+        recommendations.append({
+            "type": "flow",
+            "priority": "medium",
+            "message": "Consider improving transition variety between moves",
+            "suggestion": "Mix different move types to create smoother flow patterns"
+        })
+    
+    return recommendations
+
+def _get_tempo_recommendations(tempo: float, rhythm_strength: float, syncopation: float) -> list:
+    """Get tempo-specific recommendations."""
+    recommendations = []
+    
+    if tempo < 110:
+        recommendations.append("Consider slower, more dramatic moves for this tempo")
+    elif tempo > 140:
+        recommendations.append("Focus on quick, energetic moves for this fast tempo")
+    else:
+        recommendations.append("Perfect tempo range for classic bachata moves")
+    
+    if rhythm_strength > 0.8:
+        recommendations.append("Strong rhythm - emphasize beat-matching moves")
+    
+    if syncopation > 0.7:
+        recommendations.append("High syncopation - incorporate complex timing variations")
+    
+    return recommendations
 
 @app.get("/api/moves/stats")
 async def get_move_statistics():
@@ -662,150 +1150,427 @@ async def get_move_statistics():
 
 @app.post("/api/moves/filter")
 async def filter_moves(filters: Dict[str, Any]):
-    """Filter moves based on criteria and return matching moves."""
+    """Filter moves based on criteria using SuperlinkedRecommendationEngine."""
     try:
-        # Load annotation data
-        annotation_path = Path("data/bachata_annotations.json")
-        if not annotation_path.exists():
-            raise HTTPException(status_code=404, detail="Annotation data not found")
+        # Get SuperlinkedRecommendationEngine instance
+        engine = get_superlinked_engine()
         
-        with open(annotation_path, 'r') as f:
-            data = json.load(f)
+        # Create a dummy music features object for filtering (tempo-based)
+        from app.services.music_analyzer import MusicFeatures
+        import numpy as np
         
-        clips = data.get('clips', [])
+        # Use average tempo if tempo_range is provided, otherwise use default
+        tempo_range = filters.get('tempo_range', [102, 150])
+        target_tempo = (tempo_range[0] + tempo_range[1]) / 2 if tempo_range else 125.0
+        
+        # Create minimal music features for filtering
+        dummy_music_features = MusicFeatures(
+            tempo=target_tempo,
+            beat_positions=np.array([]),
+            duration=180.0,  # Default 3 minutes
+            mfcc_features=np.zeros((13, 100)),
+            chroma_features=np.zeros((12, 100)),
+            spectral_centroid=np.zeros((1, 100)),
+            zero_crossing_rate=np.zeros((1, 100)),
+            rms_energy=np.zeros((1, 100)),
+            harmonic_component=np.zeros((100,)),
+            percussive_component=np.zeros((100,)),
+            energy_profile=np.zeros((100,)),
+            tempo_confidence=0.8,
+            sections=[],
+            rhythm_pattern_strength=0.7,
+            syncopation_level=0.3,
+            audio_embedding=np.zeros((128,))
+        )
+        
+        # Use SuperlinkedRecommendationEngine for categorical filtering
+        recommendations = engine.search_categorical_filtered_moves(
+            music_features=dummy_music_features,
+            energy_level=filters.get('energy_level', 'medium'),
+            role_focus=filters.get('role_focus', 'both'),
+            difficulty_level=filters.get('difficulty'),
+            top_k=20  # Get more results for filtering
+        )
+        
+        # Convert recommendations to the expected format
         filtered_clips = []
-        
-        for clip in clips:
-            # Apply filters
-            if filters.get('difficulty') and clip['difficulty'] != filters['difficulty']:
-                continue
-            if filters.get('energy_level') and clip['energy_level'] != filters['energy_level']:
-                continue
-            if filters.get('role_focus') and clip['lead_follow_roles'] != filters['role_focus']:
-                continue
-            if filters.get('move_types') and clip['move_label'] not in filters['move_types']:
+        for rec in recommendations:
+            candidate = rec.move_candidate
+            
+            # Additional filtering for move types if specified
+            if filters.get('move_types') and candidate.move_label not in filters['move_types']:
                 continue
             
-            # Tempo range filter
-            tempo_range = filters.get('tempo_range')
+            # Additional tempo range filtering if specified
             if tempo_range:
                 min_tempo, max_tempo = tempo_range
-                if not (min_tempo <= clip['estimated_tempo'] <= max_tempo):
+                if not (min_tempo <= candidate.tempo <= max_tempo):
                     continue
             
             filtered_clips.append({
-                "clip_id": clip['clip_id'],
-                "move_label": clip['move_label'],
-                "difficulty": clip['difficulty'],
-                "energy_level": clip['energy_level'],
-                "role_focus": clip['lead_follow_roles'],
-                "tempo": clip['estimated_tempo'],
-                "notes": clip.get('notes', '')
+                "clip_id": candidate.move_id,
+                "move_label": candidate.move_label,
+                "difficulty": candidate.difficulty_score,
+                "energy_level": candidate.energy_level,
+                "role_focus": candidate.role_focus,
+                "tempo": candidate.tempo,
+                "notes": candidate.notes,
+                "similarity_score": rec.similarity_score
             })
+        
+        # Limit to first 10 for preview
+        filtered_clips = filtered_clips[:10]
         
         return {
             "total_matches": len(filtered_clips),
-            "clips": filtered_clips[:10]  # Return first 10 for preview
+            "clips": filtered_clips,
+            "engine_used": "SuperlinkedRecommendationEngine"
         }
         
     except Exception as e:
-        logger.error(f"Error filtering moves: {e}")
-        raise HTTPException(status_code=500, detail="Error filtering moves")
+        logger.error(f"Error filtering moves with SuperlinkedRecommendationEngine: {e}")
+        # Fallback to original annotation-based filtering
+        try:
+            annotation_path = Path("data/bachata_annotations.json")
+            if not annotation_path.exists():
+                raise HTTPException(status_code=404, detail="Annotation data not found")
+            
+            with open(annotation_path, 'r') as f:
+                data = json.load(f)
+            
+            clips = data.get('clips', [])
+            filtered_clips = []
+            
+            for clip in clips:
+                # Apply filters
+                if filters.get('difficulty') and clip['difficulty'] != filters['difficulty']:
+                    continue
+                if filters.get('energy_level') and clip['energy_level'] != filters['energy_level']:
+                    continue
+                if filters.get('role_focus') and clip['lead_follow_roles'] != filters['role_focus']:
+                    continue
+                if filters.get('move_types') and clip['move_label'] not in filters['move_types']:
+                    continue
+                
+                # Tempo range filter
+                tempo_range = filters.get('tempo_range')
+                if tempo_range:
+                    min_tempo, max_tempo = tempo_range
+                    if not (min_tempo <= clip['estimated_tempo'] <= max_tempo):
+                        continue
+                
+                filtered_clips.append({
+                    "clip_id": clip['clip_id'],
+                    "move_label": clip['move_label'],
+                    "difficulty": clip['difficulty'],
+                    "energy_level": clip['energy_level'],
+                    "role_focus": clip['lead_follow_roles'],
+                    "tempo": clip['estimated_tempo'],
+                    "notes": clip.get('notes', '')
+                })
+            
+            return {
+                "total_matches": len(filtered_clips),
+                "clips": filtered_clips[:10],
+                "engine_used": "fallback_annotation_based"
+            }
+            
+        except Exception as fallback_error:
+            logger.error(f"Fallback filtering also failed: {fallback_error}")
+            raise HTTPException(status_code=500, detail="Error filtering moves")
 
 @app.post("/api/moves/preview")
 async def preview_moves(filters: Dict[str, Any]):
-    """Get a preview of 3-5 sample moves matching the current filters."""
+    """Get a preview of 3-5 sample moves using SuperlinkedRecommendationEngine with diversity."""
     try:
-        # Use the filter endpoint to get matches
-        filter_result = await filter_moves(filters)
-        clips = filter_result['clips']
+        # Get SuperlinkedRecommendationEngine instance
+        engine = get_superlinked_engine()
         
-        # Select diverse sample moves (max 5)
-        import random
-        sample_size = min(5, len(clips))
+        # Create a dummy music features object for preview
+        from app.services.music_analyzer import MusicFeatures
+        import numpy as np
         
-        if sample_size > 0:
-            # Try to get diverse moves by type if possible
-            move_types = list(set(clip['move_label'] for clip in clips))
-            sample_clips = []
+        # Use average tempo if tempo_range is provided, otherwise use default
+        tempo_range = filters.get('tempo_range', [102, 150])
+        target_tempo = (tempo_range[0] + tempo_range[1]) / 2 if tempo_range else 125.0
+        
+        # Create minimal music features for preview
+        dummy_music_features = MusicFeatures(
+            tempo=target_tempo,
+            beat_positions=np.array([]),
+            duration=180.0,  # Default 3 minutes
+            mfcc_features=np.zeros((13, 100)),
+            chroma_features=np.zeros((12, 100)),
+            spectral_centroid=np.zeros((1, 100)),
+            zero_crossing_rate=np.zeros((1, 100)),
+            rms_energy=np.zeros((1, 100)),
+            harmonic_component=np.zeros((100,)),
+            percussive_component=np.zeros((100,)),
+            energy_profile=np.zeros((100,)),
+            tempo_confidence=0.8,
+            sections=[],
+            rhythm_pattern_strength=0.7,
+            syncopation_level=0.3,
+            audio_embedding=np.zeros((128,))
+        )
+        
+        # Use SuperlinkedRecommendationEngine with high diversity for preview
+        recommendations = engine.recommend_moves(
+            music_features=dummy_music_features,
+            target_difficulty=filters.get('difficulty', 'intermediate'),
+            target_energy=filters.get('energy_level', 'medium'),
+            role_focus=filters.get('role_focus', 'both'),
+            description=f"preview moves for {filters.get('energy_level', 'medium')} energy",
+            top_k=15,  # Get more results for diversity selection
+            diversity_factor=0.8,  # High diversity for preview
+            randomization_seed=None  # Random seed for variety
+        )
+        
+        # Convert to preview format and apply additional filters
+        preview_clips = []
+        for rec in recommendations:
+            candidate = rec.move_candidate
             
-            # Get one from each type first
-            for move_type in move_types[:sample_size]:
-                type_clips = [c for c in clips if c['move_label'] == move_type]
-                if type_clips:
-                    sample_clips.append(random.choice(type_clips))
+            # Additional filtering for move types if specified
+            if filters.get('move_types') and candidate.move_label not in filters['move_types']:
+                continue
             
-            # Fill remaining slots randomly
-            while len(sample_clips) < sample_size and len(sample_clips) < len(clips):
-                remaining_clips = [c for c in clips if c not in sample_clips]
-                if remaining_clips:
-                    sample_clips.append(random.choice(remaining_clips))
+            # Additional tempo range filtering if specified
+            if tempo_range:
+                min_tempo, max_tempo = tempo_range
+                if not (min_tempo <= candidate.tempo <= max_tempo):
+                    continue
             
-            return {
-                "preview_clips": sample_clips,
-                "total_available": filter_result['total_matches']
-            }
-        else:
-            return {
-                "preview_clips": [],
-                "total_available": 0
-            }
+            preview_clips.append({
+                "clip_id": candidate.move_id,
+                "move_label": candidate.move_label,
+                "difficulty": candidate.difficulty_score,
+                "energy_level": candidate.energy_level,
+                "role_focus": candidate.role_focus,
+                "tempo": candidate.tempo,
+                "notes": candidate.notes,
+                "similarity_score": rec.similarity_score,
+                "explanation": rec.explanation
+            })
+            
+            # Limit to 5 for preview
+            if len(preview_clips) >= 5:
+                break
+        
+        # Get total available count using filter endpoint
+        try:
+            filter_result = await filter_moves(filters)
+            total_available = filter_result['total_matches']
+        except Exception:
+            total_available = len(preview_clips)
+        
+        return {
+            "preview_clips": preview_clips,
+            "total_available": total_available,
+            "engine_used": "SuperlinkedRecommendationEngine",
+            "diversity_applied": True
+        }
         
     except Exception as e:
-        logger.error(f"Error previewing moves: {e}")
-        raise HTTPException(status_code=500, detail="Error previewing moves")
+        logger.error(f"Error previewing moves with SuperlinkedRecommendationEngine: {e}")
+        # Fallback to filter-based preview
+        try:
+            filter_result = await filter_moves(filters)
+            clips = filter_result['clips']
+            
+            # Select diverse sample moves (max 5)
+            import random
+            sample_size = min(5, len(clips))
+            
+            if sample_size > 0:
+                # Try to get diverse moves by type if possible
+                move_types = list(set(clip['move_label'] for clip in clips))
+                sample_clips = []
+                
+                # Get one from each type first
+                for move_type in move_types[:sample_size]:
+                    type_clips = [c for c in clips if c['move_label'] == move_type]
+                    if type_clips:
+                        sample_clips.append(random.choice(type_clips))
+                
+                # Fill remaining slots randomly
+                while len(sample_clips) < sample_size and len(sample_clips) < len(clips):
+                    remaining_clips = [c for c in clips if c not in sample_clips]
+                    if remaining_clips:
+                        sample_clips.append(random.choice(remaining_clips))
+                
+                return {
+                    "preview_clips": sample_clips,
+                    "total_available": filter_result['total_matches'],
+                    "engine_used": "fallback_filter_based"
+                }
+            else:
+                return {
+                    "preview_clips": [],
+                    "total_available": 0,
+                    "engine_used": "fallback_filter_based"
+                }
+                
+        except Exception as fallback_error:
+            logger.error(f"Fallback preview also failed: {fallback_error}")
+            raise HTTPException(status_code=500, detail="Error previewing moves")
 
 @app.get("/api/query-templates")
 async def get_query_templates():
-    """Get predefined query templates for easy selection."""
-    templates = [
-        {
-            "name": "Show me beginner moves",
-            "description": "Easy moves perfect for learning",
-            "filters": {
-                "difficulty": "beginner"
+    """Get predefined query templates validated with SuperlinkedRecommendationEngine."""
+    try:
+        # Get SuperlinkedRecommendationEngine instance for validation
+        engine = get_superlinked_engine()
+        
+        # Define base templates with SuperlinkedRecommendationEngine-optimized parameters
+        base_templates = [
+            {
+                "name": "Show me beginner moves",
+                "description": "Easy moves perfect for learning",
+                "filters": {
+                    "difficulty": "beginner"
+                },
+                "superlinked_query": "basic beginner moves for learning"
+            },
+            {
+                "name": "High energy advanced moves",
+                "description": "Dynamic moves for experienced dancers",
+                "filters": {
+                    "difficulty": "advanced",
+                    "energy_level": "high"
+                },
+                "superlinked_query": "energetic advanced moves for experienced dancers"
+            },
+            {
+                "name": "Slow romantic moves",
+                "description": "Gentle moves for slower songs",
+                "filters": {
+                    "energy_level": "low",
+                    "tempo_range": [102, 115]
+                },
+                "superlinked_query": "gentle romantic moves for slow songs"
+            },
+            {
+                "name": "Lead-focused moves",
+                "description": "Moves that highlight the leader",
+                "filters": {
+                    "role_focus": "lead_focus"
+                },
+                "superlinked_query": "moves that showcase the lead dancer"
+            },
+            {
+                "name": "Follow styling moves",
+                "description": "Moves that showcase the follower",
+                "filters": {
+                    "role_focus": "follow_focus"
+                },
+                "superlinked_query": "styling moves that highlight the follow"
+            },
+            {
+                "name": "Fast tempo moves",
+                "description": "Moves for high-energy songs",
+                "filters": {
+                    "tempo_range": [135, 150]
+                },
+                "superlinked_query": "fast moves for high tempo songs"
+            },
+            {
+                "name": "Intermediate balanced moves",
+                "description": "Well-rounded moves for intermediate dancers",
+                "filters": {
+                    "difficulty": "intermediate",
+                    "energy_level": "medium"
+                },
+                "superlinked_query": "balanced intermediate moves for practice"
+            },
+            {
+                "name": "Turn-based moves",
+                "description": "Moves featuring turns and spins",
+                "filters": {
+                    "move_types": ["lady_right_turn", "lady_left_turn"]
+                },
+                "superlinked_query": "turn moves with spins and rotations"
             }
-        },
-        {
-            "name": "High energy advanced moves",
-            "description": "Dynamic moves for experienced dancers",
-            "filters": {
-                "difficulty": "advanced",
-                "energy_level": "high"
-            }
-        },
-        {
-            "name": "Slow romantic moves",
-            "description": "Gentle moves for slower songs",
-            "filters": {
-                "energy_level": "low",
-                "tempo_range": [102, 115]
-            }
-        },
-        {
-            "name": "Lead-focused moves",
-            "description": "Moves that highlight the leader",
-            "filters": {
-                "role_focus": "lead_focus"
-            }
-        },
-        {
-            "name": "Follow styling moves",
-            "description": "Moves that showcase the follower",
-            "filters": {
-                "role_focus": "follow_focus"
-            }
-        },
-        {
-            "name": "Fast tempo moves",
-            "description": "Moves for high-energy songs",
-            "filters": {
-                "tempo_range": [135, 150]
-            }
+        ]
+        
+        # Validate templates using SuperlinkedRecommendationEngine
+        validated_templates = []
+        
+        for template in base_templates:
+            try:
+                # Test the template by running a quick filter
+                test_result = await filter_moves(template["filters"])
+                available_moves = test_result.get("total_matches", 0)
+                
+                # Add validation info to template
+                template_with_validation = template.copy()
+                template_with_validation.update({
+                    "available_moves": available_moves,
+                    "validated": available_moves > 0,
+                    "engine_validated": True
+                })
+                
+                validated_templates.append(template_with_validation)
+                
+            except Exception as e:
+                logger.warning(f"Template validation failed for '{template['name']}': {e}")
+                # Include template but mark as not validated
+                template_with_validation = template.copy()
+                template_with_validation.update({
+                    "available_moves": 0,
+                    "validated": False,
+                    "engine_validated": False,
+                    "validation_error": str(e)
+                })
+                validated_templates.append(template_with_validation)
+        
+        return {
+            "templates": validated_templates,
+            "engine_used": "SuperlinkedRecommendationEngine",
+            "validation_performed": True
         }
-    ]
-    
-    return {"templates": templates}
+        
+    except Exception as e:
+        logger.error(f"Error getting query templates with SuperlinkedRecommendationEngine: {e}")
+        # Fallback to basic templates
+        fallback_templates = [
+            {
+                "name": "Show me beginner moves",
+                "description": "Easy moves perfect for learning",
+                "filters": {
+                    "difficulty": "beginner"
+                },
+                "validated": False,
+                "engine_validated": False
+            },
+            {
+                "name": "High energy advanced moves",
+                "description": "Dynamic moves for experienced dancers",
+                "filters": {
+                    "difficulty": "advanced",
+                    "energy_level": "high"
+                },
+                "validated": False,
+                "engine_validated": False
+            },
+            {
+                "name": "Slow romantic moves",
+                "description": "Gentle moves for slower songs",
+                "filters": {
+                    "energy_level": "low",
+                    "tempo_range": [102, 115]
+                },
+                "validated": False,
+                "engine_validated": False
+            }
+        ]
+        
+        return {
+            "templates": fallback_templates,
+            "engine_used": "fallback",
+            "validation_performed": False,
+            "error": str(e)
+        }
 
 async def generate_choreography_task_safe(
     task_id: str,
@@ -865,22 +1630,26 @@ async def generate_choreography_task(
             "message": "Downloading audio from YouTube..."
         })
         
-        # Get pipeline with specified quality mode
+        # Get pipeline with specified quality mode and Qdrant Cloud configuration
         config = PipelineConfig(
             quality_mode=quality_mode,
             enable_caching=True,
             max_workers=4,
-            cleanup_after_generation=True
+            cleanup_after_generation=True,
+            enable_qdrant=True,
+            auto_populate_qdrant=True
         )
         task_pipeline = ChoreoGenerationPipeline(config)
         
-        # Progress tracking with more granular updates
+        # Progress tracking with SuperlinkedRecommendationEngine and Qdrant Cloud integration
         progress_stages = [
             (10, "downloading", "Downloading audio from YouTube..."),
             (25, "analyzing", "Analyzing musical structure and tempo..."),
-            (40, "selecting", "Analyzing dance moves and selecting sequences..."),
-            (70, "generating", "Generating choreography video..."),
-            (90, "finalizing", "Finalizing video and metadata...")
+            (35, "embedding", "Generating unified Superlinked embeddings..."),
+            (50, "searching", "Searching Qdrant Cloud for compatible moves..."),
+            (65, "selecting", "Selecting diverse moves with unified vector similarity..."),
+            (80, "generating", "Generating choreography video..."),
+            (95, "finalizing", "Finalizing video and metadata...")
         ]
         
         # Simulate progress updates during generation
@@ -930,13 +1699,29 @@ async def generate_choreography_task(
                 }
             })
             
-            # Update Qdrant metrics in task
+            # Update Qdrant and Superlinked metrics in task
             if hasattr(result, 'qdrant_enabled') and result.qdrant_enabled:
                 active_tasks[task_id]["qdrant_metrics"].update({
                     "embeddings_stored": result.qdrant_embeddings_stored,
                     "embeddings_retrieved": result.qdrant_embeddings_retrieved,
                     "search_time_ms": result.qdrant_search_time * 1000  # Convert to ms
                 })
+            
+            # Add SuperlinkedRecommendationEngine metrics
+            try:
+                engine = get_superlinked_engine()
+                perf_stats = engine.get_performance_stats()
+                active_tasks[task_id]["superlinked_metrics"] = {
+                    "unified_searches": perf_stats.get("unified_searches", 0),
+                    "avg_search_time_ms": perf_stats.get("avg_search_time_ms", 0.0),
+                    "natural_language_queries": perf_stats.get("natural_language_queries", 0),
+                    "qdrant_searches": perf_stats.get("qdrant_searches", 0),
+                    "fallback_searches": perf_stats.get("fallback_searches", 0),
+                    "cache_hits": perf_stats.get("cache_hits", 0)
+                }
+            except Exception as e:
+                logger.warning(f"Failed to get SuperlinkedRecommendationEngine metrics: {e}")
+                active_tasks[task_id]["superlinked_metrics"] = {"error": str(e)}
             
             logger.info(f"Task {task_id} completed successfully in {result.processing_time:.2f}s")
             
