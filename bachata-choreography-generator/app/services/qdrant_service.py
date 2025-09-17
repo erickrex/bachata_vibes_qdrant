@@ -1,6 +1,6 @@
 """
-Qdrant vector database integration for faster similarity search.
-Provides optimized vector search for multimodal embeddings with metadata filtering.
+Qdrant vector database integration for Superlinked embeddings.
+Provides optimized vector search for unified Superlinked embeddings with metadata filtering.
 """
 
 import logging
@@ -15,7 +15,8 @@ try:
     from qdrant_client.http import models
     from qdrant_client.http.models import (
         Distance, VectorParams, CreateCollection, PointStruct,
-        Filter, FieldCondition, MatchValue, Range, SearchRequest
+        Filter, FieldCondition, MatchValue, Range, SearchRequest,
+        KeywordIndexParams, IntegerIndexParams, FloatIndexParams
     )
     QDRANT_AVAILABLE = True
 except ImportError:
@@ -26,9 +27,6 @@ except ImportError:
     class models:
         pass
 
-from .feature_fusion import MultiModalEmbedding
-from .recommendation_engine import MoveCandidate
-
 logger = logging.getLogger(__name__)
 
 
@@ -37,9 +35,13 @@ class QdrantConfig:
     """Configuration for Qdrant vector database."""
     host: str = "localhost"
     port: int = 6333
-    collection_name: str = "bachata_moves"
-    vector_size: int = 512  # 128D audio + 384D pose features
+    collection_name: str = "superlinked_bachata_moves"
+    vector_size: int = 512  # Superlinked unified embedding dimension
     distance_metric: str = "Cosine"  # Cosine, Dot, Euclid
+    
+    # Cloud deployment settings
+    api_key: Optional[str] = None
+    url: Optional[str] = None  # Full URL for cloud deployment
     
     # Performance settings
     hnsw_config: Dict[str, Any] = None
@@ -48,14 +50,67 @@ class QdrantConfig:
     # Connection settings
     timeout: float = 30.0
     prefer_grpc: bool = False
+    
+    @classmethod
+    def from_env(cls) -> 'QdrantConfig':
+        """Create configuration from environment variables."""
+        import os
+        
+        # Try to load .env file if available
+        try:
+            from dotenv import load_dotenv
+            load_dotenv()
+        except ImportError:
+            pass  # dotenv not available, continue with system env vars
+        
+        # Check for cloud deployment first
+        qdrant_url = os.getenv('QDRANT_URL')
+        qdrant_api_key = os.getenv('QDRANT_API_KEY')
+        
+        # Remove quotes if present
+        if qdrant_url and qdrant_url.startswith("'") and qdrant_url.endswith("'"):
+            qdrant_url = qdrant_url[1:-1]
+        if qdrant_api_key and qdrant_api_key.startswith("'") and qdrant_api_key.endswith("'"):
+            qdrant_api_key = qdrant_api_key[1:-1]
+        
+        if qdrant_url and qdrant_api_key:
+            # Cloud deployment
+            return cls(
+                url=qdrant_url,
+                api_key=qdrant_api_key,
+                collection_name="superlinked_bachata_moves",
+                vector_size=512,
+                distance_metric="Cosine",
+                timeout=30.0,
+                prefer_grpc=False
+            )
+        else:
+            # Local deployment (fallback)
+            return cls(
+                host=os.getenv('QDRANT_HOST', 'localhost'),
+                port=int(os.getenv('QDRANT_PORT', '6333')),
+                collection_name="superlinked_bachata_moves",
+                vector_size=512,
+                distance_metric="Cosine",
+                timeout=30.0,
+                prefer_grpc=False
+            )
 
 
 @dataclass
-class SearchResult:
-    """Result from vector similarity search."""
-    move_id: str
-    score: float
-    metadata: Dict[str, Any]
+class SuperlinkedSearchResult:
+    """Result from Superlinked vector similarity search."""
+    clip_id: str
+    move_label: str
+    move_description: str
+    tempo: float
+    difficulty_score: float
+    energy_level: str
+    role_focus: str
+    video_path: str
+    notes: str
+    similarity_score: float
+    transition_compatibility: List[str]
     embedding: Optional[np.ndarray] = None
 
 
@@ -69,20 +124,20 @@ class QdrantStats:
     collection_size_mb: float = 0.0
 
 
-class QdrantEmbeddingService:
+class SuperlinkedQdrantService:
     """
-    Qdrant-based vector database service for fast similarity search.
+    Qdrant-based vector database service for Superlinked unified embeddings.
     Features:
-    - Single collection for 512-dimensional multimodal embeddings
-    - Basic metadata filtering for tempo range and difficulty level
-    - Batch upload for existing move embeddings
-    - Optimized vector search replacing in-memory cosine similarity
+    - Single collection for Superlinked unified embeddings
+    - Metadata filtering for tempo, difficulty, energy, and role focus
+    - Batch upload for Superlinked move embeddings
+    - Optimized vector search with preserved linear relationships
     - Performance monitoring and statistics
     """
     
     def __init__(self, config: Optional[QdrantConfig] = None):
         """
-        Initialize Qdrant embedding service.
+        Initialize Superlinked Qdrant service.
         
         Args:
             config: Qdrant configuration
@@ -102,21 +157,37 @@ class QdrantEmbeddingService:
         # Ensure collection exists
         self._ensure_collection()
         
-        logger.info(f"QdrantEmbeddingService initialized: {self.config.host}:{self.config.port}")
+        if self.config.url:
+            logger.info(f"SuperlinkedQdrantService initialized: {self.config.url}")
+        else:
+            logger.info(f"SuperlinkedQdrantService initialized: {self.config.host}:{self.config.port}")
     
     def _connect(self) -> None:
-        """Establish connection to Qdrant."""
+        """Establish connection to Qdrant (cloud or local)."""
         try:
-            self.client = QdrantClient(
-                host=self.config.host,
-                port=self.config.port,
-                timeout=self.config.timeout,
-                prefer_grpc=self.config.prefer_grpc
-            )
+            # Check if using cloud deployment
+            if self.config.url and self.config.api_key:
+                # Cloud deployment with API key authentication
+                self.client = QdrantClient(
+                    url=self.config.url,
+                    api_key=self.config.api_key,
+                    timeout=self.config.timeout,
+                    prefer_grpc=self.config.prefer_grpc
+                )
+                logger.info(f"Connected to Qdrant Cloud: {self.config.url}")
+            else:
+                # Local deployment
+                self.client = QdrantClient(
+                    host=self.config.host,
+                    port=self.config.port,
+                    timeout=self.config.timeout,
+                    prefer_grpc=self.config.prefer_grpc
+                )
+                logger.info(f"Connected to local Qdrant: {self.config.host}:{self.config.port}")
             
             # Test connection
             collections = self.client.get_collections()
-            logger.info(f"Connected to Qdrant: {len(collections.collections)} collections found")
+            logger.info(f"Qdrant connection successful: {len(collections.collections)} collections found")
             
         except Exception as e:
             logger.error(f"Failed to connect to Qdrant: {e}")
@@ -144,7 +215,7 @@ class QdrantEmbeddingService:
             raise
     
     def _create_collection(self) -> None:
-        """Create the collection with optimized settings."""
+        """Create the collection with optimized settings and proper indexing."""
         # Default HNSW configuration for good performance
         hnsw_config = self.config.hnsw_config or {
             "m": 16,  # Number of bi-directional links for each node
@@ -172,64 +243,111 @@ class QdrantEmbeddingService:
         )
         
         logger.info(f"Created collection {self.config.collection_name} with {self.config.vector_size}D vectors")
+        
+        # Create indexes for metadata fields to enable efficient filtering and retrieval
+        try:
+            # Index for clip_id (keyword field for exact matching)
+            self.client.create_payload_index(
+                collection_name=self.config.collection_name,
+                field_name="clip_id",
+                field_schema=models.KeywordIndexParams(
+                    type="keyword",
+                    is_tenant=False
+                )
+            )
+            logger.info("Created keyword index for clip_id field")
+            
+            # Index for move_label (keyword field for filtering)
+            self.client.create_payload_index(
+                collection_name=self.config.collection_name,
+                field_name="move_label",
+                field_schema=models.KeywordIndexParams(
+                    type="keyword",
+                    is_tenant=False
+                )
+            )
+            logger.info("Created keyword index for move_label field")
+            
+            # Index for energy_level (keyword field for filtering)
+            self.client.create_payload_index(
+                collection_name=self.config.collection_name,
+                field_name="energy_level",
+                field_schema=models.KeywordIndexParams(
+                    type="keyword",
+                    is_tenant=False
+                )
+            )
+            logger.info("Created keyword index for energy_level field")
+            
+            # Index for role_focus (keyword field for filtering)
+            self.client.create_payload_index(
+                collection_name=self.config.collection_name,
+                field_name="role_focus",
+                field_schema=models.KeywordIndexParams(
+                    type="keyword",
+                    is_tenant=False
+                )
+            )
+            logger.info("Created keyword index for role_focus field")
+            
+            # Index for tempo (integer field for range filtering)
+            self.client.create_payload_index(
+                collection_name=self.config.collection_name,
+                field_name="tempo",
+                field_schema=models.IntegerIndexParams(type="integer")
+            )
+            logger.info("Created integer index for tempo field")
+            
+            # Index for difficulty_score (float field for range filtering)
+            self.client.create_payload_index(
+                collection_name=self.config.collection_name,
+                field_name="difficulty_score",
+                field_schema=models.FloatIndexParams(type="float")
+            )
+            logger.info("Created float index for difficulty_score field")
+            
+        except Exception as e:
+            logger.warning(f"Failed to create some indexes (may already exist): {e}")
+            # Continue anyway - indexes might already exist
     
-    def store_move_embedding(self, 
-                           move_candidate: MoveCandidate,
-                           embedding: Optional[np.ndarray] = None) -> str:
+    def store_superlinked_move(self, 
+                             move_data: Dict[str, Any]) -> str:
         """
-        Store a move embedding in Qdrant.
+        Store a Superlinked move embedding in Qdrant.
         
         Args:
-            move_candidate: Move candidate with metadata
-            embedding: Optional custom embedding (uses candidate's embedding if not provided)
+            move_data: Dictionary containing move data with Superlinked embedding
             
         Returns:
             Point ID in Qdrant
         """
-        # Use provided embedding or extract from candidate
-        if embedding is not None:
-            vector = embedding.tolist()
-        else:
-            # Combine audio and pose embeddings
-            audio_emb = move_candidate.multimodal_embedding.audio_embedding
-            pose_emb = move_candidate.multimodal_embedding.pose_embedding
-            
-            # Ensure consistent dimensionality
-            if len(audio_emb) + len(pose_emb) != self.config.vector_size:
-                logger.warning(f"Embedding size mismatch: expected {self.config.vector_size}, "
-                             f"got {len(audio_emb) + len(pose_emb)}")
-                # Pad or truncate as needed
-                combined = np.concatenate([audio_emb, pose_emb])
-                if len(combined) < self.config.vector_size:
-                    combined = np.pad(combined, (0, self.config.vector_size - len(combined)))
-                elif len(combined) > self.config.vector_size:
-                    combined = combined[:self.config.vector_size]
-                vector = combined.tolist()
-            else:
-                vector = np.concatenate([audio_emb, pose_emb]).tolist()
+        # Extract embedding
+        embedding = move_data.get("embedding")
+        if embedding is None:
+            raise ValueError("Move data must contain 'embedding' field")
         
-        # Prepare metadata
+        # Ensure embedding is the correct size
+        if len(embedding) != self.config.vector_size:
+            logger.warning(f"Embedding size mismatch: expected {self.config.vector_size}, got {len(embedding)}")
+            if len(embedding) < self.config.vector_size:
+                embedding = np.pad(embedding, (0, self.config.vector_size - len(embedding)))
+            else:
+                embedding = embedding[:self.config.vector_size]
+        
+        vector = embedding.tolist() if isinstance(embedding, np.ndarray) else embedding
+        
+        # Prepare metadata (exclude embedding from payload)
         metadata = {
-            "move_id": move_candidate.move_id,
-            "move_label": move_candidate.move_label,
-            "video_path": move_candidate.video_path,
-            "energy_level": move_candidate.energy_level,
-            "difficulty": move_candidate.difficulty,
-            "estimated_tempo": move_candidate.estimated_tempo,
-            "lead_follow_roles": move_candidate.lead_follow_roles,
-            
-            # Analysis metrics
-            "movement_complexity": move_candidate.analysis_result.movement_complexity_score,
-            "difficulty_score": move_candidate.analysis_result.difficulty_score,
-            "analysis_quality": move_candidate.analysis_result.analysis_quality,
-            "pose_detection_rate": move_candidate.analysis_result.pose_detection_rate,
-            "duration": move_candidate.analysis_result.duration,
-            
-            # Tempo compatibility range
-            "tempo_min": move_candidate.analysis_result.tempo_compatibility_range[0],
-            "tempo_max": move_candidate.analysis_result.tempo_compatibility_range[1],
-            
-            # Timestamp
+            "clip_id": move_data["clip_id"],
+            "move_label": move_data["move_label"],
+            "move_description": move_data["move_description"],
+            "video_path": move_data["video_path"],
+            "tempo": move_data["tempo"],
+            "difficulty_score": move_data["difficulty_score"],
+            "energy_level": move_data["energy_level"],
+            "role_focus": move_data["role_focus"],
+            "notes": move_data["notes"],
+            "transition_compatibility": move_data["transition_compatibility"],
             "created_at": time.time()
         }
         
@@ -251,19 +369,19 @@ class QdrantEmbeddingService:
             )
             
             self.stats.total_points += 1
-            logger.debug(f"Stored move embedding: {move_candidate.move_id}")
+            logger.debug(f"Stored Superlinked move embedding: {move_data['clip_id']}")
             return point_id
             
         except Exception as e:
-            logger.error(f"Failed to store move embedding {move_candidate.move_id}: {e}")
+            logger.error(f"Failed to store Superlinked move embedding {move_data['clip_id']}: {e}")
             raise
     
-    def batch_store_embeddings(self, move_candidates: List[MoveCandidate]) -> List[str]:
+    def batch_store_superlinked_moves(self, moves_data: List[Dict[str, Any]]) -> List[str]:
         """
-        Store multiple move embeddings in batch for better performance.
+        Store multiple Superlinked move embeddings in batch for better performance.
         
         Args:
-            move_candidates: List of move candidates to store
+            moves_data: List of move data dictionaries with Superlinked embeddings
             
         Returns:
             List of point IDs in Qdrant
@@ -271,37 +389,34 @@ class QdrantEmbeddingService:
         points = []
         point_ids = []
         
-        for candidate in move_candidates:
-            # Combine embeddings
-            audio_emb = candidate.multimodal_embedding.audio_embedding
-            pose_emb = candidate.multimodal_embedding.pose_embedding
+        for move_data in moves_data:
+            # Extract embedding
+            embedding = move_data.get("embedding")
+            if embedding is None:
+                logger.warning(f"Skipping move {move_data.get('clip_id', 'unknown')} - no embedding")
+                continue
             
             # Ensure consistent dimensionality
-            combined = np.concatenate([audio_emb, pose_emb])
-            if len(combined) != self.config.vector_size:
-                if len(combined) < self.config.vector_size:
-                    combined = np.pad(combined, (0, self.config.vector_size - len(combined)))
+            if len(embedding) != self.config.vector_size:
+                if len(embedding) < self.config.vector_size:
+                    embedding = np.pad(embedding, (0, self.config.vector_size - len(embedding)))
                 else:
-                    combined = combined[:self.config.vector_size]
+                    embedding = embedding[:self.config.vector_size]
             
-            vector = combined.tolist()
+            vector = embedding.tolist() if isinstance(embedding, np.ndarray) else embedding
             
-            # Prepare metadata
+            # Prepare metadata (exclude embedding from payload)
             metadata = {
-                "move_id": candidate.move_id,
-                "move_label": candidate.move_label,
-                "video_path": candidate.video_path,
-                "energy_level": candidate.energy_level,
-                "difficulty": candidate.difficulty,
-                "estimated_tempo": candidate.estimated_tempo,
-                "lead_follow_roles": candidate.lead_follow_roles,
-                "movement_complexity": candidate.analysis_result.movement_complexity_score,
-                "difficulty_score": candidate.analysis_result.difficulty_score,
-                "analysis_quality": candidate.analysis_result.analysis_quality,
-                "pose_detection_rate": candidate.analysis_result.pose_detection_rate,
-                "duration": candidate.analysis_result.duration,
-                "tempo_min": candidate.analysis_result.tempo_compatibility_range[0],
-                "tempo_max": candidate.analysis_result.tempo_compatibility_range[1],
+                "clip_id": move_data["clip_id"],
+                "move_label": move_data["move_label"],
+                "move_description": move_data["move_description"],
+                "video_path": move_data["video_path"],
+                "tempo": move_data["tempo"],
+                "difficulty_score": move_data["difficulty_score"],
+                "energy_level": move_data["energy_level"],
+                "role_focus": move_data["role_focus"],
+                "notes": move_data["notes"],
+                "transition_compatibility": move_data["transition_compatibility"],
                 "created_at": time.time()
             }
             
@@ -322,33 +437,33 @@ class QdrantEmbeddingService:
             )
             
             self.stats.total_points += len(points)
-            logger.info(f"Batch stored {len(points)} move embeddings")
+            logger.info(f"Batch stored {len(points)} Superlinked move embeddings")
             return point_ids
             
         except Exception as e:
-            logger.error(f"Failed to batch store embeddings: {e}")
+            logger.error(f"Failed to batch store Superlinked embeddings: {e}")
             raise
     
-    def search_similar_moves(self,
-                           query_embedding: np.ndarray,
-                           limit: int = 10,
-                           tempo_range: Optional[Tuple[float, float]] = None,
-                           difficulty: Optional[str] = None,
-                           energy_level: Optional[str] = None,
-                           min_quality: Optional[float] = None) -> List[SearchResult]:
+    def search_superlinked_moves(self,
+                               query_embedding: np.ndarray,
+                               limit: int = 10,
+                               tempo_range: Optional[Tuple[float, float]] = None,
+                               difficulty_range: Optional[Tuple[float, float]] = None,
+                               energy_level: Optional[str] = None,
+                               role_focus: Optional[str] = None) -> List[SuperlinkedSearchResult]:
         """
-        Search for similar moves using vector similarity.
+        Search for similar moves using Superlinked unified vector similarity.
         
         Args:
-            query_embedding: Query embedding vector
+            query_embedding: Superlinked query embedding vector
             limit: Maximum number of results
             tempo_range: Optional tempo range filter (min_tempo, max_tempo)
-            difficulty: Optional difficulty level filter
+            difficulty_range: Optional difficulty score range filter (min_score, max_score)
             energy_level: Optional energy level filter
-            min_quality: Optional minimum analysis quality filter
+            role_focus: Optional role focus filter
             
         Returns:
-            List of search results sorted by similarity score
+            List of SuperlinkedSearchResult objects sorted by similarity score
         """
         start_time = time.time()
         
@@ -364,23 +479,20 @@ class QdrantEmbeddingService:
             filter_conditions = []
             
             if tempo_range:
-                # Move is compatible if its tempo range overlaps with query range
-                filter_conditions.extend([
-                    FieldCondition(
-                        key="tempo_min",
-                        range=Range(lte=tempo_range[1])  # Move min <= query max
-                    ),
-                    FieldCondition(
-                        key="tempo_max", 
-                        range=Range(gte=tempo_range[0])  # Move max >= query min
-                    )
-                ])
-            
-            if difficulty:
+                # Filter by tempo range with tolerance
                 filter_conditions.append(
                     FieldCondition(
-                        key="difficulty",
-                        match=MatchValue(value=difficulty)
+                        key="tempo",
+                        range=Range(gte=tempo_range[0], lte=tempo_range[1])
+                    )
+                )
+            
+            if difficulty_range:
+                # Filter by difficulty score range
+                filter_conditions.append(
+                    FieldCondition(
+                        key="difficulty_score",
+                        range=Range(gte=difficulty_range[0], lte=difficulty_range[1])
                     )
                 )
             
@@ -392,11 +504,11 @@ class QdrantEmbeddingService:
                     )
                 )
             
-            if min_quality:
+            if role_focus:
                 filter_conditions.append(
                     FieldCondition(
-                        key="analysis_quality",
-                        range=Range(gte=min_quality)
+                        key="role_focus",
+                        match=MatchValue(value=role_focus)
                     )
                 )
             
@@ -413,13 +525,22 @@ class QdrantEmbeddingService:
                 with_vectors=False  # Don't return vectors to save bandwidth
             )
             
-            # Convert to SearchResult objects
+            # Convert to SuperlinkedSearchResult objects
             results = []
             for result in search_results:
-                search_result = SearchResult(
-                    move_id=result.payload["move_id"],
-                    score=result.score,
-                    metadata=result.payload
+                payload = result.payload
+                search_result = SuperlinkedSearchResult(
+                    clip_id=payload["clip_id"],
+                    move_label=payload["move_label"],
+                    move_description=payload["move_description"],
+                    tempo=payload["tempo"],
+                    difficulty_score=payload["difficulty_score"],
+                    energy_level=payload["energy_level"],
+                    role_focus=payload["role_focus"],
+                    video_path=payload["video_path"],
+                    notes=payload["notes"],
+                    similarity_score=result.score,
+                    transition_compatibility=payload["transition_compatibility"]
                 )
                 results.append(search_result)
             
@@ -431,61 +552,75 @@ class QdrantEmbeddingService:
                 self.stats.search_requests
             )
             
-            logger.debug(f"Vector search completed: {len(results)} results in {search_time:.2f}ms")
+            logger.debug(f"Superlinked vector search completed: {len(results)} results in {search_time:.2f}ms")
             return results
             
         except Exception as e:
-            logger.error(f"Vector search failed: {e}")
+            logger.error(f"Superlinked vector search failed: {e}")
             raise
     
-    def search_by_music_features(self,
-                                music_embedding: np.ndarray,
-                                tempo: float,
-                                limit: int = 10,
-                                tempo_tolerance: float = 10.0,
-                                difficulty: Optional[str] = None) -> List[SearchResult]:
+    def search_by_superlinked_query(self,
+                                  query_embedding: np.ndarray,
+                                  tempo: float,
+                                  difficulty_score: float,
+                                  energy_level: str,
+                                  role_focus: str,
+                                  limit: int = 10,
+                                  tempo_tolerance: float = 10.0,
+                                  difficulty_tolerance: float = 0.5) -> List[SuperlinkedSearchResult]:
         """
-        Search for moves compatible with music features.
+        Search for moves using Superlinked query embedding with preserved linear relationships.
         
         Args:
-            music_embedding: Music embedding vector
-            tempo: Music tempo in BPM
+            query_embedding: Superlinked query embedding vector
+            tempo: Target tempo in BPM
+            difficulty_score: Target difficulty score (1.0-3.0)
+            energy_level: Target energy level
+            role_focus: Target role focus
             limit: Maximum number of results
             tempo_tolerance: Tempo tolerance in BPM
-            difficulty: Optional difficulty filter
+            difficulty_tolerance: Difficulty score tolerance
             
         Returns:
-            List of compatible moves
+            List of compatible moves with preserved linear relationships
         """
-        # Define tempo range
+        # Define tempo range with preserved linear relationships
         tempo_range = (tempo - tempo_tolerance, tempo + tempo_tolerance)
         
-        return self.search_similar_moves(
-            query_embedding=music_embedding,
+        # Define difficulty range with preserved linear relationships
+        difficulty_range = (
+            max(1.0, difficulty_score - difficulty_tolerance),
+            min(3.0, difficulty_score + difficulty_tolerance)
+        )
+        
+        return self.search_superlinked_moves(
+            query_embedding=query_embedding,
             limit=limit,
             tempo_range=tempo_range,
-            difficulty=difficulty
+            difficulty_range=difficulty_range,
+            energy_level=energy_level,
+            role_focus=role_focus
         )
     
-    def get_move_by_id(self, move_id: str) -> Optional[SearchResult]:
+    def get_move_by_clip_id(self, clip_id: str) -> Optional[SuperlinkedSearchResult]:
         """
-        Get a specific move by its ID.
+        Get a specific move by its clip ID.
         
         Args:
-            move_id: Move identifier
+            clip_id: Move clip identifier
             
         Returns:
-            SearchResult if found, None otherwise
+            SuperlinkedSearchResult if found, None otherwise
         """
         try:
-            # Search by move_id in payload
+            # Search by clip_id in payload
             search_results = self.client.scroll(
                 collection_name=self.config.collection_name,
                 scroll_filter=Filter(
                     must=[
                         FieldCondition(
-                            key="move_id",
-                            match=MatchValue(value=move_id)
+                            key="clip_id",
+                            match=MatchValue(value=clip_id)
                         )
                     ]
                 ),
@@ -496,25 +631,34 @@ class QdrantEmbeddingService:
             
             if search_results[0]:  # Points found
                 result = search_results[0][0]  # First point
-                return SearchResult(
-                    move_id=result.payload["move_id"],
-                    score=1.0,  # Exact match
-                    metadata=result.payload,
+                payload = result.payload
+                return SuperlinkedSearchResult(
+                    clip_id=payload["clip_id"],
+                    move_label=payload["move_label"],
+                    move_description=payload["move_description"],
+                    tempo=payload["tempo"],
+                    difficulty_score=payload["difficulty_score"],
+                    energy_level=payload["energy_level"],
+                    role_focus=payload["role_focus"],
+                    video_path=payload["video_path"],
+                    notes=payload["notes"],
+                    similarity_score=1.0,  # Exact match
+                    transition_compatibility=payload["transition_compatibility"],
                     embedding=np.array(result.vector) if result.vector else None
                 )
             
             return None
             
         except Exception as e:
-            logger.error(f"Failed to get move by ID {move_id}: {e}")
+            logger.error(f"Failed to get move by clip ID {clip_id}: {e}")
             return None
     
-    def delete_move(self, move_id: str) -> bool:
+    def delete_move(self, clip_id: str) -> bool:
         """
         Delete a move from the collection.
         
         Args:
-            move_id: Move identifier
+            clip_id: Move clip identifier
             
         Returns:
             True if deleted successfully
@@ -526,8 +670,8 @@ class QdrantEmbeddingService:
                 scroll_filter=Filter(
                     must=[
                         FieldCondition(
-                            key="move_id",
-                            match=MatchValue(value=move_id)
+                            key="clip_id",
+                            match=MatchValue(value=clip_id)
                         )
                     ]
                 ),
@@ -548,13 +692,13 @@ class QdrantEmbeddingService:
                 )
                 
                 self.stats.total_points -= 1
-                logger.info(f"Deleted move: {move_id}")
+                logger.info(f"Deleted move: {clip_id}")
                 return True
             
             return False
             
         except Exception as e:
-            logger.error(f"Failed to delete move {move_id}: {e}")
+            logger.error(f"Failed to delete move {clip_id}: {e}")
             return False
     
     def clear_collection(self) -> bool:
@@ -652,15 +796,17 @@ class QdrantEmbeddingService:
                 # Test search
                 try:
                     dummy_vector = np.random.random(self.config.vector_size)
-                    self.search_similar_moves(dummy_vector, limit=1)
+                    self.search_superlinked_moves(dummy_vector, limit=1)
                     health_status["can_search"] = True
                 except Exception as e:
                     health_status["error_message"] = f"Search test failed: {e}"
                 
                 # Test store (create and delete dummy point)
                 try:
+                    import uuid
+                    test_id = str(uuid.uuid4())  # Use UUID for point ID
                     dummy_point = PointStruct(
-                        id="health_check_test",
+                        id=test_id,
                         vector=dummy_vector.tolist(),
                         payload={"test": True}
                     )
@@ -672,7 +818,7 @@ class QdrantEmbeddingService:
                     
                     self.client.delete(
                         collection_name=self.config.collection_name,
-                        points_selector=models.PointIdsList(points=["health_check_test"])
+                        points_selector=models.PointIdsList(points=[test_id])
                     )
                     
                     health_status["can_store"] = True
@@ -685,17 +831,17 @@ class QdrantEmbeddingService:
         
         return health_status
     
-    def migrate_from_memory_cache(self, move_candidates: List[MoveCandidate]) -> Dict[str, Any]:
+    def migrate_superlinked_embeddings(self, moves_data: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
-        Migrate existing move embeddings from in-memory cache to Qdrant.
+        Migrate Superlinked move embeddings to Qdrant.
         
         Args:
-            move_candidates: List of move candidates to migrate
+            moves_data: List of move data dictionaries with Superlinked embeddings
             
         Returns:
             Migration summary
         """
-        logger.info(f"Starting migration of {len(move_candidates)} move embeddings to Qdrant")
+        logger.info(f"Starting migration of {len(moves_data)} Superlinked move embeddings to Qdrant")
         
         start_time = time.time()
         successful_migrations = 0
@@ -704,102 +850,107 @@ class QdrantEmbeddingService:
         # Clear existing data
         self.clear_collection()
         
-        # Batch store all candidates
+        # Batch store all moves
         try:
-            point_ids = self.batch_store_embeddings(move_candidates)
+            point_ids = self.batch_store_superlinked_moves(moves_data)
             successful_migrations = len(point_ids)
             
         except Exception as e:
             logger.error(f"Batch migration failed: {e}")
             
             # Fallback to individual storage
-            for candidate in move_candidates:
+            for move_data in moves_data:
                 try:
-                    self.store_move_embedding(candidate)
+                    self.store_superlinked_move(move_data)
                     successful_migrations += 1
                 except Exception as e:
-                    logger.warning(f"Failed to migrate {candidate.move_id}: {e}")
+                    logger.warning(f"Failed to migrate {move_data.get('clip_id', 'unknown')}: {e}")
                     failed_migrations += 1
         
         migration_time = time.time() - start_time
         
         summary = {
-            "total_candidates": len(move_candidates),
+            "total_moves": len(moves_data),
             "successful_migrations": successful_migrations,
             "failed_migrations": failed_migrations,
             "migration_time_seconds": migration_time,
             "final_collection_size": self.stats.total_points
         }
         
-        logger.info(f"Migration completed: {summary}")
+        logger.info(f"Superlinked migration completed: {summary}")
         return summary
 
 
-def setup_local_qdrant_docker() -> str:
-    """
-    Provide instructions for setting up local Qdrant instance using Docker.
-    
-    Returns:
-        Docker command string
-    """
-    docker_command = """
-# Set up local Qdrant instance using Docker
-docker run -p 6333:6333 -p 6334:6334 \\
-    -v $(pwd)/qdrant_storage:/qdrant/storage:z \\
-    qdrant/qdrant
-
-# Or with docker-compose, create docker-compose.yml:
-version: '3.8'
-services:
-  qdrant:
-    image: qdrant/qdrant
-    ports:
-      - "6333:6333"
-      - "6334:6334"
-    volumes:
-      - ./qdrant_storage:/qdrant/storage:z
-    """
-    
-    return docker_command.strip()
+# Docker setup removed - now using Qdrant Cloud deployment
 
 
 # Fallback implementation when Qdrant is not available
-class MockQdrantEmbeddingService:
+class MockSuperlinkedQdrantService:
     """Mock implementation for when Qdrant is not available."""
     
     def __init__(self, config: Optional[QdrantConfig] = None):
         self.config = config or QdrantConfig()
-        logger.warning("Qdrant not available, using mock implementation")
+        logger.warning("Qdrant not available, using mock Superlinked implementation")
     
-    def store_move_embedding(self, move_candidate: MoveCandidate, embedding: Optional[np.ndarray] = None) -> str:
+    def store_superlinked_move(self, move_data: Dict[str, Any]) -> str:
         return "mock_id"
     
-    def batch_store_embeddings(self, move_candidates: List[MoveCandidate]) -> List[str]:
-        return ["mock_id"] * len(move_candidates)
+    def batch_store_superlinked_moves(self, moves_data: List[Dict[str, Any]]) -> List[str]:
+        return ["mock_id"] * len(moves_data)
     
-    def search_similar_moves(self, query_embedding: np.ndarray, limit: int = 10, **kwargs) -> List[SearchResult]:
+    def search_superlinked_moves(self, query_embedding: np.ndarray, limit: int = 10, **kwargs) -> List[SuperlinkedSearchResult]:
+        return []
+    
+    def search_by_superlinked_query(self, query_embedding: np.ndarray, **kwargs) -> List[SuperlinkedSearchResult]:
         return []
     
     def health_check(self) -> Dict[str, Any]:
         return {"qdrant_available": False, "error_message": "Qdrant client not installed"}
+    
+    def get_statistics(self) -> QdrantStats:
+        return QdrantStats()
+    
+    def get_collection_info(self) -> Dict[str, Any]:
+        return {"points_count": 0}
+    
+    def migrate_superlinked_embeddings(self, moves_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+        return {"error": "Qdrant not available"}
+    
+    def clear_collection(self) -> bool:
+        return True
 
 
 # Factory function to create appropriate service
-def create_qdrant_service(config: Optional[QdrantConfig] = None) -> Union[QdrantEmbeddingService, MockQdrantEmbeddingService]:
+def create_superlinked_qdrant_service(config: Optional[QdrantConfig] = None) -> Union[SuperlinkedQdrantService, MockSuperlinkedQdrantService]:
     """
-    Create Qdrant service or mock if not available.
+    Create Superlinked Qdrant service or mock if not available.
     
     Args:
         config: Qdrant configuration
         
     Returns:
-        QdrantEmbeddingService or MockQdrantEmbeddingService
+        SuperlinkedQdrantService or MockSuperlinkedQdrantService
     """
     if QDRANT_AVAILABLE:
         try:
-            return QdrantEmbeddingService(config)
+            return SuperlinkedQdrantService(config)
         except Exception as e:
-            logger.warning(f"Failed to create Qdrant service: {e}, using mock")
-            return MockQdrantEmbeddingService(config)
+            logger.warning(f"Failed to create Superlinked Qdrant service: {e}, using mock")
+            return MockSuperlinkedQdrantService(config)
     else:
-        return MockQdrantEmbeddingService(config)
+        return MockSuperlinkedQdrantService(config)
+
+
+# Backward compatibility - keep old factory function but redirect to new service
+def create_qdrant_service(config: Optional[QdrantConfig] = None) -> Union[SuperlinkedQdrantService, MockSuperlinkedQdrantService]:
+    """
+    Create Qdrant service (now using Superlinked embeddings).
+    
+    Args:
+        config: Qdrant configuration
+        
+    Returns:
+        SuperlinkedQdrantService or MockSuperlinkedQdrantService
+    """
+    logger.info("Creating Superlinked-enabled Qdrant service")
+    return create_superlinked_qdrant_service(config)
